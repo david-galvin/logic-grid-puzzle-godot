@@ -46,7 +46,7 @@ func set_in_range(from_index: int, to_index: int, val: bool):
 	for id in range(from_word_id, to_word_id + 1):
 		from_bit_id = _get_bit_id(from_index) if id == from_word_id else 0
 		to_bit_id = _get_bit_id(to_index) if id == to_word_id else 62
-		bitmask = ((1 << (to_bit_id - from_bit_id + 1)) - 1) << (from_bit_id - 1)
+		bitmask = ((1 << (to_bit_id - from_bit_id + 1)) - 1) << (from_bit_id)
 		if val == true:
 			_words[id] |= bitmask
 		else:

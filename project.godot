@@ -78,6 +78,10 @@ config/name="LogicPuzzle"
 run/main_scene="res://Node2D.tscn"
 config/icon="res://icon.png"
 
+[editor_plugins]
+
+enabled=PoolStringArray( "gut" )
+
 [rendering]
 
 environment/default_environment="res://default_env.tres"
