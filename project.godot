@@ -1,0 +1,77 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=4
+
+_global_script_classes=[ {
+"base": "Node",
+"class": "BitMask",
+"language": "GDScript",
+"path": "res://BitMask.gd"
+}, {
+"base": "Node",
+"class": "BitSet",
+"language": "GDScript",
+"path": "res://BitSet.gd"
+}, {
+"base": "HBoxContainer",
+"class": "ContributorClass",
+"language": "GDScript",
+"path": "res://addons/github-integration/scripts/ContributorClass.gd"
+}, {
+"base": "PanelContainer",
+"class": "GistItem",
+"language": "GDScript",
+"path": "res://addons/github-integration/scripts/GistItem.gd"
+}, {
+"base": "Node",
+"class": "Grid",
+"language": "GDScript",
+"path": "res://Grid.gd"
+}, {
+"base": "HBoxContainer",
+"class": "InvitationItem",
+"language": "GDScript",
+"path": "res://addons/github-integration/scripts/InvitationItem.gd"
+}, {
+"base": "Node",
+"class": "Math",
+"language": "GDScript",
+"path": "res://Math.gd"
+}, {
+"base": "Node",
+"class": "Permutation",
+"language": "GDScript",
+"path": "res://Permutation.gd"
+}, {
+"base": "PanelContainer",
+"class": "RepositoryItem",
+"language": "GDScript",
+"path": "res://addons/github-integration/scripts/RepositoryItem.gd"
+} ]
+_global_script_class_icons={
+"BitMask": "",
+"BitSet": "",
+"ContributorClass": "",
+"GistItem": "",
+"Grid": "",
+"InvitationItem": "",
+"Math": "",
+"Permutation": "",
+"RepositoryItem": ""
+}
+
+[application]
+
+config/name="LogicPuzzle"
+run/main_scene="res://Node2D.tscn"
+config/icon="res://icon.png"
+
+[rendering]
+
+environment/default_environment="res://default_env.tres"
