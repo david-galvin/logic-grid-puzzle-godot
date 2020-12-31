@@ -40,6 +40,11 @@ _global_script_classes=[ {
 "path": "res://addons/github-integration/scripts/InvitationItem.gd"
 }, {
 "base": "Node",
+"class": "LogicGridPuzzle",
+"language": "GDScript",
+"path": "res://LogicGridPuzzle.gd"
+}, {
+"base": "Node",
 "class": "Math",
 "language": "GDScript",
 "path": "res://Math.gd"
@@ -61,6 +66,7 @@ _global_script_class_icons={
 "GistItem": "",
 "Grid": "",
 "InvitationItem": "",
+"LogicGridPuzzle": "",
 "Math": "",
 "Permutation": "",
 "RepositoryItem": ""

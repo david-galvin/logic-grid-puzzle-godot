@@ -22,6 +22,7 @@ var r = BitSet.new(50)
 func _ready():
 	#math = get_node("res://Math.gd")
 	#z.set_rank(3)
+	print("Hello world")
 	w.set_in_range(5,10,true)
 	r.set_in_range(3,8,true)
 	w.bitwise_and(r)
