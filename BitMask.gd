@@ -6,17 +6,21 @@ var max_possible_solutions_per_grid: int
 var true_bit_masks = []
 var false_bit_mask: BitSet
 var math = load("res://Math.gd").new()
+var _category_size: int
 
-func _init(category_size: int):
-	max_possible_solutions_per_grid = math.factorial(category_size)
+func _init(my_category_size: int):
+	_category_size = my_category_size
+	max_possible_solutions_per_grid = math.factorial(_category_size)
 	false_bit_mask = BitSet.new(max_possible_solutions_per_grid)
-	true_bit_masks.resize(category_size)
-	for i in range(category_size):
+	true_bit_masks.resize(_category_size)
+	for i in range(_category_size):
 		true_bit_masks[i] = []
-		true_bit_masks[i].resize(category_size)
-	_build_bit_masks(category_size)
+		true_bit_masks[i].resize(_category_size)
+	_build_bit_masks(_category_size)
 
 func get_true_bit_mask(row: int, col: int) -> BitSet:
+	if row >= _category_size || col >= _category_size:
+		push_error("Row or column are too large")
 	return true_bit_masks[row][col]
 
 func get_false_bit_mask(row: int, col: int) -> BitSet:

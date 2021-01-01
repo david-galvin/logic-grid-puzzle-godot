@@ -19,9 +19,4 @@ class TestLogicGridPuzzle:
 			_lp.eliminate_possible_solutions(0, 0, _category_count - 2, _category_size - i - 1, true)
 			_lp.eliminate_possible_solutions(0, 1, _category_count - 2, _category_size - i - 1, true)
 
-		for row_cat in range(0,3):
-			for left_cat in range(4, row_cat, -1):
-				for right_cat in range(left_cat-1, row_cat, -1):
-					print("rowcat, leftcat, rightcat = " + str(row_cat) + ", " + str(left_cat) + ", " + str(right_cat))
-
 		_lp.print_puzzle()
