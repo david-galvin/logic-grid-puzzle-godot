@@ -29,18 +29,18 @@ class TestBitSet:
 		assert_eq(_big_bset.to_string(), "0000000000" + _big_padding_str)
 	
 	func test_set_in_range():
-		_bset.set_in_range(1, 4, true)
+		_bset.set_in_range(1, 5, true)
 		assert_eq(_bset.to_string(), "0000011110")
 		_bset.set_in_range(3, 5, false)
 		assert_eq(_bset.to_string(), "0000000110")
 		
-		_big_bset.set_in_range(1 + _big_padding_size, 4 + _big_padding_size, true)
+		_big_bset.set_in_range(1 + _big_padding_size, 5 + _big_padding_size, true)
 		assert_eq(_big_bset.to_string(), "0000011110" + _big_padding_str)
 		_big_bset.set_in_range(3 + _big_padding_size, 5 + _big_padding_size, false)
 		assert_eq(_big_bset.to_string(), "0000000110" + _big_padding_str)
 	
 	func test_next_set_bit():
-		_bset.set_in_range(2, 3, true)
+		_bset.set_in_range(2, 4, true)
 		_bset.set_at_index(5, true)
 		assert_eq(_bset.next_set_bit(0), 2)
 		assert_eq(_bset.next_set_bit(1), 2)
@@ -50,7 +50,7 @@ class TestBitSet:
 		assert_eq(_bset.next_set_bit(5), 5)
 		assert_eq(_bset.next_set_bit(6), -1)
 
-		_big_bset.set_in_range(2 + _big_padding_size, 3 + _big_padding_size, true)
+		_big_bset.set_in_range(2 + _big_padding_size, 4 + _big_padding_size, true)
 		_big_bset.set_at_index(5 + _big_padding_size, true)
 		assert_eq(_big_bset.next_set_bit(0), 2 + _big_padding_size)
 		assert_eq(_big_bset.next_set_bit(0 + _big_padding_size), 2 + _big_padding_size)
@@ -79,11 +79,11 @@ class TestBitSet:
 		assert_eq(_big_bset.get_at_index(4 + _big_padding_size), false)
 	
 	func test_clear():
-		_bset.set_in_range(2, 6, true)
+		_bset.set_in_range(2, 7, true)
 		_bset.clear()
 		assert_eq(_bset.to_string(), "0000000000")
 		
-		_big_bset.set_in_range(2 + _big_padding_size, 6 + _big_padding_size, true)
+		_big_bset.set_in_range(2 + _big_padding_size, 7 + _big_padding_size, true)
 		_big_bset.clear()
 		assert_eq(_big_bset.to_string(), "0000000000" + _big_padding_str)
 	
@@ -93,11 +93,11 @@ class TestBitSet:
 		assert_eq(_bset.cardinality(), 1)
 		_bset.set_at_index(4, true)
 		assert_eq(_bset.cardinality(), 2)
-		_bset.set_in_range(1, 5, true)
+		_bset.set_in_range(1, 6, true)
 		assert_eq(_bset.cardinality(), 5)
 		_bset.set_at_index(1, false)
 		assert_eq(_bset.cardinality(), 4)
-		_bset.set_in_range(4, 7, false)
+		_bset.set_in_range(4, 8, false)
 		assert_eq(_bset.cardinality(), 2)
 
 		assert_eq(_big_bset.cardinality(), 0)
@@ -105,11 +105,11 @@ class TestBitSet:
 		assert_eq(_big_bset.cardinality(), 1)
 		_big_bset.set_at_index(4 + _big_padding_size, true)
 		assert_eq(_big_bset.cardinality(), 2)
-		_big_bset.set_in_range(1 + _big_padding_size, 5 + _big_padding_size, true)
+		_big_bset.set_in_range(1 + _big_padding_size, 6 + _big_padding_size, true)
 		assert_eq(_big_bset.cardinality(), 5)
 		_big_bset.set_at_index(1 + _big_padding_size, false)
 		assert_eq(_big_bset.cardinality(), 4)
-		_big_bset.set_in_range(4 + _big_padding_size, 7 + _big_padding_size, false)
+		_big_bset.set_in_range(4 + _big_padding_size, 8 + _big_padding_size, false)
 		assert_eq(_big_bset.cardinality(), 2)
 		
 		
@@ -130,47 +130,47 @@ class TestBitSetPairwise:
 		_big_bset2 = BitSet.new(10 + _big_padding_size)
 		
 	func test_bitwise_and():
-		_bset.set_in_range(1, 5, true)
+		_bset.set_in_range(1, 6, true)
 		_bset2.set_in_range(3, 7, true)
 		_bset.bitwise_and(_bset2)
 		assert_eq(_bset.to_string(), "0000111000")
 
-		_big_bset.set_in_range(1 + _big_padding_size, 5 + _big_padding_size, true)
-		_big_bset2.set_in_range(3 + _big_padding_size, 7 + _big_padding_size, true)
+		_big_bset.set_in_range(1 + _big_padding_size, 6 + _big_padding_size, true)
+		_big_bset2.set_in_range(3 + _big_padding_size, 8 + _big_padding_size, true)
 		_big_bset.bitwise_and(_big_bset2)
 		assert_eq(_big_bset.to_string(), "0000111000" + _big_padding_str)
 	
 	func test_bitwise_xor():
-		_bset.set_in_range(1, 5, true)
-		_bset2.set_in_range(3, 7, true)
+		_bset.set_in_range(1, 6, true)
+		_bset2.set_in_range(3, 8, true)
 		_bset.bitwise_xor(_bset2)
 		assert_eq(_bset.to_string(), "0011000110")
 
-		_big_bset.set_in_range(1 + _big_padding_size, 5 + _big_padding_size, true)
-		_big_bset2.set_in_range(3 + _big_padding_size, 7 + _big_padding_size, true)
+		_big_bset.set_in_range(1 + _big_padding_size, 6 + _big_padding_size, true)
+		_big_bset2.set_in_range(3 + _big_padding_size, 8 + _big_padding_size, true)
 		_big_bset.bitwise_xor(_big_bset2)
 		assert_eq(_big_bset.to_string(), "0011000110" + _big_padding_str)
 	
 	func test_bitwise_and_not():
-		_bset.set_in_range(1, 5, true)
-		_bset2.set_in_range(3, 7, true)
+		_bset.set_in_range(1, 6, true)
+		_bset2.set_in_range(3, 8, true)
 		_bset.bitwise_and_not(_bset2)
 		assert_eq(_bset.to_string(), "0000000110")
 
-		_big_bset.set_in_range(1 + _big_padding_size, 5 + _big_padding_size, true)
-		_big_bset2.set_in_range(3 + _big_padding_size, 7 + _big_padding_size, true)
+		_big_bset.set_in_range(1 + _big_padding_size, 6 + _big_padding_size, true)
+		_big_bset2.set_in_range(3 + _big_padding_size, 8 + _big_padding_size, true)
 		_big_bset.bitwise_and_not(_big_bset2)
 		assert_eq(_big_bset.to_string(), "0000000110" + _big_padding_str)
 	
 	func test_bitwise_intersects():
-		_bset.set_in_range(1, 3, true)
-		_bset2.set_in_range(4, 7, true)
+		_bset.set_in_range(1, 4, true)
+		_bset2.set_in_range(4, 8, true)
 		assert_eq(_bset.bitwise_intersects(_bset2), false)
 		_bset2.set_at_index(3, true)
 		assert_eq(_bset.bitwise_intersects(_bset2), true)
 
-		_big_bset.set_in_range(1 + _big_padding_size, 3 + _big_padding_size, true)
-		_big_bset2.set_in_range(4 + _big_padding_size, 7 + _big_padding_size, true)
+		_big_bset.set_in_range(1 + _big_padding_size, 4 + _big_padding_size, true)
+		_big_bset2.set_in_range(4 + _big_padding_size, 8 + _big_padding_size, true)
 		assert_eq(_big_bset.bitwise_intersects(_big_bset2), false)
 		_big_bset2.set_at_index(3 + _big_padding_size, true)
 		assert_eq(_big_bset.bitwise_intersects(_big_bset2), true)

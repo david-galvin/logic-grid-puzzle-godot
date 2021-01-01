@@ -1,6 +1,6 @@
 extends "res://addons/gut/test.gd"
 
-class TestPermutation:
+class TestGrid:
 	extends "res://addons/gut/test.gd"
 	var Grid = load("res://Grid.gd")
 	var BitMask = load("res://BitMask.gd")

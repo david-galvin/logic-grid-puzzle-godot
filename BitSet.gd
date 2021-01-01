@@ -65,25 +65,25 @@ func validate_index(index):
 	if index < 0:
 		push_error("Index can't be negative")
 
-func set_in_range(from_index: int, to_index: int, val: bool):
-	validate_index(from_index)
-	validate_index(to_index)
-	if from_index > to_index:
-		push_error("from_index must be <= to_index")
+func set_in_range(start: int, stop: int, val: bool):
+	validate_index(start)
+	validate_index(stop - 1)
+	if start > stop:
+		push_error("start must be <= stop")
 	_have_bits_changed = true
-	var from_word_id: int = _get_word_id(from_index)
-	var to_word_id: int = _get_word_id(to_index)
-	var from_bit_id: int = 0
-	var to_bit_id: int = 0
+	var first_word_id: int = _get_word_id(start)
+	var last_word_id: int = _get_word_id(stop - 1)
+	var start_bit_id: int = 0
+	var stop_bit_id: int = 0
 	var bitmask: int = 0
-	for id in range(from_word_id, to_word_id + 1):
-		from_bit_id = _get_bit_id(from_index) if id == from_word_id else 0
-		to_bit_id = _get_bit_id(to_index) if id == to_word_id else 62
-		bitmask = ((1 << (to_bit_id - from_bit_id + 1)) - 1) << (from_bit_id)
+	for word_id in range(first_word_id, last_word_id + 1):
+		start_bit_id = _get_bit_id(start) if word_id == first_word_id else 0
+		stop_bit_id = _get_bit_id(stop) if word_id == last_word_id else _BITS_PER_WORD
+		bitmask = ((1 << (stop_bit_id - start_bit_id)) - 1) << (start_bit_id)
 		if val == true:
-			_words[id] |= bitmask
+			_words[word_id] |= bitmask
 		else:
-			_words[id] &= (_ALL_SET_BITS ^ bitmask)
+			_words[word_id] &= (_ALL_SET_BITS ^ bitmask)
 
 func bitwise_and(other_bit_set):
 	_have_bits_changed = true
@@ -117,7 +117,7 @@ func next_set_bit(index: int) -> int:
 		return -1
 	else:
 		for id in range(word_id + 1, _num_words):
-			if _words[id]:
+			if (_words[id] > 0):
 				return _next_set_bit_in_word(_words[id], 0) + _BITS_PER_WORD * id
 	return -1
 	
