@@ -36,12 +36,13 @@ func to_string() -> String:
 
 func _word_to_string(word: int, num_bits: int) -> String:
 	var word_str: String = ""
-	for bit in range(num_bits - 1, -1, -1):
-		var bit_mask: int = 1 << bit
-		if word & bit_mask:
-			word_str += "1"
+	var bit_mask: int
+	for bit in range(num_bits):
+		bit_mask = 1 << bit
+		if word & bit_mask > 0:
+			word_str = "1" + word_str
 		else:
-			word_str += "0"
+			word_str = "0" + word_str
 	return word_str
 
 func _get_word_id(index: int) -> int:

@@ -9,12 +9,13 @@ var max_solutions_to_check_per_grid_trio: int = 5000000
 var use_permutation_lookup_table: bool
 var permutation_ranks = [[]]
 var permutation: Permutation
-var grid_trio = [].resize(3)
+var grid_trio = []
 var possible_trio_solutions = []
 var rank_to_inverse_rank = []
 var math = load("res://Math.gd").new()
 
 func _init(my_category_count: int, my_category_size: int):
+	grid_trio.resize(3)
 	category_count = my_category_count
 	category_size = my_category_size
 	grids_arr = _build_grids()
@@ -65,6 +66,7 @@ func eliminate_possible_solutions(category1: int, element1: int, category2: int,
 		eliminate_possible_solutions(category2, element2, category1, element1, truth_val)
 	else:
 		push_error("The categories must be different")
+	check_all_trios()
 
 # For all trios of categories A, B, C, check the pairs AB, AC, and BC for  
 # implied information about valid solutions
@@ -84,10 +86,10 @@ func _is_grid_trio_worth_checking() -> bool:
 	var num_solutions_to_check: int = 1
 	var num_grids_with_data: int = 0
 	for grid in grid_trio:
-		num_solutions_to_check *= grid.cardinality()
+		num_solutions_to_check *= grid.all_possible_solutions.cardinality()
 		if num_solutions_to_check > max_solutions_to_check_per_grid_trio:
 			return false
-		if grid.all_possible_solutions.cardinality() < grid.max_possible_solutions():
+		if grid.all_possible_solutions.cardinality() < grid.max_possible_solutions:
 			num_grids_with_data += 1
 			if num_grids_with_data >= 2:
 				return true
