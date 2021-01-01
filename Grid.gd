@@ -18,7 +18,7 @@ func _init(my_category_size: int, my_bit_mask: BitMask):
 	bit_mask = my_bit_mask
 	max_possible_solutions = math.factorial(category_size)
 	all_possible_solutions = BitSet.new(max_possible_solutions)
-	all_possible_solutions.set_in_range(0, max_possible_solutions, true)
+	all_possible_solutions.set_in_range(0, max_possible_solutions - 1, true)
 
 func eliminate(category1_elt: int, category2_elt: int, are_equal: bool):
 	var true_bit_mask: BitSet = bit_mask.get_true_bit_mask(category1_elt, category2_elt)
@@ -37,11 +37,11 @@ func get_row_str(row: int) -> String:
 		if some_true && some_false:
 			row_str += "?"
 		elif some_true:
-			row_str += "1"
+			row_str += "O"
 		elif some_false:
-			row_str += "0"
+			row_str += "X"
 		else:
-			row_str += " "
+			row_str += "*"
 	return row_str
 
 func to_string() -> String:
