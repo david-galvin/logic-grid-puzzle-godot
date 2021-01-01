@@ -18,6 +18,7 @@ var _print_str = ""
 func _init(my_num_bits: int):
 	_num_bits = my_num_bits
 	_print_str = "%0*d" % [_num_bits, 0]
+# warning-ignore:integer_division
 	_num_words = (_num_bits - 1) / _BITS_PER_WORD + 1
 	_words.resize(_num_words)
 	for i in range(_num_words):
@@ -28,7 +29,7 @@ func to_string() -> String:
 		var print_str: String = ""
 		var padding: int
 		for i in range(_num_words):
-			padding = min(_BITS_PER_WORD, _num_bits - i * _BITS_PER_WORD)
+			padding = [_BITS_PER_WORD, _num_bits - i * _BITS_PER_WORD].min()
 			print_str = _word_to_string(_words[i], padding) + print_str
 		_print_str = print_str
 	return _print_str
@@ -44,6 +45,7 @@ func _word_to_string(word: int, num_bits: int) -> String:
 	return word_str
 
 func _get_word_id(index: int) -> int:
+# warning-ignore:integer_division
 	return index / _BITS_PER_WORD
 
 func _get_bit_id(index: int) -> int:

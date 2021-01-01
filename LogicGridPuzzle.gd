@@ -142,6 +142,7 @@ func print_puzzle():
 	print_debug(to_string())
 
 func _get_grid(category1: int, category2: int) -> Grid:
+# warning-ignore:integer_division
 		var index: int =  grids_arr.size() - (category_count - 1 - category1) * (category_count - category1) / 2 + (category_count - category2 - 1);
 		return grids_arr[index]
 
@@ -150,6 +151,7 @@ func _get_repeated_string(c: String, num_times: int) -> String:
 
 func _build_grids():
 	var bit_mask: BitMask = BitMask.new(category_size)
+# warning-ignore:integer_division
 	var num_grids: int = (category_count - 1) * category_count / 2
 	grids_arr.resize(num_grids)
 	for i in range(num_grids):
