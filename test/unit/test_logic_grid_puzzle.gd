@@ -9,7 +9,7 @@ class TestLogicGridPuzzle:
 	
 	func before_each():
 		_category_count = 3
-		_category_size = 4
+		_category_size = 5
 		_lp = LogicGridPuzzle.new(_category_count, _category_size)
 
 	func test_eliminate_possible_solutions():

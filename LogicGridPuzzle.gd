@@ -118,7 +118,7 @@ func check_grid_trio():
 		right_grid_rank = right_grid.all_possible_solutions.next_set_bit(0)
 	left_grid.all_possible_solutions.bitwise_and(left_grid_possible_solutions)
 	right_grid.all_possible_solutions.bitwise_and(right_grid_possible_solutions)
-	implied_grid.all_possible_solutions.bitwise_and(right_grid_possible_solutions)
+	implied_grid.all_possible_solutions.bitwise_and(implied_possible_solutions)
 
 func _is_valid_category(category: int) -> bool:
 	if category < 0 || category >= category_count:
