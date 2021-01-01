@@ -1,4 +1,4 @@
-extends Node
+extends Reference
 
 class_name Permutation
 
@@ -7,10 +7,6 @@ var permutation_int_arr = []
 var _copy_of_permutation_int_arr = []
 var _inverse_ofPermutation_int_arr = []
 var rank: int
-
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass # Replace with function body.
 
 func _init(length: int):
 	permutation_int_arr.resize(length)
@@ -43,6 +39,7 @@ func set_rank(new_rank: int):
 func _set_rank_iterative(my_rank: int):
 	for i in range(permutation_int_arr.size(), 0, -1):
 		_swap(permutation_int_arr, i-1, my_rank % i)
+		my_rank /= i
 
 func _set_permutation_to_identity():
 	for i in range(permutation_int_arr.size()):

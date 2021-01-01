@@ -1,4 +1,4 @@
-extends Node
+extends Reference
 
 class_name Grid
 
@@ -21,9 +21,9 @@ func _init(my_category_size: int, my_bit_mask: BitMask):
 	all_possible_solutions.set_in_range(0, max_possible_solutions, true)
 
 func eliminate(category1_elt: int, category2_elt: int, are_equal: bool):
-	var true_bit_mask = bit_mask.get_true_bit_mask(category1_elt, category2_elt)
+	var true_bit_mask: BitSet = bit_mask.get_true_bit_mask(category1_elt, category2_elt)
 	if(are_equal):
-		all_possible_solutions.bitwise_xor(true_bit_mask)
+		all_possible_solutions.bitwise_and_not(true_bit_mask)
 	else:
 		all_possible_solutions.bitwise_and(true_bit_mask)
 

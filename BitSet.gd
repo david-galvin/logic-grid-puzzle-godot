@@ -1,4 +1,4 @@
-extends Node
+extends Reference
 
 class_name BitSet
 
@@ -81,6 +81,12 @@ func bitwise_xor(other_bit_set):
 	_have_bits_changed = true
 	for i in range(_num_words):
 		_words[i] ^= (other_bit_set._words[i])
+
+# Clears all bits in this bitset which are set in the other bitset
+func bitwise_and_not(other_bit_set):
+	_have_bits_changed = true
+	for i in range(_num_words):
+		_words[i] &= (~other_bit_set._words[i])
 
 func bitwise_intersects(other_bit_set) -> bool:
 	for i in range(_num_words):

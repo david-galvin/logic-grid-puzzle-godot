@@ -1,4 +1,4 @@
-extends Node
+extends Reference
 
 class_name BitMask
 
@@ -22,7 +22,7 @@ func get_true_bit_mask(row: int, col: int) -> BitSet:
 func get_false_bit_mask(row: int, col: int) -> BitSet:
 	var true_bit_mask: BitSet = true_bit_masks[row][col]
 	false_bit_mask.set_in_range(0, max_possible_solutions_per_grid, true)
-	false_bit_mask.bitwise_xor(true_bit_mask)
+	false_bit_mask.bitwise_and_not(true_bit_mask)
 	return false_bit_mask
 
 func _build_bit_masks(category_size: int):

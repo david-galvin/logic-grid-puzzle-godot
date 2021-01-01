@@ -1,40 +1,13 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=2 format=2]
 
 [ext_resource path="res://addons/gut/plugin_control.gd" type="Script" id=1]
-[ext_resource path="res://Math.gd" type="Script" id=2]
-[ext_resource path="res://Permutation.gd" type="Script" id=3]
-[ext_resource path="res://BitSet.gd" type="Script" id=4]
-[ext_resource path="res://BitMask.gd" type="Script" id=5]
-[ext_resource path="res://Grid.gd" type="Script" id=6]
-[ext_resource path="res://LogicGridPuzzle.gd" type="Script" id=7]
-[ext_resource path="res://LPTester.gd" type="Script" id=8]
 
 [node name="Node2D" type="Node2D"]
 
-[node name="Math" type="Node" parent="."]
-script = ExtResource( 2 )
-
-[node name="Permutation" type="Node" parent="."]
-script = ExtResource( 3 )
-
-[node name="BitSet" type="Node" parent="."]
-script = ExtResource( 4 )
-
-[node name="BitMask" type="Node" parent="."]
-script = ExtResource( 5 )
-
-[node name="Grid" type="Node" parent="."]
-script = ExtResource( 6 )
-
-[node name="LogicGridPuzzle" type="Node" parent="."]
-script = ExtResource( 7 )
-
-[node name="LPTester" type="Node" parent="."]
-script = ExtResource( 8 )
-
 [node name="Gut" type="Control" parent="."]
+margin_top = -1.0
 margin_right = 740.0
-margin_bottom = 250.0
+margin_bottom = 249.0
 rect_min_size = Vector2( 740, 250 )
 script = ExtResource( 1 )
 __meta__ = {
