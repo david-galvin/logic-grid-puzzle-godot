@@ -117,6 +117,10 @@ func _is_grid_trio_worth_checking() -> bool:
 	return false
 
 #TODO SPEED THIS UP!!!!
+#MAYBE ID WHICH BITS ARE STILL AMBIGUOUS AND STOP AS SOON AS THEY HAVE
+#BOTH A TRUE AND FALSE SOLUTION
+#Maybe only keep track of internally possible solutions, then stop
+#as soon as we find that all unsolved cells in a grid can't be determined.
 func check_grid_trio():
 	var left_grid: Grid = grid_trio[0]
 	var right_grid: Grid = grid_trio[1]
