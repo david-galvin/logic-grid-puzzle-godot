@@ -19,7 +19,7 @@ func _init(my_num_bits: int):
 	for i in range(_num_words):
 		_words[i] = 0
 
-func to_string() -> String:
+func _to_string() -> String:
 	if _have_bits_changed:
 		var print_str: String = ""
 		var padding: int

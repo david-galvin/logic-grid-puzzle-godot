@@ -15,15 +15,14 @@ class TestGrid:
 
 	func test_eliminate_false():
 		_grid.eliminate(0, 1, false)
-		assert_eq("\n" + _grid.to_string(), "\nXOX\n?X?\n?X?\n")
-		print(_grid.to_string())
+		assert_eq("\n" + str(_grid), "\nXOX\n?X?\n?X?\n")
 
 	func test_eliminate_true():
 		_grid.eliminate(0, 1, true)
-		assert_eq("\n" + _grid.to_string(), "\n?X?\n???\n???\n")
+		assert_eq("\n" + str(_grid), "\n?X?\n???\n???\n")
 		
 		_grid.eliminate(0, 2, true)
-		assert_eq("\n" + _grid.to_string(), "\nOXX\nX??\nX??\n")
+		assert_eq("\n" + str(_grid), "\nOXX\nX??\nX??\n")
 		
 		var true_bit_mask: BitSet = _grid.bit_mask.get_true_bit_mask(0, 0)
 		var false_bit_mask: BitSet = _grid.bit_mask.get_false_bit_mask(0, 0)

@@ -11,7 +11,7 @@ class TestLogicGridPuzzle:
 
 	func before_each():
 		_category_count = 3
-		_category_size = 6
+		_category_size = 7
 		_time_before = OS.get_ticks_msec()
 		_lp = LogicGridPuzzle.new(_category_count, _category_size)
 		print("Init new puz: " + str(OS.get_ticks_msec() - _time_before))
@@ -38,8 +38,7 @@ class TestLogicGridPuzzle:
 			_time_before = OS.get_ticks_msec()
 			_lp.eliminate_possible_solutions(0, 1, _category_count - 2, _category_size - i - 1, true)
 			_times_arr.append(OS.get_ticks_msec() - _time_before) 
-		print("Min time per move " + str(_times_arr.min()))
 		print("Max time per move " + str(_times_arr.max()))
 		print(str(_times_arr))
 
-		_lp.print_puzzle()
+		print(_lp)

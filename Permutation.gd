@@ -14,7 +14,7 @@ func _init(length: int):
 	_inverse_ofPermutation_int_arr.resize(length)
 	rank = -1
 
-func to_string() -> String:
+func _to_string() -> String:
 	var mystr: String = str(rank) + ":"
 	for i in range(permutation_int_arr.size()):
 		mystr += " " + str(permutation_int_arr[i])
@@ -32,9 +32,10 @@ func permute_by_rank(my_rank: int):
 	update_rank()
 
 func set_rank(new_rank: int):
-	_set_permutation_to_identity()
-	_set_rank_iterative(new_rank)
-	rank = new_rank
+	if rank != new_rank:
+		_set_permutation_to_identity()
+		_set_rank_iterative(new_rank)
+		rank = new_rank
 
 func _set_rank_iterative(my_rank: int):
 	for i in range(permutation_int_arr.size(), 0, -1):
