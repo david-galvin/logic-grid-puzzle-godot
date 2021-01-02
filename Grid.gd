@@ -7,11 +7,9 @@ var max_possible_solutions: int
 var all_possible_solutions: BitSet
 var bit_mask: BitMask
 var math = load("res://Math.gd").new()
+var _is_solved: bool = false
+var _is_solvable: bool = true
 
-
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass # Replace with function body.
 
 func _init(my_category_size: int, my_bit_mask: BitMask):
 	category_size = my_category_size
@@ -20,12 +18,27 @@ func _init(my_category_size: int, my_bit_mask: BitMask):
 	all_possible_solutions = BitSet.new(max_possible_solutions)
 	all_possible_solutions.set_in_range(0, max_possible_solutions, true)
 
+func is_solved() -> bool:
+	return _is_solved
+
+func is_solvable() -> bool:
+	return _is_solvable
+
+func _update_solved_status():
+	var bit: int = all_possible_solutions.next_set_bit(0)
+	if bit == -1:
+		_is_solvable = false
+		push_error("No solution!")
+	elif all_possible_solutions.next_set_bit(bit) == -1:
+		_is_solved = true
+
 func eliminate(category1_elt: int, category2_elt: int, are_equal: bool):
 	var true_bit_mask: BitSet = bit_mask.get_true_bit_mask(category1_elt, category2_elt)
 	if(are_equal):
 		all_possible_solutions.bitwise_and_not(true_bit_mask)
 	else:
 		all_possible_solutions.bitwise_and(true_bit_mask)
+	_update_solved_status()
 
 func get_row_str(row: int) -> String:
 	var row_str: String = ""

@@ -62,12 +62,33 @@ func _calculate_implied_rank(left_grid_rank: int, right_grid_rank: int) -> int:
 func eliminate_possible_solutions(category1: int, element1: int, category2: int, element2: int, truth_val: bool):
 	if category1 < category2:
 		_get_grid(category1, category2).eliminate(element1, element2, truth_val)
+		#check_all_trios_including_categories(category1, category2)
+		check_all_trios()
 	elif category2 < category1:
 		eliminate_possible_solutions(category2, element2, category1, element1, truth_val)
 	else:
 		push_error("The categories must be different")
-	check_all_trios()
+	
+#TODO CHECK ALL TRIOS THAT ARE AFFECTED BY THIS MOVE!
 
+func check_all_trios_including_categories(category1: int, category2: int):
+	var cat_matches: int = 0
+	for row_category in range(0, category_count - 2):
+		if [category1, category2].has(row_category):
+			cat_matches += 1
+		for left_grid_category in range(category_count - 1, row_category + 1, -1):
+			if [category1, category2].has(left_grid_category):
+				cat_matches += 1 
+			grid_trio[0] = _get_grid(row_category, left_grid_category)
+			for right_grid_category in range(left_grid_category - 1, row_category, -1):
+				if [category1, category2].has(right_grid_category):
+					cat_matches += 1 
+				if cat_matches == 2:
+					grid_trio[1] = _get_grid(row_category, right_grid_category)
+					grid_trio[2] = _get_grid(right_grid_category, left_grid_category)
+					if _is_grid_trio_worth_checking():
+						check_grid_trio()
+				
 # For all trios of categories A, B, C, check the pairs AB, AC, and BC for  
 # implied information about valid solutions
 func check_all_trios():
@@ -95,6 +116,7 @@ func _is_grid_trio_worth_checking() -> bool:
 				return true
 	return false
 
+#TODO SPEED THIS UP!!!!
 func check_grid_trio():
 	var left_grid: Grid = grid_trio[0]
 	var right_grid: Grid = grid_trio[1]
@@ -106,8 +128,8 @@ func check_grid_trio():
 	var left_grid_possible_solutions: BitSet = possible_trio_solutions[0]
 	var right_grid_possible_solutions: BitSet = possible_trio_solutions[1]
 	var implied_possible_solutions: BitSet = possible_trio_solutions[2]
-	while left_grid_rank >= 0:
-		while right_grid_rank >= 0:
+	while left_grid_rank >= 0 && left_grid_rank < left_grid.max_possible_solutions - 1:
+		while right_grid_rank >= 0 && right_grid_rank < right_grid.max_possible_solutions - 1:
 			var implied_grid_rank: int = get_implied_grid_rank(left_grid_rank, right_grid_rank)
 			if implied_grid.all_possible_solutions.get_at_index(implied_grid_rank):
 				left_grid_possible_solutions.set_at_index(left_grid_rank, true)

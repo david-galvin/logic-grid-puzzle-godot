@@ -144,7 +144,7 @@ func cardinality() -> int:
 	if _have_bits_changed:
 		var ans: int = 0
 		var index: int = next_set_bit(0)
-		while index != -1:
+		while index != -1 && index < _num_bits - 1:
 			index  = next_set_bit(index + 1)
 			ans += 1
 		_cardinality = ans
