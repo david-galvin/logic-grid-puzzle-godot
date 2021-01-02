@@ -13,23 +13,38 @@ var grid_trio = []
 var possible_trio_solutions = []
 var rank_to_inverse_rank = []
 var math = load("res://Math.gd").new()
+var _grid_trio_false_cells_threshold: int = 0
+	
 
 func _init(my_category_count: int, my_category_size: int):
 	grid_trio.resize(3)
 	category_count = my_category_count
 	category_size = my_category_size
+	var _time_before = OS.get_ticks_msec()
 	grids_arr = _build_grids()
+	print("grids_arr: " + str(OS.get_ticks_msec() - _time_before))
+	_grid_trio_false_cells_threshold = 4 * 2 * (category_size - 2) 
 	use_permutation_lookup_table = (category_size <= 7)
+	
+	_time_before = OS.get_ticks_msec()
 	permutation = Permutation.new(category_size)
+	print("perm: " + str(OS.get_ticks_msec() - _time_before))
+	_time_before = OS.get_ticks_msec()
 	rank_to_inverse_rank.resize(math.factorial(category_size))
 	_build_inverse_rank_lookup_table()
+	print("_build_inverse_rank_lookup_table(): " + str(OS.get_ticks_msec() - _time_before))
+	
+	_time_before = OS.get_ticks_msec()
 	if use_permutation_lookup_table:
 		permutation_ranks = _build_permutation_lookup_table()
+		print("_build_inverse_rank_lookup_table(): " + str(OS.get_ticks_msec() - _time_before))
 	else:
 		permutation_ranks = null
 	possible_trio_solutions.resize(3)
+	_time_before = OS.get_ticks_msec()
 	for i in range(3):
 		possible_trio_solutions[i] = BitSet.new(math.factorial(category_size))
+	print("possible_trio_solutions: " + str(OS.get_ticks_msec() - _time_before))
 
 func _build_permutation_lookup_table():
 	var num_solutions_per_grid: int = math.factorial(category_size)
@@ -100,6 +115,11 @@ func check_all_trios():
 					check_grid_trio()
 
 func _is_grid_trio_worth_checking() -> bool:
+	var count_of_false_cells_in_trio: int = 0
+	for grid in grid_trio:
+		count_of_false_cells_in_trio += grid.count_of_false_cells
+	if count_of_false_cells_in_trio < _grid_trio_false_cells_threshold:
+		return false
 	var num_solutions_to_check: int = 1
 	var num_grids_with_data: int = 0
 	for grid in grid_trio:
@@ -120,6 +140,8 @@ func _is_grid_trio_worth_checking() -> bool:
 
 #MAYBE: Determine sufficient eliminations to make new data possibile & skip o/w
 func check_grid_trio():
+	print_debug("Checking grid trio")
+	print_debug(to_string())
 	var left_grid: Grid = grid_trio[0]
 	var right_grid: Grid = grid_trio[1]
 	var implied_grid: Grid = grid_trio[2]
@@ -140,9 +162,9 @@ func check_grid_trio():
 			right_grid_rank = right_grid.all_possible_solutions.next_set_bit(right_grid_rank + 1)
 		left_grid_rank = left_grid.all_possible_solutions.next_set_bit(left_grid_rank + 1)
 		right_grid_rank = right_grid.all_possible_solutions.next_set_bit(0)
-	left_grid.all_possible_solutions.bitwise_and(left_grid_possible_solutions)
-	right_grid.all_possible_solutions.bitwise_and(right_grid_possible_solutions)
-	implied_grid.all_possible_solutions.bitwise_and(implied_possible_solutions)
+	left_grid.merge_possible_solutions_from_grid_trio(left_grid_possible_solutions)
+	right_grid.merge_possible_solutions_from_grid_trio(right_grid_possible_solutions)
+	implied_grid.merge_possible_solutions_from_grid_trio(implied_possible_solutions)
 
 func _is_valid_category(category: int) -> bool:
 	if category < 0 || category >= category_count:
@@ -168,7 +190,6 @@ func print_puzzle():
 	print_debug(to_string())
 
 func _get_grid(category1: int, category2: int) -> Grid:
-# warning-ignore:integer_division
 		var index: int =  grids_arr.size() - (category_count - 1 - category1) * (category_count - category1) / 2 + (category_count - category2 - 1);
 		return grids_arr[index]
 
@@ -177,23 +198,8 @@ func _get_repeated_string(c: String, num_times: int) -> String:
 
 func _build_grids():
 	var bit_mask: BitMask = BitMask.new(category_size)
-# warning-ignore:integer_division
 	var num_grids: int = (category_count - 1) * category_count / 2
 	grids_arr.resize(num_grids)
 	for i in range(num_grids):
 		grids_arr[i] = Grid.new(category_size, bit_mask)
 	return grids_arr
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -11,14 +11,9 @@ var _have_bits_changed: bool = true
 var _cardinality: int = 0
 var _print_str = ""
 
-# Called when the node enters the scene tree for the first time.
-#func _ready():#
-#	pass # Replace with function body.
-
 func _init(my_num_bits: int):
 	_num_bits = my_num_bits
 	_print_str = "%0*d" % [_num_bits, 0]
-# warning-ignore:integer_division
 	_num_words = (_num_bits - 1) / _BITS_PER_WORD + 1
 	_words.resize(_num_words)
 	for i in range(_num_words):
@@ -46,7 +41,6 @@ func _word_to_string(word: int, num_bits: int) -> String:
 	return word_str
 
 func _get_word_id(index: int) -> int:
-# warning-ignore:integer_division
 	return index / _BITS_PER_WORD
 
 func _get_bit_id(index: int) -> int:
