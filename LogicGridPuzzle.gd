@@ -62,8 +62,8 @@ func _calculate_implied_rank(left_grid_rank: int, right_grid_rank: int) -> int:
 func eliminate_possible_solutions(category1: int, element1: int, category2: int, element2: int, truth_val: bool):
 	if category1 < category2:
 		_get_grid(category1, category2).eliminate(element1, element2, truth_val)
-		#check_all_trios_including_categories(category1, category2)
-		check_all_trios()
+		check_all_trios_including_categories(category1, category2)
+		#check_all_trios()
 	elif category2 < category1:
 		eliminate_possible_solutions(category2, element2, category1, element1, truth_val)
 	else:
@@ -72,22 +72,18 @@ func eliminate_possible_solutions(category1: int, element1: int, category2: int,
 #TODO CHECK ALL TRIOS THAT ARE AFFECTED BY THIS MOVE!
 
 func check_all_trios_including_categories(category1: int, category2: int):
-	var cat_matches: int = 0
 	for row_category in range(0, category_count - 2):
-		if [category1, category2].has(row_category):
-			cat_matches += 1
 		for left_grid_category in range(category_count - 1, row_category + 1, -1):
-			if [category1, category2].has(left_grid_category):
-				cat_matches += 1 
 			grid_trio[0] = _get_grid(row_category, left_grid_category)
 			for right_grid_category in range(left_grid_category - 1, row_category, -1):
-				if [category1, category2].has(right_grid_category):
-					cat_matches += 1 
-				if cat_matches == 2:
-					grid_trio[1] = _get_grid(row_category, right_grid_category)
-					grid_trio[2] = _get_grid(right_grid_category, left_grid_category)
-					if _is_grid_trio_worth_checking():
-						check_grid_trio()
+				if [left_grid_category, right_grid_category, row_category].has(category1):
+					
+					if [left_grid_category, right_grid_category, row_category].has(category2):
+						grid_trio[1] = _get_grid(row_category, right_grid_category)
+						grid_trio[2] = _get_grid(right_grid_category, left_grid_category)
+						if _is_grid_trio_worth_checking():
+							print("checking: " + str(row_category) + ", " + str(left_grid_category) + ", " + str(right_grid_category))
+							check_grid_trio()
 				
 # For all trios of categories A, B, C, check the pairs AB, AC, and BC for  
 # implied information about valid solutions
@@ -121,6 +117,8 @@ func _is_grid_trio_worth_checking() -> bool:
 #BOTH A TRUE AND FALSE SOLUTION
 #Maybe only keep track of internally possible solutions, then stop
 #as soon as we find that all unsolved cells in a grid can't be determined.
+
+#MAYBE: Determine sufficient eliminations to make new data possibile & skip o/w
 func check_grid_trio():
 	var left_grid: Grid = grid_trio[0]
 	var right_grid: Grid = grid_trio[1]
