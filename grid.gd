@@ -38,8 +38,10 @@ func merge_possible_solutions_from_grid_trio(calculated_possible_solutions: BitS
 	all_possible_solutions.bitwise_and(calculated_possible_solutions)
 	_update_grid_cells()
 
+
 func is_solved() -> bool:
 	return _is_solved
+
 
 func is_solvable() -> bool:
 	return _is_solvable
