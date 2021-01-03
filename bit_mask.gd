@@ -44,5 +44,5 @@ func _build_bit_masks(cat_size: int) -> void:
 	for solution_id in range(math.factorial(cat_size)):
 		solution.set_rank(solution_id)
 		for row in range(cat_size):
-			var col: int = solution.perm_int_arr[row]
+			var col: int = solution.perm_ints[row]
 			true_bit_masks[row][col].set_at_index(solution_id, true)

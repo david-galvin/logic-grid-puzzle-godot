@@ -28,7 +28,7 @@ var possible_trio_solutions: Array = []
 var rank_to_inverse_rank: Array = []
 var math: Math = load("res://math.gd").new()
 
-var _grid_arr: Array = []
+var _grids: Array = []
 var _grid_trio_false_cells_threshold: int = 0
 
 
@@ -36,7 +36,7 @@ func _init(my_cat_count: int, my_cat_size: int) -> void:
 	grid_trio.resize(3)
 	cat_count = my_cat_count
 	cat_size = my_cat_size
-	_grid_arr = _build_grids()
+	_grids = _build_grids()
 	# The minimum number of false cells before a grid trio can yield
 	# sufficient extra information to eliminate further cells
 	_grid_trio_false_cells_threshold = 4 * (cat_size - 2) + 2
@@ -167,7 +167,7 @@ func _to_string() -> String:
 func _get_grid(cat1: int, cat2: int) -> Grid:
 	# indexing is an arbitrary way to get a unique index for every row, col
 	# pair. It depends on row_id > col_id
-	return _grid_arr[_get_grid_index(cat1, cat2)]
+	return _grids[_get_grid_index(cat1, cat2)]
 
 
 func _get_grid_index(cat1: int, cat2: int) -> int:
@@ -183,7 +183,7 @@ func _get_repeated_string(c: String, num_times: int) -> String:
 func _build_grids() -> Array:
 	var bit_mask: BitMask = BitMask.new(cat_size)
 	var num_grids: int = (cat_count - 1) * cat_count / 2
-	_grid_arr.resize(num_grids)
+	_grids.resize(num_grids)
 	for i in range(num_grids):
-		_grid_arr[i] = Grid.new(cat_size, bit_mask)
-	return _grid_arr
+		_grids[i] = Grid.new(cat_size, bit_mask)
+	return _grids

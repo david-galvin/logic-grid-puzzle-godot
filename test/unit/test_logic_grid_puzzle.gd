@@ -12,7 +12,6 @@ class TestLogicGridPuzzle:
 	var _category_size: int = 0
 	var _lp = null
 	var _time_before = null
-	var _times_arr = []
 
 
 	func before_each():
