@@ -55,22 +55,6 @@ func eliminate_possible_solutions(cat1: int, elt1: int, \
 	_check_all_trios_including_categories(cat1, cat2)
 
 
-func _check_all_trios_including_categories(cat1: int, cat2: int):
-	for cat3 in range(cat_count):
-		if ! [cat1, cat2].has(cat3):
-			var cat_trio = [cat1, cat2, cat3]
-			cat_trio.sort()
-			# The order of grids in grid_trio is important. The first two
-			# need to be in the same row, with the first to the left of the
-			# second. This means they should be in order of category size:
-			# (big, small), (big, med), (med, small)
-			grid_trio[0] = _get_grid(cat_trio[2], cat_trio[0])
-			grid_trio[1] = _get_grid(cat_trio[2], cat_trio[1])
-			grid_trio[2] = _get_grid(cat_trio[1], cat_trio[0])
-			if _is_grid_trio_worth_checking():
-				_check_grid_trio()
-
-
 func _build_perm_lookup_table():
 	var num_solutions_per_grid: int = math.factorial(cat_size)
 	var implied_solutions = []
@@ -86,6 +70,22 @@ func _build_inverse_rank_lookup_table():
 		perm.set_rank(i)
 		perm.invert_perm()
 		rank_to_inverse_rank[i] = perm.rank
+
+
+func _check_all_trios_including_categories(cat1: int, cat2: int):
+	for cat3 in range(cat_count):
+		if ! [cat1, cat2].has(cat3):
+			var cat_trio = [cat1, cat2, cat3]
+			cat_trio.sort()
+			# The order of grids in grid_trio is important. The first two
+			# need to be in the same row, with the first to the left of the
+			# second. This means they should be in order of category size:
+			# (big, small), (big, med), (med, small)
+			grid_trio[0] = _get_grid(cat_trio[2], cat_trio[0])
+			grid_trio[1] = _get_grid(cat_trio[2], cat_trio[1])
+			grid_trio[2] = _get_grid(cat_trio[1], cat_trio[0])
+			if _is_grid_trio_worth_checking():
+				_check_grid_trio()
 
 
 func _calculate_implied_rank(left_grid_rank: int, right_grid_rank: int) -> int:

@@ -23,6 +23,13 @@ func _init(my_num_bits: int):
 		_words[i] = 0
 
 
+func validate_index(index):
+	if index > _num_bits - 1:
+		push_error("Index exceeds size of BitSet")
+	if index < 0:
+		push_error("Index can't be negative")
+
+
 func set_at_index(index: int, val: bool):
 	validate_index(index)
 	_have_bits_changed = true
@@ -32,11 +39,9 @@ func set_at_index(index: int, val: bool):
 		_words[_get_word_id(index)] &= (_ALL_SET_BITS ^ (1 << _get_bit_id(index)))
 
 
-func validate_index(index):
-	if index > _num_bits - 1:
-		push_error("Index exceeds size of BitSet")
-	if index < 0:
-		push_error("Index can't be negative")
+func get_at_index(index: int) -> bool:
+	validate_index(index)
+	return (_words[_get_word_id(index)] & (1 << _get_bit_id(index))) > 0
 
 
 func set_in_range(start: int, stop: int, val: bool):
@@ -99,11 +104,6 @@ func next_set_bit(index: int) -> int:
 			if (_words[id] > 0):
 				return _next_set_bit_in_word(_words[id], 0) + _BITS_PER_WORD * id
 	return -1
-
-
-func get_at_index(index: int) -> bool:
-	validate_index(index)
-	return (_words[_get_word_id(index)] & (1 << _get_bit_id(index))) > 0
 
 
 func clear():
