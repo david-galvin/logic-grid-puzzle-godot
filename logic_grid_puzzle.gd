@@ -21,18 +21,18 @@ class_name LogicGridPuzzle
 # grid_trio: 3 grids formed pairwise from 3 categories
 var cat_count: int
 var cat_size: int
-var implied_perm_ranks
+var implied_perm_ranks: Array
 var perm: Permutation
-var grid_trio = []
-var possible_trio_solutions = []
-var rank_to_inverse_rank = []
-var math = load("res://math.gd").new()
+var grid_trio: Array = []
+var possible_trio_solutions: Array = []
+var rank_to_inverse_rank: Array = []
+var math: Math = load("res://math.gd").new()
 
-var _grid_arr = []
+var _grid_arr: Array = []
 var _grid_trio_false_cells_threshold: int = 0
 
 
-func _init(my_cat_count: int, my_cat_size: int):
+func _init(my_cat_count: int, my_cat_size: int) -> void:
 	grid_trio.resize(3)
 	cat_count = my_cat_count
 	cat_size = my_cat_size
@@ -50,12 +50,12 @@ func _init(my_cat_count: int, my_cat_size: int):
 
 
 func eliminate_possible_solutions(cat1: int, elt1: int, \
-		cat2: int, elt2: int, truth_val: bool):
+		cat2: int, elt2: int, truth_val: bool) -> void:
 	_get_grid(cat1, cat2).eliminate(elt1, elt2, truth_val)
 	_check_all_trios_including_categories(cat1, cat2)
 
 
-func _build_perm_lookup_table():
+func _build_perm_lookup_table() -> Array:
 	var num_solutions_per_grid: int = math.factorial(cat_size)
 	var implied_solutions = []
 	implied_solutions.resize(num_solutions_per_grid)
@@ -65,14 +65,14 @@ func _build_perm_lookup_table():
 	return implied_solutions
 
 
-func _build_inverse_rank_lookup_table():
+func _build_inverse_rank_lookup_table() -> void:
 	for i in range(rank_to_inverse_rank.size()):
 		perm.set_rank(i)
 		perm.invert_perm()
 		rank_to_inverse_rank[i] = perm.rank
 
 
-func _check_all_trios_including_categories(cat1: int, cat2: int):
+func _check_all_trios_including_categories(cat1: int, cat2: int) -> void:
 	for cat3 in range(cat_count):
 		if ! [cat1, cat2].has(cat3):
 			var cat_trio = [cat1, cat2, cat3]
@@ -109,7 +109,7 @@ func _is_grid_trio_worth_checking() -> bool:
 	return false
 
 
-func _check_grid_trio():
+func _check_grid_trio() -> void:
 	var left_grid: Grid = grid_trio[0]
 	var right_grid: Grid = grid_trio[1]
 	var implied_grid: Grid = grid_trio[2]
@@ -180,7 +180,7 @@ func _get_repeated_string(c: String, num_times: int) -> String:
 	return c.repeat(num_times)
 
 
-func _build_grids():
+func _build_grids() -> Array:
 	var bit_mask: BitMask = BitMask.new(cat_size)
 	var num_grids: int = (cat_count - 1) * cat_count / 2
 	_grid_arr.resize(num_grids)

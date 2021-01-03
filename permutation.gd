@@ -4,21 +4,21 @@ extends Reference
 class_name Permutation
 
 
-var perm_int_arr = []
+var perm_int_arr: Array = []
 var rank: int
 
-var _copy_of_perm_int_arr = []
-var _inverse_of_perm_int_arr = []
+var _copy_of_perm_int_arr: Array = []
+var _inverse_of_perm_int_arr: Array = []
 
 
-func _init(length: int):
+func _init(length: int) -> void:
 	perm_int_arr.resize(length)
 	_copy_of_perm_int_arr.resize(length)
 	_inverse_of_perm_int_arr.resize(length)
 	rank = -1
 
 
-func invert_perm():
+func invert_perm() -> void:
 	for i in range(perm_int_arr.size()):
 		_inverse_of_perm_int_arr[perm_int_arr[i]] = i
 	for i in range(perm_int_arr.size()):
@@ -26,19 +26,19 @@ func invert_perm():
 	_update_rank()
 
 
-func permute_by_rank(my_rank: int):
+func permute_by_rank(my_rank: int) -> void:
 	_set_rank_iterative(my_rank)
 	_update_rank()
 
 
-func set_rank(new_rank: int):
+func set_rank(new_rank: int) -> void:
 	if rank != new_rank:
 		_set_perm_to_identity()
 		_set_rank_iterative(new_rank)
 		rank = new_rank
 
 
-func _update_rank():
+func _update_rank() -> void:
 	_update_auxilliary_perms()
 	rank = _update_rank_recursive(perm_int_arr.size())
 
@@ -50,18 +50,18 @@ func _to_string() -> String:
 	return mystr
 
 
-func _set_rank_iterative(my_rank: int):
+func _set_rank_iterative(my_rank: int) -> void:
 	for i in range(perm_int_arr.size(), 0, -1):
 		_swap(perm_int_arr, i-1, my_rank % i)
 		my_rank /= i
 
 
-func _set_perm_to_identity():
+func _set_perm_to_identity() -> void:
 	for i in range(perm_int_arr.size()):
 		perm_int_arr[i] = i
 
 
-func _update_auxilliary_perms():
+func _update_auxilliary_perms() -> void:
 	if perm_int_arr.size() != _inverse_of_perm_int_arr.size():
 		_inverse_of_perm_int_arr = []
 		_inverse_of_perm_int_arr.resize(perm_int_arr.size())
@@ -82,7 +82,7 @@ func _update_rank_recursive(index: int) -> int:
 	return s + index * _update_rank_recursive(index - 1)
 
 
-func _swap(arr, index1: int, index2: int):
+func _swap(arr, index1: int, index2: int) -> void:
 	if index1 == index2:
 		return
 	arr[index1] ^= arr[index2]

@@ -11,13 +11,13 @@ var count_of_true_cells: int = 0
 var count_of_false_cells: int = 0
 
 var _cat_size: int
-var _math = load("res://math.gd").new()
+var _math: Math = load("res://math.gd").new()
 var _is_solved: bool = false
 var _is_solvable: bool = true
-var _grid_cells = []
+var _grid_cells: Array = []
 
 
-func _init(my_cat_size: int, my_bit_mask: BitMask):
+func _init(my_cat_size: int, my_bit_mask: BitMask) -> void:
 	_cat_size = my_cat_size
 	_grid_cells.resize(_cat_size)
 	for i in range(_cat_size):
@@ -29,7 +29,7 @@ func _init(my_cat_size: int, my_bit_mask: BitMask):
 	all_possible_solutions.set_in_range(0, max_possible_solutions, true)
 
 
-func merge_possible_solutions_from_grid_trio(calculated_possible_solutions):
+func merge_possible_solutions_from_grid_trio(calculated_possible_solutions: BitSet) -> void:
 	all_possible_solutions.bitwise_and(calculated_possible_solutions)
 	_update_grid_cells()
 
@@ -40,7 +40,7 @@ func is_solvable() -> bool:
 	return _is_solvable
 
 
-func eliminate(cat1_elt: int, cat2_elt: int, are_equal: bool):
+func eliminate(cat1_elt: int, cat2_elt: int, are_equal: bool) -> void:
 	var true_bit_mask: BitSet = bit_mask.get_true_bit_mask(cat1_elt, cat2_elt)
 	if(are_equal):
 		all_possible_solutions.bitwise_and_not(true_bit_mask)
@@ -66,7 +66,7 @@ func get_row_str(row: int) -> String:
 	return row_str
 
 
-func _update_solved_status():
+func _update_solved_status() -> void:
 	var bit: int = all_possible_solutions.next_set_bit(0)
 	if bit == -1:
 		_is_solvable = false
@@ -75,7 +75,7 @@ func _update_solved_status():
 		_is_solved = true
 
 
-func _update_grid_cells():
+func _update_grid_cells() -> void:
 	count_of_true_cells = 0
 	count_of_false_cells = 0
 	for row in range(_cat_size):

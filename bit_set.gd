@@ -9,13 +9,13 @@ const _ALL_SET_BITS: int = (1 << _BITS_PER_WORD) - 1
 
 var _num_words: int = 0
 var _num_bits: int = 0
-var _words = []
+var _words: Array = []
 var _have_bits_changed: bool = true
 var _cardinality: int = 0
-var _print_str = ""
+var _print_str: String = ""
 
 
-func _init(my_num_bits: int):
+func _init(my_num_bits: int) -> void:
 	_num_bits = my_num_bits
 	_num_words = (_num_bits - 1) / _BITS_PER_WORD + 1
 	_words.resize(_num_words)
@@ -23,14 +23,14 @@ func _init(my_num_bits: int):
 		_words[i] = 0
 
 
-func validate_index(index):
+func validate_index(index: int) -> void:
 	if index > _num_bits - 1:
 		push_error("Index exceeds size of BitSet")
 	if index < 0:
 		push_error("Index can't be negative")
 
 
-func set_at_index(index: int, val: bool):
+func set_at_index(index: int, val: bool) -> void:
 	validate_index(index)
 	_have_bits_changed = true
 	if val == true:
@@ -44,7 +44,7 @@ func get_at_index(index: int) -> bool:
 	return (_words[_get_word_id(index)] & (1 << _get_bit_id(index))) > 0
 
 
-func set_in_range(start: int, stop: int, val: bool):
+func set_in_range(start: int, stop: int, val: bool) -> void:
 	validate_index(start)
 	validate_index(stop - 1)
 	if start > stop:
@@ -65,26 +65,26 @@ func set_in_range(start: int, stop: int, val: bool):
 			_words[word_id] &= (_ALL_SET_BITS ^ bitmask)
 
 
-func bitwise_and(other_bit_set):
+func bitwise_and(other_bit_set: BitSet) -> void:
 	_have_bits_changed = true
 	for i in range(_num_words):
 		_words[i] &= other_bit_set._words[i]
 
 
-func bitwise_xor(other_bit_set):
+func bitwise_xor(other_bit_set: BitSet) -> void:
 	_have_bits_changed = true
 	for i in range(_num_words):
 		_words[i] ^= (other_bit_set._words[i])
 
 
 # Clears all bits in this bitset which are set in the other bitset
-func bitwise_and_not(other_bit_set):
+func bitwise_and_not(other_bit_set: BitSet) -> void:
 	_have_bits_changed = true
 	for i in range(_num_words):
 		_words[i] &= (~other_bit_set._words[i])
 
 
-func bitwise_intersects(other_bit_set) -> bool:
+func bitwise_intersects(other_bit_set: BitSet) -> bool:
 	for i in range(_num_words):
 		if _words[i] & other_bit_set._words[i]:
 			return true
@@ -106,7 +106,7 @@ func next_set_bit(index: int) -> int:
 	return -1
 
 
-func clear():
+func clear() -> void:
 	_print_str = "%0*d" % [_num_bits, 0]
 	_cardinality = 0
 	_have_bits_changed = false
