@@ -6,6 +6,7 @@ class_name Permutation
 
 var perm_int_arr = []
 var rank: int
+
 var _copy_of_perm_int_arr = []
 var _inverse_of_perm_int_arr = []
 
@@ -17,24 +18,17 @@ func _init(length: int):
 	rank = -1
 
 
-func _to_string() -> String:
-	var mystr: String = str(rank) + ":"
-	for i in range(perm_int_arr.size()):
-		mystr += " " + str(perm_int_arr[i])
-	return mystr
-
-
 func invert_perm():
 	for i in range(perm_int_arr.size()):
 		_inverse_of_perm_int_arr[perm_int_arr[i]] = i
 	for i in range(perm_int_arr.size()):
 		perm_int_arr[i] = _inverse_of_perm_int_arr[i]
-	update_rank()
+	_update_rank()
 
 
 func permute_by_rank(my_rank: int):
 	_set_rank_iterative(my_rank)
-	update_rank()
+	_update_rank()
 
 
 func set_rank(new_rank: int):
@@ -42,6 +36,18 @@ func set_rank(new_rank: int):
 		_set_perm_to_identity()
 		_set_rank_iterative(new_rank)
 		rank = new_rank
+
+
+func _update_rank():
+	_update_auxilliary_perms()
+	rank = _update_rank_recursive(perm_int_arr.size())
+
+
+func _to_string() -> String:
+	var mystr: String = str(rank) + ":"
+	for i in range(perm_int_arr.size()):
+		mystr += " " + str(perm_int_arr[i])
+	return mystr
 
 
 func _set_rank_iterative(my_rank: int):
@@ -53,11 +59,6 @@ func _set_rank_iterative(my_rank: int):
 func _set_perm_to_identity():
 	for i in range(perm_int_arr.size()):
 		perm_int_arr[i] = i
-
-
-func update_rank():
-	_update_auxilliary_perms()
-	rank = _update_rank_recursive(perm_int_arr.size())
 
 
 func _update_auxilliary_perms():

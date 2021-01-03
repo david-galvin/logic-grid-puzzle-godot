@@ -27,6 +27,7 @@ var grid_trio = []
 var possible_trio_solutions = []
 var rank_to_inverse_rank = []
 var math = load("res://math.gd").new()
+
 var _grid_arr = []
 var _grid_trio_false_cells_threshold: int = 0
 
@@ -48,6 +49,28 @@ func _init(my_cat_count: int, my_cat_size: int):
 		possible_trio_solutions[i] = BitSet.new(math.factorial(cat_size))
 
 
+func eliminate_possible_solutions(cat1: int, elt1: int, \
+		cat2: int, elt2: int, truth_val: bool):
+	_get_grid(cat1, cat2).eliminate(elt1, elt2, truth_val)
+	_check_all_trios_including_categories(cat1, cat2)
+
+
+func _check_all_trios_including_categories(cat1: int, cat2: int):
+	for cat3 in range(cat_count):
+		if ! [cat1, cat2].has(cat3):
+			var cat_trio = [cat1, cat2, cat3]
+			cat_trio.sort()
+			# The order of grids in grid_trio is important. The first two
+			# need to be in the same row, with the first to the left of the
+			# second. This means they should be in order of category size:
+			# (big, small), (big, med), (med, small)
+			grid_trio[0] = _get_grid(cat_trio[2], cat_trio[0])
+			grid_trio[1] = _get_grid(cat_trio[2], cat_trio[1])
+			grid_trio[2] = _get_grid(cat_trio[1], cat_trio[0])
+			if _is_grid_trio_worth_checking():
+				_check_grid_trio()
+
+
 func _build_perm_lookup_table():
 	var num_solutions_per_grid: int = math.factorial(cat_size)
 	var implied_solutions = []
@@ -65,38 +88,10 @@ func _build_inverse_rank_lookup_table():
 		rank_to_inverse_rank[i] = perm.rank
 
 
-func get_implied_grid_rank(left_grid_rank: int, right_grid_rank: int) -> int:
-	if implied_perm_ranks[left_grid_rank][right_grid_rank] == null:
-		implied_perm_ranks[left_grid_rank][right_grid_rank] = _calculate_implied_rank(left_grid_rank, right_grid_rank)
-	return implied_perm_ranks[left_grid_rank][right_grid_rank]
-
-
 func _calculate_implied_rank(left_grid_rank: int, right_grid_rank: int) -> int:
 	perm.set_rank(left_grid_rank)
 	perm.permute_by_rank(rank_to_inverse_rank[right_grid_rank])
 	return perm.rank
-
-
-func eliminate_possible_solutions(cat1: int, elt1: int, \
-		cat2: int, elt2: int, truth_val: bool):
-	_get_grid(cat1, cat2).eliminate(elt1, elt2, truth_val)
-	check_all_trios_including_categories(cat1, cat2)
-
-
-func check_all_trios_including_categories(cat1: int, cat2: int):
-	for cat3 in range(cat_count):
-		if ! [cat1, cat2].has(cat3):
-			var cat_trio = [cat1, cat2, cat3]
-			cat_trio.sort()
-			# The order of grids in grid_trio is important. The first two
-			# need to be in the same row, with the first to the left of the
-			# second. This means they should be in order of category size:
-			# (big, small), (big, med), (med, small)
-			grid_trio[0] = _get_grid(cat_trio[2], cat_trio[0])
-			grid_trio[1] = _get_grid(cat_trio[2], cat_trio[1])
-			grid_trio[2] = _get_grid(cat_trio[1], cat_trio[0])
-			if _is_grid_trio_worth_checking():
-				check_grid_trio()
 
 
 func _is_grid_trio_worth_checking() -> bool:
@@ -114,7 +109,7 @@ func _is_grid_trio_worth_checking() -> bool:
 	return false
 
 
-func check_grid_trio():
+func _check_grid_trio():
 	var left_grid: Grid = grid_trio[0]
 	var right_grid: Grid = grid_trio[1]
 	var implied_grid: Grid = grid_trio[2]
@@ -127,7 +122,7 @@ func check_grid_trio():
 	var implied_possible_solutions: BitSet = possible_trio_solutions[2]
 	while left_grid_rank >= 0 and left_grid_rank < left_grid.max_possible_solutions - 1:
 		while right_grid_rank >= 0 and right_grid_rank < right_grid.max_possible_solutions - 1:
-			var implied_grid_rank: int = get_implied_grid_rank(left_grid_rank, right_grid_rank)
+			var implied_grid_rank: int = _get_implied_grid_rank(left_grid_rank, right_grid_rank)
 			if implied_grid.all_possible_solutions.get_at_index(implied_grid_rank):
 				left_grid_possible_solutions.set_at_index(left_grid_rank, true)
 				right_grid_possible_solutions.set_at_index(right_grid_rank, true)
@@ -138,6 +133,12 @@ func check_grid_trio():
 	left_grid.merge_possible_solutions_from_grid_trio(left_grid_possible_solutions)
 	right_grid.merge_possible_solutions_from_grid_trio(right_grid_possible_solutions)
 	implied_grid.merge_possible_solutions_from_grid_trio(implied_possible_solutions)
+
+
+func _get_implied_grid_rank(left_grid_rank: int, right_grid_rank: int) -> int:
+	if implied_perm_ranks[left_grid_rank][right_grid_rank] == null:
+		implied_perm_ranks[left_grid_rank][right_grid_rank] = _calculate_implied_rank(left_grid_rank, right_grid_rank)
+	return implied_perm_ranks[left_grid_rank][right_grid_rank]
 
 
 func _is_valid_cat(cat: int) -> bool:
@@ -161,10 +162,6 @@ func _to_string() -> String:
 				print_str += "|" + _get_grid(row_cat, col_cat).get_row_str(row_grid)
 			print_str += "\n"
 	return print_str
-
-
-func print_puzzle():
-	print_debug(_to_string())
 
 
 func _get_grid(cat1: int, cat2: int) -> Grid:

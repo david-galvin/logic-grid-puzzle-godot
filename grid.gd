@@ -9,6 +9,7 @@ var all_possible_solutions: BitSet
 var bit_mask: BitMask
 var count_of_true_cells: int = 0
 var count_of_false_cells: int = 0
+
 var _cat_size: int
 var _math = load("res://math.gd").new()
 var _is_solved: bool = false
@@ -39,15 +40,6 @@ func is_solvable() -> bool:
 	return _is_solvable
 
 
-func _update_solved_status():
-	var bit: int = all_possible_solutions.next_set_bit(0)
-	if bit == -1:
-		_is_solvable = false
-		push_error("No solution!")
-	elif all_possible_solutions.next_set_bit(bit) == -1:
-		_is_solved = true
-
-
 func eliminate(cat1_elt: int, cat2_elt: int, are_equal: bool):
 	var true_bit_mask: BitSet = bit_mask.get_true_bit_mask(cat1_elt, cat2_elt)
 	if(are_equal):
@@ -56,6 +48,31 @@ func eliminate(cat1_elt: int, cat2_elt: int, are_equal: bool):
 		all_possible_solutions.bitwise_and(true_bit_mask)
 	_update_solved_status()
 	_update_grid_cells()
+
+
+func get_row_str(row: int) -> String:
+	_update_grid_cells()
+	var row_str: String = ""
+	for col in range(_cat_size):
+		match _grid_cells[row][col]:
+			null:
+				row_str += "?"
+			true:
+				row_str += "O"
+			false:
+				row_str += "X"
+			"*":
+				row_str += "*"
+	return row_str
+
+
+func _update_solved_status():
+	var bit: int = all_possible_solutions.next_set_bit(0)
+	if bit == -1:
+		_is_solvable = false
+		push_error("No solution!")
+	elif all_possible_solutions.next_set_bit(bit) == -1:
+		_is_solved = true
 
 
 func _update_grid_cells():
@@ -78,22 +95,6 @@ func _update_grid_cells():
 			else:
 				_grid_cells[row][col] = "*"
 	_is_solved = (count_of_true_cells == _cat_size)
-
-
-func get_row_str(row: int) -> String:
-	_update_grid_cells()
-	var row_str: String = ""
-	for col in range(_cat_size):
-		match _grid_cells[row][col]:
-			null:
-				row_str += "?"
-			true:
-				row_str += "O"
-			false:
-				row_str += "X"
-			"*":
-				row_str += "*"
-	return row_str
 
 
 func _to_string() -> String:

@@ -26,10 +26,3 @@ class TestPermutation:
 		_perm.set_rank(1)
 		_perm.invert_perm()
 		assert_eq(_perm.perm_int_arr, [3, 4, 1, 2, 0])
-	
-
-	func test_update_rank():
-		_perm.set_rank(5)
-		_perm.perm_int_arr = [4, 2, 3, 0, 1]
-		_perm.update_rank()
-		assert_eq(_perm.rank, 1)

@@ -8,6 +8,7 @@ var max_possible_solutions_per_grid: int
 var true_bit_masks = []
 var false_bit_mask: BitSet
 var math = load("res://math.gd").new()
+
 var _cat_size: int
 
 

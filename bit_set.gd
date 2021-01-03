@@ -6,6 +6,7 @@ class_name BitSet
 
 const _BITS_PER_WORD: int = 63
 const _ALL_SET_BITS: int = (1 << _BITS_PER_WORD) - 1
+
 var _num_words: int = 0
 var _num_bits: int = 0
 var _words = []
