@@ -1,7 +1,5 @@
-extends Reference
-
-
 class_name BitMask
+extends Reference
 
 
 var max_possible_solutions_per_grid: int

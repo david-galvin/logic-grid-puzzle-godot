@@ -1,7 +1,5 @@
-extends Reference
-
-
 class_name Permutation
+extends Reference
 
 
 var perm_ints: Array = []

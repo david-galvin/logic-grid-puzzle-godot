@@ -1,7 +1,5 @@
-extends Reference
-
-
 class_name Grid
+extends Reference
 
 
 var max_possible_solutions: int

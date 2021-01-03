@@ -1,7 +1,5 @@
-extends Reference
-
-
 class_name LogicGridPuzzle
+extends Reference
 
 
 # A number of terms are abbreviated to avoid long, confusing statements. 

@@ -1,7 +1,5 @@
-extends Reference
-
-
 class_name BitSet
+extends Reference
 
 
 const _BITS_PER_WORD: int = 63
