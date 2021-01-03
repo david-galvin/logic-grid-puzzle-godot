@@ -19,7 +19,7 @@ class_name LogicGridPuzzle
 # grid_trio: 3 grids formed pairwise from 3 categories
 var cat_count: int
 var cat_size: int
-var grids_arr = []
+var _grid_arr = []
 var implied_perm_ranks
 var perm: Permutation
 var grid_trio = []
@@ -32,10 +32,10 @@ func _init(my_cat_count: int, my_cat_size: int):
 	grid_trio.resize(3)
 	cat_count = my_cat_count
 	cat_size = my_cat_size
-	grids_arr = _build_grids()
+	_grid_arr = _build_grids()
 	# The minimum number of false cells before a grid trio can yield
 	# sufficient extra information to eliminate further cells
-	_grid_trio_false_cells_threshold = 4 * 2 * (cat_size - 2) 
+	_grid_trio_false_cells_threshold = 4 * (cat_size - 2) + 2
 	perm = Permutation.new(cat_size)
 	rank_to_inverse_rank.resize(math.factorial(cat_size))
 	_build_inverse_rank_lookup_table()
@@ -71,27 +71,19 @@ func _calculate_implied_rank(left_grid_rank: int, right_grid_rank: int) -> int:
 
 func eliminate_possible_solutions(cat1: int, elt1: int, \
 cat2: int, elt2: int, truth_val: bool):
-	if cat1 < cat2:
-		_get_grid(cat1, cat2).eliminate(elt1, elt2, truth_val)
-		check_all_trios_including_categories(cat1, cat2)
-	elif cat2 < cat1:
-		eliminate_possible_solutions(cat2, elt2, cat1, elt1, truth_val)
-	else:
-		push_error("The categories must be different")
+	_get_grid(cat1, cat2).eliminate(elt1, elt2, truth_val)
+	check_all_trios_including_categories(cat1, cat2)
 
 func check_all_trios_including_categories(cat1: int, cat2: int):
-	# note that a logic puzzle has grid rows from 0 to n-1 going down, 
-	# but columns n to 1 going left to right.
-	for row_cat in range(0, cat_count - 2):
-		for left_grid_cat in range(cat_count - 1, row_cat + 1, -1):
-			grid_trio[0] = _get_grid(row_cat, left_grid_cat)
-			for right_grid_cat in range(left_grid_cat - 1, row_cat, -1):
-				if [left_grid_cat, right_grid_cat, row_cat].has(cat1):
-					if [left_grid_cat, right_grid_cat, row_cat].has(cat2):
-						grid_trio[1] = _get_grid(row_cat, right_grid_cat)
-						grid_trio[2] = _get_grid(right_grid_cat, left_grid_cat)
-						if _is_grid_trio_worth_checking():
-							check_grid_trio()
+	for cat3 in range(cat_count):
+		if ! [cat1, cat2].has(cat3):
+			var cat_trio = [cat1, cat2, cat3]
+			cat_trio.sort()
+			grid_trio[0] = _get_grid(cat_trio[2], cat_trio[0])
+			grid_trio[1] = _get_grid(cat_trio[2], cat_trio[1])
+			grid_trio[2] = _get_grid(cat_trio[1], cat_trio[0])
+			if _is_grid_trio_worth_checking():
+				check_grid_trio()
 
 func _is_grid_trio_worth_checking() -> bool:
 	var count_of_false_cells_in_trio: int = 0
@@ -155,10 +147,15 @@ func _to_string() -> String:
 func print_puzzle():
 	print_debug(_to_string())
 
-func _get_grid(cat_row: int, cat_col: int) -> Grid:
+func _get_grid(cat1: int, cat2: int) -> Grid:
 	#indexing is an arbitrary way to get a unique index for every row, col
 	#pair. It depends on row_id > col_id
-	return grids_arr[cat_row * (cat_row - 1) / 2 + cat_col]
+	return _grid_arr[_get_grid_index(cat1, cat2)]
+
+func _get_grid_index(cat1: int, cat2: int) -> int:
+	if cat1 < cat2:
+		return _get_grid_index(cat2, cat1)
+	return cat1 * (cat1 - 1) / 2 + cat2
 
 func _get_repeated_string(c: String, num_times: int) -> String:
 	return c.repeat(num_times)
@@ -166,7 +163,7 @@ func _get_repeated_string(c: String, num_times: int) -> String:
 func _build_grids():
 	var bit_mask: BitMask = BitMask.new(cat_size)
 	var num_grids: int = (cat_count - 1) * cat_count / 2
-	grids_arr.resize(num_grids)
+	_grid_arr.resize(num_grids)
 	for i in range(num_grids):
-		grids_arr[i] = Grid.new(cat_size, bit_mask)
-	return grids_arr
+		_grid_arr[i] = Grid.new(cat_size, bit_mask)
+	return _grid_arr
