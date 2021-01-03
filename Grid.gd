@@ -14,12 +14,7 @@ var _grid_cells = []
 var count_of_true_cells: int = 0
 var count_of_false_cells: int = 0
 
-func timer(printstr: String):
-	print(printstr + ": " + str(OS.get_ticks_msec() - _timestamp))
-	_timestamp = OS.get_ticks_msec()
-
 func _init(my_category_size: int, my_bit_mask: BitMask):
-	timer("Grid: prework")
 	_category_size = my_category_size
 	_grid_cells.resize(_category_size)
 	for i in range(_category_size):
@@ -28,9 +23,7 @@ func _init(my_category_size: int, my_bit_mask: BitMask):
 	bit_mask = my_bit_mask
 	max_possible_solutions = _math.factorial(_category_size)
 	all_possible_solutions = BitSet.new(max_possible_solutions)
-	timer("Grid: all_possible_solutions = BitSet.new(max_possible_solutions)")
 	all_possible_solutions.set_in_range(0, max_possible_solutions, true)
-	timer("Grid: all_possible_solutions.set_in_range(0, max_possible_solutions, true)")
 
 func merge_possible_solutions_from_grid_trio(calculated_possible_solutions):
 	all_possible_solutions.bitwise_and(calculated_possible_solutions)

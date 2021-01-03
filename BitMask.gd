@@ -37,5 +37,5 @@ func _build_bit_masks(category_size: int):
 	for solution_id in range(math.factorial(category_size)):
 		solution.set_rank(solution_id)
 		for row in range(category_size):
-			var col: int = solution.permutation_int_arr[row]
+			var col: int = solution.perm_int_arr[row]
 			true_bit_masks[row][col].set_at_index(solution_id, true)

@@ -10,35 +10,24 @@ class TestLogicGridPuzzle:
 	var _times_arr = []
 
 	func before_each():
-		_category_count = 3
-		_category_size = 7
+		_category_count = 5
+		_category_size = 5
 		_time_before = OS.get_ticks_msec()
 		_lp = LogicGridPuzzle.new(_category_count, _category_size)
-		print("Init new puz: " + str(OS.get_ticks_msec() - _time_before))
 
 	func test_eliminate_possible_solutions():
 
-# Do stuff
-# Best: 100 milliseconds per move
-# Okay: 300 ms per move
-
-		for i in range(_category_size - 2):
-			_time_before = OS.get_ticks_msec()
-			_lp.eliminate_possible_solutions(0, 0, _category_count - 1, i, true)
-			_times_arr.append(OS.get_ticks_msec() - _time_before) 
-			
-			_time_before = OS.get_ticks_msec()
-			_lp.eliminate_possible_solutions(0, 1, _category_count - 1, i, true)
-			_times_arr.append(OS.get_ticks_msec() - _time_before)
-			 
-			_time_before = OS.get_ticks_msec()
-			_lp.eliminate_possible_solutions(0, 0, _category_count - 2, _category_size - i - 1, true)
-			_times_arr.append(OS.get_ticks_msec() - _time_before) 
-			
-			_time_before = OS.get_ticks_msec()
-			_lp.eliminate_possible_solutions(0, 1, _category_count - 2, _category_size - i - 1, true)
-			_times_arr.append(OS.get_ticks_msec() - _time_before) 
-		print("Max time per move " + str(_times_arr.max()))
-		print(str(_times_arr))
+		#for i in range(_category_size - 2):
+		#	_lp.eliminate_possible_solutions(0, 0, _category_count - 1, i, true)
+		#	_lp.eliminate_possible_solutions(0, 1, _category_count - 1, i, true)
+		#	_lp.eliminate_possible_solutions(0, 0, _category_count - 2, _category_size - i - 1, true)
+		#	_lp.eliminate_possible_solutions(0, 1, _category_count - 2, _category_size - i - 1, true)
+		_lp.eliminate_possible_solutions(3,0,0,1,true)
+		
+		for i in range(7, 3, -1):
+			print(str(i))
+		
+		for i in range(7,0,-1):
+			print(str(i))
 
 		print(_lp)

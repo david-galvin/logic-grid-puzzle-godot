@@ -6,14 +6,13 @@ var _num_words: int = 0
 var _num_bits: int = 0
 var _words = []
 const _BITS_PER_WORD: int = 63
-const _ALL_SET_BITS: int = (1 << 63) - 1
+const _ALL_SET_BITS: int = (1 << _BITS_PER_WORD) - 1
 var _have_bits_changed: bool = true
 var _cardinality: int = 0
 var _print_str = ""
 
 func _init(my_num_bits: int):
 	_num_bits = my_num_bits
-	_print_str = "%0*d" % [_num_bits, 0]
 	_num_words = (_num_bits - 1) / _BITS_PER_WORD + 1
 	_words.resize(_num_words)
 	for i in range(_num_words):
