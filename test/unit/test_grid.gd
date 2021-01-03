@@ -1,21 +1,29 @@
 extends "res://addons/gut/test.gd"
 
+
 class TestGrid:
+
+
 	extends "res://addons/gut/test.gd"
-	var Grid = load("res://Grid.gd")
-	var BitMask = load("res://BitMask.gd")
+
+
+	var Grid = load("res://grid.gd")
+	var BitMask = load("res://bit_mask.gd")
 	var _grid: Grid = null
 	var _bit_mask: BitMask = null
 	var _category_size: int = 0
 	
+
 	func before_each():
 		_category_size = 3
 		_bit_mask = BitMask.new(_category_size)
 		_grid = Grid.new(_category_size, _bit_mask)
 
+
 	func test_eliminate_false():
 		_grid.eliminate(0, 1, false)
 		assert_eq("\n" + str(_grid), "\nXOX\n?X?\n?X?\n")
+
 
 	func test_eliminate_true():
 		_grid.eliminate(0, 1, true)

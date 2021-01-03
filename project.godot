@@ -12,40 +12,64 @@ _global_script_classes=[ {
 "base": "Reference",
 "class": "BitMask",
 "language": "GDScript",
-"path": "res://BitMask.gd"
+"path": "res://bit_mask.gd"
 }, {
 "base": "Reference",
 "class": "BitSet",
 "language": "GDScript",
-"path": "res://BitSet.gd"
+"path": "res://bit_set.gd"
+}, {
+"base": "HBoxContainer",
+"class": "ContributorClass",
+"language": "GDScript",
+"path": "res://addons/github-integration/scripts/ContributorClass.gd"
+}, {
+"base": "PanelContainer",
+"class": "GistItem",
+"language": "GDScript",
+"path": "res://addons/github-integration/scripts/GistItem.gd"
 }, {
 "base": "Reference",
 "class": "Grid",
 "language": "GDScript",
-"path": "res://Grid.gd"
+"path": "res://grid.gd"
+}, {
+"base": "HBoxContainer",
+"class": "InvitationItem",
+"language": "GDScript",
+"path": "res://addons/github-integration/scripts/InvitationItem.gd"
 }, {
 "base": "Reference",
 "class": "LogicGridPuzzle",
 "language": "GDScript",
-"path": "res://LogicGridPuzzle.gd"
+"path": "res://logic_grid_puzzle.gd"
 }, {
 "base": "Reference",
 "class": "Math",
 "language": "GDScript",
-"path": "res://Math.gd"
+"path": "res://math.gd"
 }, {
 "base": "Reference",
 "class": "Permutation",
 "language": "GDScript",
-"path": "res://Permutation.gd"
+"path": "res://permutation.gd"
+}, {
+"base": "PanelContainer",
+"class": "RepositoryItem",
+"language": "GDScript",
+"path": "res://addons/github-integration/scripts/RepositoryItem.gd"
 } ]
 _global_script_class_icons={
 "BitMask": "",
 "BitSet": "",
+"ContributorClass": "",
+"GistItem": "",
 "Grid": "",
+"InvitationItem": "",
 "LogicGridPuzzle": "",
 "Math": "",
-"Permutation": ""
+"Permutation": "",
+"RepositoryItem": ""
 }
 
 [application]
@@ -54,9 +78,13 @@ config/name="LogicPuzzle"
 run/main_scene="res://Node2D.tscn"
 config/icon="res://icon.png"
 
+[debug]
+
+gdscript/warnings/integer_division=false
+
 [editor_plugins]
 
-enabled=PoolStringArray(  )
+enabled=PoolStringArray( "gut" )
 
 [rendering]
 
