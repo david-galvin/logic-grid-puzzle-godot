@@ -16,13 +16,11 @@ extends Reference
 #   is fully determined. This is a double array that takes two perm_ranks as
 #   inputs, and returns the perm_rank of the implied pairing.
 # grid: a pair of categories.
-# grid_trio: 3 grids formed pairwise from 3 categories
 var cat_count: int
 var cat_size: int
 var implied_perm_ranks: Array
 var perm: Permutation
-var grid_trio: Array = []
-var possible_trio_solutions: Array = []
+var grid_trio_solutions_bitsets: Array = []
 var rank_to_inverse_rank: Array = []
 var math: Math = load("res://math.gd").new()
 
@@ -31,7 +29,6 @@ var _grid_trio_false_cells_threshold: int = 0
 
 
 func _init(my_cat_count: int, my_cat_size: int) -> void:
-	grid_trio.resize(3)
 	cat_count = my_cat_count
 	cat_size = my_cat_size
 	_grids = _build_grids()
@@ -42,9 +39,9 @@ func _init(my_cat_count: int, my_cat_size: int) -> void:
 	rank_to_inverse_rank.resize(math.factorial(cat_size))
 	_build_inverse_rank_lookup_table()
 	implied_perm_ranks = _build_perm_lookup_table()
-	possible_trio_solutions.resize(3)
+	grid_trio_solutions_bitsets.resize(3)
 	for i in range(3):
-		possible_trio_solutions[i] = BitSet.new(math.factorial(cat_size))
+		grid_trio_solutions_bitsets[i] = BitSet.new(math.factorial(cat_size))
 
 
 func eliminate_possible_solutions(cat1: int, elt1: int, \
@@ -55,7 +52,7 @@ func eliminate_possible_solutions(cat1: int, elt1: int, \
 
 func _build_perm_lookup_table() -> Array:
 	var num_solutions_per_grid: int = math.factorial(cat_size)
-	var implied_solutions = []
+	var implied_solutions: Array = []
 	implied_solutions.resize(num_solutions_per_grid)
 	for left_grid_rank in range(num_solutions_per_grid):
 		implied_solutions[left_grid_rank] = []
@@ -73,17 +70,19 @@ func _build_inverse_rank_lookup_table() -> void:
 func _check_all_trios_including_categories(cat1: int, cat2: int) -> void:
 	for cat3 in range(cat_count):
 		if ! [cat1, cat2].has(cat3):
-			var cat_trio = [cat1, cat2, cat3]
+			var cat_trio: Array = [cat1, cat2, cat3]
 			cat_trio.sort()
 			# The order of grids in grid_trio is important. The first two
 			# need to be in the same row, with the first to the left of the
 			# second. This means they should be in order of category size:
 			# (big, small), (big, med), (med, small)
-			grid_trio[0] = _get_grid(cat_trio[2], cat_trio[0])
-			grid_trio[1] = _get_grid(cat_trio[2], cat_trio[1])
-			grid_trio[2] = _get_grid(cat_trio[1], cat_trio[0])
-			if _is_grid_trio_worth_checking():
-				_check_grid_trio()
+			var _grid_trio: Array = []
+			_grid_trio.resize(3)
+			_grid_trio[0] = _get_grid(cat_trio[2], cat_trio[0])
+			_grid_trio[1] = _get_grid(cat_trio[2], cat_trio[1])
+			_grid_trio[2] = _get_grid(cat_trio[1], cat_trio[0])
+			if _is_grid_trio_worth_checking(_grid_trio):
+				_check_grid_trio(_grid_trio)
 
 
 func _calculate_implied_rank(left_grid_rank: int, right_grid_rank: int) -> int:
@@ -92,11 +91,11 @@ func _calculate_implied_rank(left_grid_rank: int, right_grid_rank: int) -> int:
 	return perm.rank
 
 
-func _is_grid_trio_worth_checking() -> bool:
+func _is_grid_trio_worth_checking(_grid_trio) -> bool:
 	var count_of_false_cells_in_trio: int = 0
 	var count_of_true_cells_in_trio: int = 0
 	var num_grids_with_data: int = 0
-	for grid in grid_trio:
+	for grid in _grid_trio:
 		count_of_false_cells_in_trio += grid.count_of_false_cells
 		count_of_false_cells_in_trio += grid.count_of_true_cells
 		num_grids_with_data += 1
@@ -107,30 +106,30 @@ func _is_grid_trio_worth_checking() -> bool:
 	return false
 
 
-func _check_grid_trio() -> void:
-	var left_grid: Grid = grid_trio[0]
-	var right_grid: Grid = grid_trio[1]
-	var implied_grid: Grid = grid_trio[2]
-	var left_grid_rank: int = left_grid.all_possible_solutions.next_set_bit(0)
-	var right_grid_rank: int = right_grid.all_possible_solutions.next_set_bit(0)
-	for i in range(possible_trio_solutions.size()):
-		possible_trio_solutions[i].clear()
-	var left_grid_possible_solutions: BitSet = possible_trio_solutions[0]
-	var right_grid_possible_solutions: BitSet = possible_trio_solutions[1]
-	var implied_possible_solutions: BitSet = possible_trio_solutions[2]
+func _check_grid_trio(_grid_trio) -> void:
+	var left_grid: Grid = _grid_trio[0]
+	var right_grid: Grid = _grid_trio[1]
+	var implied_grid: Grid = _grid_trio[2]
+	var left_grid_rank: int = left_grid.solutions_bitset.next_set_bit(0)
+	var right_grid_rank: int = right_grid.solutions_bitset.next_set_bit(0)
+	for i in range(grid_trio_solutions_bitsets.size()):
+		grid_trio_solutions_bitsets[i].clear()
+	var left_grid_solutions_bitset: BitSet = grid_trio_solutions_bitsets[0]
+	var right_grid_solutions_bitset: BitSet = grid_trio_solutions_bitsets[1]
+	var implied_grid_solutions_bitset: BitSet = grid_trio_solutions_bitsets[2]
 	while left_grid_rank >= 0 and left_grid_rank < left_grid.max_possible_solutions - 1:
 		while right_grid_rank >= 0 and right_grid_rank < right_grid.max_possible_solutions - 1:
 			var implied_grid_rank: int = _get_implied_grid_rank(left_grid_rank, right_grid_rank)
-			if implied_grid.all_possible_solutions.get_at_index(implied_grid_rank):
-				left_grid_possible_solutions.set_at_index(left_grid_rank, true)
-				right_grid_possible_solutions.set_at_index(right_grid_rank, true)
-				implied_possible_solutions.set_at_index(implied_grid_rank, true)
-			right_grid_rank = right_grid.all_possible_solutions.next_set_bit(right_grid_rank + 1)
-		left_grid_rank = left_grid.all_possible_solutions.next_set_bit(left_grid_rank + 1)
-		right_grid_rank = right_grid.all_possible_solutions.next_set_bit(0)
-	left_grid.merge_possible_solutions_from_grid_trio(left_grid_possible_solutions)
-	right_grid.merge_possible_solutions_from_grid_trio(right_grid_possible_solutions)
-	implied_grid.merge_possible_solutions_from_grid_trio(implied_possible_solutions)
+			if implied_grid.solutions_bitset.get_at_index(implied_grid_rank):
+				left_grid_solutions_bitset.set_at_index(left_grid_rank, true)
+				right_grid_solutions_bitset.set_at_index(right_grid_rank, true)
+				implied_grid_solutions_bitset.set_at_index(implied_grid_rank, true)
+			right_grid_rank = right_grid.solutions_bitset.next_set_bit(right_grid_rank + 1)
+		left_grid_rank = left_grid.solutions_bitset.next_set_bit(left_grid_rank + 1)
+		right_grid_rank = right_grid.solutions_bitset.next_set_bit(0)
+	left_grid.merge_solutions_from_grid_trio(left_grid_solutions_bitset)
+	right_grid.merge_solutions_from_grid_trio(right_grid_solutions_bitset)
+	implied_grid.merge_solutions_from_grid_trio(implied_grid_solutions_bitset)
 
 
 func _get_implied_grid_rank(left_grid_rank: int, right_grid_rank: int) -> int:

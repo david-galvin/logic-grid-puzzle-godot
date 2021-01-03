@@ -10,7 +10,7 @@ enum GridCellState {
 }
 
 var max_possible_solutions: int
-var all_possible_solutions: BitSet
+var solutions_bitset: BitSet
 var bit_mask: BitMask
 var count_of_true_cells: int = 0
 var count_of_false_cells: int = 0
@@ -30,12 +30,12 @@ func _init(my_dimension: int, my_bit_mask: BitMask) -> void:
 		_grid_cells[i].resize(_dimension)
 	bit_mask = my_bit_mask
 	max_possible_solutions = _math.factorial(_dimension)
-	all_possible_solutions = BitSet.new(max_possible_solutions)
-	all_possible_solutions.set_in_range(0, max_possible_solutions, true)
+	solutions_bitset = BitSet.new(max_possible_solutions)
+	solutions_bitset.set_in_range(0, max_possible_solutions, true)
 
 
-func merge_possible_solutions_from_grid_trio(calculated_possible_solutions: BitSet) -> void:
-	all_possible_solutions.bitwise_and(calculated_possible_solutions)
+func merge_solutions_from_grid_trio(calculated_possible_solutions: BitSet) -> void:
+	solutions_bitset.bitwise_and(calculated_possible_solutions)
 	_update_grid_cells()
 
 
@@ -50,9 +50,9 @@ func is_solvable() -> bool:
 func eliminate(row_elt: int, col_elt: int, are_equal: bool) -> void:
 	var true_bit_mask: BitSet = bit_mask.get_true_bit_mask(row_elt, col_elt)
 	if(are_equal):
-		all_possible_solutions.bitwise_and_not(true_bit_mask)
+		solutions_bitset.bitwise_and_not(true_bit_mask)
 	else:
-		all_possible_solutions.bitwise_and(true_bit_mask)
+		solutions_bitset.bitwise_and(true_bit_mask)
 	_update_solved_status()
 	_update_grid_cells()
 
@@ -74,11 +74,11 @@ func get_row_str(row: int) -> String:
 
 
 func _update_solved_status() -> void:
-	var bit: int = all_possible_solutions.next_set_bit(0)
+	var bit: int = solutions_bitset.next_set_bit(0)
 	if bit == -1:
 		_is_solvable = false
 		push_error("No solution!")
-	elif all_possible_solutions.next_set_bit(bit) == -1:
+	elif solutions_bitset.next_set_bit(bit) == -1:
 		_is_solved = true
 
 
@@ -89,8 +89,8 @@ func _update_grid_cells() -> void:
 		for col in range(_dimension):
 			var true_bit_mask: BitSet = bit_mask.get_true_bit_mask(row, col)
 			var false_bit_mask: BitSet = bit_mask.get_false_bit_mask(row, col)
-			var some_true: bool = all_possible_solutions.bitwise_intersects(true_bit_mask)
-			var some_false: bool = all_possible_solutions.bitwise_intersects(false_bit_mask)
+			var some_true: bool = solutions_bitset.bitwise_intersects(true_bit_mask)
+			var some_false: bool = solutions_bitset.bitwise_intersects(false_bit_mask)
 			if some_true and some_false:
 				_grid_cells[row][col] = GridCellState.UNKNOWN
 			elif some_true:

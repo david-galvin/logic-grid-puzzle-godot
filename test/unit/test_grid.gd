@@ -34,7 +34,7 @@ class TestGrid:
 		
 		var true_bit_mask: BitSet = _grid.bit_mask.get_true_bit_mask(0, 0)
 		var false_bit_mask: BitSet = _grid.bit_mask.get_false_bit_mask(0, 0)
-		var some_true: bool = _grid.all_possible_solutions.bitwise_intersects(true_bit_mask)
-		var some_false: bool = _grid.all_possible_solutions.bitwise_intersects(false_bit_mask)
+		var some_true: bool = _grid.solutions_bitset.bitwise_intersects(true_bit_mask)
+		var some_false: bool = _grid.solutions_bitset.bitwise_intersects(false_bit_mask)
 		assert_eq(some_true, true)
 		assert_eq(some_false, false)
