@@ -79,6 +79,10 @@ func check_all_trios_including_categories(cat1: int, cat2: int):
 		if ! [cat1, cat2].has(cat3):
 			var cat_trio = [cat1, cat2, cat3]
 			cat_trio.sort()
+			# The order of grids in grid_trio is important. The first two
+			# need to be in the same row, with the first to the left of the
+			# second. This means they should be in order of category size:
+			# (big, small), (big, med), (med, small)
 			grid_trio[0] = _get_grid(cat_trio[2], cat_trio[0])
 			grid_trio[1] = _get_grid(cat_trio[2], cat_trio[1])
 			grid_trio[2] = _get_grid(cat_trio[1], cat_trio[0])
