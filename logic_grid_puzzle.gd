@@ -36,7 +36,7 @@ func _init(my_cat_count: int, my_cat_size: int) -> void:
 	_grids = _build_grids()
 	# The minimum number of false cells before a grid trio can yield
 	# sufficient extra information to eliminate further cells
-	_grid_trio_false_cells_threshold = 4 * (cat_size - 2) + 2
+	_grid_trio_false_cells_threshold = cat_size
 	perm = Permutation.new(cat_size)
 	rank_to_inverse_rank.resize(math.factorial(cat_size))
 	_build_inverse_rank_lookup_table()
