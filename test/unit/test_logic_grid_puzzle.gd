@@ -67,14 +67,35 @@ class TestLogicGridPuzzle:
 		
 
 
-#	func test_random_puzzles():
-#		var rng := RandomNumberGenerator.new()
-#		rng.randomize()
-#
-#		var num_puzzles: int = 10
-#		var cat_count_range: Array = range(3,7)
-#		var cat_size_range: Array = range(3,6)
-
+	func test_random_puzzles():
+		_cat_count = 3
+		_cat_size = 4
+		var _start_time = OS.get_ticks_msec()
+		var _tries: int = 0
+		while (OS.get_ticks_msec() - _start_time) < 60000:
+			_tries += 1
+			_lp = LogicGridPuzzle.new(_cat_count, _cat_size)
+			
+			var _row: int
+			var _col: int
+			var _coords: Array
+			var _grid: Grid
+			var _counter: int = 0
+			var _moves: String = ""
+			while (_lp.is_solvable() and not _lp.is_solved()) and _counter <= _cat_size * _cat_size * _cat_count:
+				_grid = _lp.get_random_unsolved_grid()
+				_coords = _grid.get_random_unsolved_cell_coordinates()
+				_row = _coords[0]
+				_col = _coords[1]
+				_moves += "(" + str(_grid.cat1) + "." + str(_row) + ") != (" + str(_grid.cat2) + "." + str(_col) + ")\n"
+				_grid.set_cell(_row, _col, false)
+				_lp.set_grid_cell(_grid.cat1, _row, _grid.cat2, _col, false)
+				_counter += 1
+			if not _lp.is_solved():
+				print(_lp)
+				print(_moves)
+				break
+		print("Num tries: " + str(_tries))
 
 # TODO: Write some real lp tests:
 # test set one: moves that should imply something about the puzzle.

@@ -70,10 +70,10 @@ func set_grid_cell(cat1: int, elt1: int, \
 	_check_all_trios_including_categories(cat1, cat2)
 
 
-#TODO: Implement a return class for this
 func get_random_unsolved_grid() -> Grid:
 	if _unsolved_grids.size() == 0:
 		push_error("There are no unsolved grids")
+		print(self)
 		return null
 	var rand_index: int = randi() % _unsolved_grids.size()
 	var rand_grid: Grid = _unsolved_grids[rand_index]
@@ -216,7 +216,9 @@ func _build_grids() -> Array:
 	var num_grids: int = (cat_count - 1) * cat_count / 2
 	_grids.resize(num_grids)
 	_unsolved_grids.resize(num_grids)
-	for i in range(num_grids):
-		_grids[i] = Grid.new(cat_size, bit_mask)
-		_unsolved_grids[i] = _grids[i]
+	for cat1 in range(1, cat_count):
+		for cat2 in range(0, cat1):
+			var index: int = _get_grid_index(cat1, cat2)
+			_grids[index] = Grid.new(cat_size, bit_mask, cat1, cat2)
+			_unsolved_grids[index] = _grids[index]
 	return _grids
