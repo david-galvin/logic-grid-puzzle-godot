@@ -2,12 +2,7 @@ class_name Grid
 extends Reference
 
 
-enum GridCellState {
-	TRUE,
-	FALSE,
-	UNKNOWN,
-	UNSOLVABLE
-}
+const GridCellState = preload("res://grid_cell_state.gd")
 
 var max_possible_solutions: int
 var solutions_bitset: BitSet

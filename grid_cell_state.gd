@@ -1,0 +1,6 @@
+enum {
+	FALSE,
+	TRUE,
+	UNKNOWN,
+	UNSOLVABLE
+}
