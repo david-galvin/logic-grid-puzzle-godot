@@ -25,10 +25,12 @@ var rank_to_inverse_rank: Array = []
 var math: Math = load("res://math.gd").new()
 
 var _grids: Array = []
+var _unsolved_grids: Array = []
 var _grid_trio_false_cells_threshold: int = 0
 
 
 func _init(my_cat_count: int, my_cat_size: int) -> void:
+	randomize()
 	cat_count = my_cat_count
 	cat_size = my_cat_size
 	_grids = _build_grids()
@@ -44,10 +46,42 @@ func _init(my_cat_count: int, my_cat_size: int) -> void:
 		grid_trio_solutions_bitsets[i] = BitSet.new(math.factorial(cat_size))
 
 
+func is_solved() -> bool:
+	for grid in _grids:
+		if grid.is_solved() == false:
+			return false
+	return true
+
+
+func is_solvable() -> bool:
+	for grid in _grids:
+		if not grid.is_solvable():
+			return false
+	return true
+
+
+func read_grid_cell(cat1: int, elt1: int, cat2: int, elt2: int):
+	return _get_grid(cat1, cat2).read_cell(elt1, elt2)
+
+
 func set_grid_cell(cat1: int, elt1: int, \
 		cat2: int, elt2: int, truth_val: bool) -> void:
 	_get_grid(cat1, cat2).set_cell(elt1, elt2, truth_val)
 	_check_all_trios_including_categories(cat1, cat2)
+
+
+#TODO: Implement a return class for this
+func get_random_unsolved_grid() -> Grid:
+	if _unsolved_grids.size() == 0:
+		push_error("There are no unsolved grids")
+		return null
+	var rand_index: int = randi() % _unsolved_grids.size()
+	var rand_grid: Grid = _unsolved_grids[rand_index]
+	if rand_grid.is_solved():
+		_unsolved_grids.remove(rand_index)
+		return get_random_unsolved_grid()
+	else:
+		return rand_grid
 
 
 func _build_perm_lookup_table() -> Array:
@@ -181,6 +215,8 @@ func _build_grids() -> Array:
 	var bit_mask: BitMask = BitMask.new(cat_size)
 	var num_grids: int = (cat_count - 1) * cat_count / 2
 	_grids.resize(num_grids)
+	_unsolved_grids.resize(num_grids)
 	for i in range(num_grids):
 		_grids[i] = Grid.new(cat_size, bit_mask)
+		_unsolved_grids[i] = _grids[i]
 	return _grids

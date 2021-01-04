@@ -20,13 +20,27 @@ var _grid_cells: Array = []
 func _init(my_dimension: int, my_bit_mask: BitMask) -> void:
 	_dimension = my_dimension
 	_grid_cells.resize(_dimension)
-	for i in range(_dimension):
-		_grid_cells[i] = []
-		_grid_cells[i].resize(_dimension)
+	for row in range(_dimension):
+		_grid_cells[row] = []
+		_grid_cells[row].resize(_dimension)
+		for col in range(_dimension):
+			_grid_cells[row][col] = GridCellState.UNKNOWN
 	bit_mask = my_bit_mask
 	max_possible_solutions = _math.factorial(_dimension)
 	solutions_bitset = BitSet.new(max_possible_solutions)
 	solutions_bitset.set_in_range(0, max_possible_solutions, true)
+
+
+func read_cell(row: int, col: int):
+	match _grid_cells[row][col]:
+		GridCellState.UNKNOWN:
+			return GridCellState.UNKNOWN
+		GridCellState.FALSE:
+			return GridCellState.FALSE
+		GridCellState.TRUE:
+			return GridCellState.TRUE
+		GridCellState.UNSOLVABLE:
+			return GridCellState.UNSOLVABLE
 
 
 func merge_solutions_from_grid_trio(calculated_possible_solutions: BitSet) -> void:
@@ -42,8 +56,8 @@ func is_solvable() -> bool:
 	return _is_solvable
 
 
-func set_cell(row_elt: int, col_elt: int, are_equal: bool) -> void:
-	var true_bit_mask: BitSet = bit_mask.get_true_bit_mask(row_elt, col_elt)
+func set_cell(row: int, col: int, are_equal: bool) -> void:
+	var true_bit_mask: BitSet = bit_mask.get_true_bit_mask(row, col)
 	if(are_equal):
 		solutions_bitset.bitwise_and(true_bit_mask)
 	else:

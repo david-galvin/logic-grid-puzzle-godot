@@ -38,3 +38,21 @@ class TestGrid:
 		var some_false: bool = _grid.solutions_bitset.bitwise_intersects(false_bit_mask)
 		assert_eq(some_true, true)
 		assert_eq(some_false, false)
+	
+	
+	func test_is_solved():
+		assert_eq(_grid.is_solved(), false)
+		_grid.set_cell(0, 0, true)
+		assert_eq(_grid.is_solved(), false)
+		_grid.set_cell(1, 1, true)
+		assert_eq(_grid.is_solved(), true)
+	
+	
+	func test_is_solvable():
+		assert_eq(_grid.is_solvable(), true)
+		_grid.set_cell(0, 0, false)
+		assert_eq(_grid.is_solvable(), true)
+		_grid.set_cell(0, 1, false)
+		assert_eq(_grid.is_solvable(), true)
+		_grid.set_cell(0, 2, false)
+		assert_eq(_grid.is_solvable(), false)
