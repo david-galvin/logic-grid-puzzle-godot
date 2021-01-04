@@ -44,9 +44,9 @@ func _init(my_cat_count: int, my_cat_size: int) -> void:
 		grid_trio_solutions_bitsets[i] = BitSet.new(math.factorial(cat_size))
 
 
-func eliminate_possible_solutions(cat1: int, elt1: int, \
+func set_grid_cell(cat1: int, elt1: int, \
 		cat2: int, elt2: int, truth_val: bool) -> void:
-	_get_grid(cat1, cat2).eliminate(elt1, elt2, truth_val)
+	_get_grid(cat1, cat2).set_cell(elt1, elt2, truth_val)
 	_check_all_trios_including_categories(cat1, cat2)
 
 

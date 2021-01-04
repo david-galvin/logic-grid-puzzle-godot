@@ -20,20 +20,20 @@ class TestLogicGridPuzzle:
 		_lp = LogicGridPuzzle.new(_category_count, _category_size)
 
 
-	func test_eliminate_possible_solutions():
-		_lp.eliminate_possible_solutions(2, 0, 0, 0, true)
-		_lp.eliminate_possible_solutions(2, 0, 0, 1, true)
-		_lp.eliminate_possible_solutions(2, 0, 0, 2, true)
-		_lp.eliminate_possible_solutions(2, 0, 1, 0, true)
-		#_lp.eliminate_possible_solutions(2, 0, 1, 1, true)
-		#_lp.eliminate_possible_solutions(2, 0, 1, 2, true)
-		_lp.eliminate_possible_solutions(2, 1, 0, 0, true)
-		_lp.eliminate_possible_solutions(2, 1, 0, 1, true)
-		_lp.eliminate_possible_solutions(2, 1, 0, 2, true)
-		_lp.eliminate_possible_solutions(2, 1, 1, 0, true)
-		#_lp.eliminate_possible_solutions(2, 1, 1, 1, true)
-		#_lp.eliminate_possible_solutions(2, 1, 1, 2, true)
-#		_lp.eliminate_possible_solutions(1, 3, 0, 0, true)
+	func test_set_grid_cell():
+		_lp.set_grid_cell(2, 0, 0, 0, false)
+		_lp.set_grid_cell(2, 0, 0, 1, false)
+		_lp.set_grid_cell(2, 0, 0, 2, false)
+		_lp.set_grid_cell(2, 0, 1, 0, false)
+		_lp.set_grid_cell(2, 0, 1, 1, false)
+		_lp.set_grid_cell(2, 0, 1, 2, false)
+		_lp.set_grid_cell(2, 1, 0, 0, false)
+		_lp.set_grid_cell(2, 1, 0, 1, false)
+		_lp.set_grid_cell(2, 1, 0, 2, false)
+		_lp.set_grid_cell(2, 1, 1, 0, false)
+		_lp.set_grid_cell(2, 1, 1, 1, false)
+		_lp.set_grid_cell(2, 1, 1, 2, false)
+#		_lp.set_grid_cell(1, 3, 0, 0, false)
 
 		print(_lp)
 # TODO: Write some real lp tests:

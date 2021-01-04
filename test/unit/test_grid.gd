@@ -20,16 +20,16 @@ class TestGrid:
 		_grid = Grid.new(_category_size, _bit_mask)
 
 
-	func test_eliminate_false():
-		_grid.eliminate(0, 1, false)
+	func test_set_cell_true():
+		_grid.set_cell(0, 1, true)
 		assert_eq("\n" + str(_grid), "\nXOX\n?X?\n?X?\n")
 
 
-	func test_eliminate_true():
-		_grid.eliminate(0, 1, true)
+	func test_set_cell_false():
+		_grid.set_cell(0, 1, false)
 		assert_eq("\n" + str(_grid), "\n?X?\n???\n???\n")
 		
-		_grid.eliminate(0, 2, true)
+		_grid.set_cell(0, 2, false)
 		assert_eq("\n" + str(_grid), "\nOXX\nX??\nX??\n")
 		
 		var true_bit_mask: BitSet = _grid.bit_mask.get_true_bit_mask(0, 0)

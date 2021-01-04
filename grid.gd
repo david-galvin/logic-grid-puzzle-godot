@@ -47,12 +47,12 @@ func is_solvable() -> bool:
 	return _is_solvable
 
 
-func eliminate(row_elt: int, col_elt: int, are_equal: bool) -> void:
+func set_cell(row_elt: int, col_elt: int, are_equal: bool) -> void:
 	var true_bit_mask: BitSet = bit_mask.get_true_bit_mask(row_elt, col_elt)
 	if(are_equal):
-		solutions_bitset.bitwise_and_not(true_bit_mask)
-	else:
 		solutions_bitset.bitwise_and(true_bit_mask)
+	else:
+		solutions_bitset.bitwise_and_not(true_bit_mask)
 	_update_solved_status()
 	_update_grid_cells()
 
