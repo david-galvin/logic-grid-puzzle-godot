@@ -34,6 +34,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://grid.gd"
 }, {
+"base": "Reference",
+"class": "GridSorter",
+"language": "GDScript",
+"path": "res://grid_sorter.gd"
+}, {
 "base": "HBoxContainer",
 "class": "InvitationItem",
 "language": "GDScript",
@@ -70,6 +75,7 @@ _global_script_class_icons={
 "ContributorClass": "",
 "GistItem": "",
 "Grid": "",
+"GridSorter": "",
 "InvitationItem": "",
 "LogicGridPuzzle": "",
 "Math": "",

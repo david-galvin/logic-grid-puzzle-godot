@@ -65,13 +65,17 @@ func read_grid_cell(cat1: int, elt1: int, cat2: int, elt2: int):
 
 
 func set_grid_cell(cat1: int, elt1: int, \
-		cat2: int, elt2: int, truth_val: bool) -> void:
+		cat2: int, elt2: int, target_state: bool) -> void:
 	var grid: Grid = _get_grid(cat1, cat2)
 	if grid.is_solved():
 		push_error("Entering a move in a solved grid!")
-	grid.set_cell(elt1, elt2, truth_val)
+	grid.set_cell(elt1, elt2, target_state)
 	#_check_all_trios_including_categories(cat1, cat2)
 	_check_all_trios_multiple_times(2)
+
+
+func apply_move(move: Move) -> void:
+	set_grid_cell(move.cat1, move.elt1, move.cat2, move.elt2, move.target_state)
 
 
 # This is only used for testing.

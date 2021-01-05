@@ -192,12 +192,12 @@ class TestLogicGridPuzzle:
 		
 
 	func test_random_puzzles():
-		_cat_count = 3
+		_cat_count = 5
 		_cat_size = 3
 		var _minutes: int = 0
 		var _start_time = OS.get_ticks_msec()
 		var _tries: int = 0
-		while (OS.get_ticks_msec() - _start_time) < _minutes * 60000:
+		while (OS.get_ticks_msec() - _start_time) < 1000: #_minutes * 60000:
 			_tries += 1
 			_lp = LogicGridPuzzle.new(_cat_count, _cat_size)
 			
@@ -212,17 +212,12 @@ class TestLogicGridPuzzle:
 			while (_lp.is_solvable() and not _lp.is_solved()) and _counter <= _cat_size * _cat_size * _cat_count:
 				_grid = _lp.get_random_unsolved_grid()
 				_coords = _grid.get_random_unsolved_cell_coordinates()
-				_cat1 = _grid.cat1
-				_row = _coords[0]
-				_cat2 = _grid.cat2
-				_col = _coords[1]
-				var move: Move = Move.new(_cat1, _row, _cat2, _col, false)
-				#_moves += "_lp.set_grid_cell(" + str(_cat1) + ", " + str(_row) + ", " + str(_cat2) + ", " + str(_col) + ", false)\n"
+				var move: Move = Move.new(_grid.cat1, _coords[0], _grid.cat2, _coords[1], false)
 				_moves += str(move)
-				_grid.set_cell(_row, _col, false)
-				_lp.set_grid_cell(_cat1, _row, _cat2, _col, false)
+				_lp.apply_move(move)
 				_counter += 1
 			if not _lp.is_solved():
+				pass
 				print(_lp)
 				print(_moves)
 				break
