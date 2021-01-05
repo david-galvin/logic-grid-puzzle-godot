@@ -16,7 +16,7 @@ func _init(length: int) -> void:
 	rank = -1
 
 
-func invert_perm() -> void:
+func invert() -> void:
 	for i in range(perm_ints.size()):
 		_inverse_of_perm_ints[perm_ints[i]] = i
 	for i in range(perm_ints.size()):

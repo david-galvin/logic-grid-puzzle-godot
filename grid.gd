@@ -6,12 +6,12 @@ const GridCellState = preload("res://grid_cell_state.gd")
 
 var max_possible_solutions: int
 var solutions_bitset: BitSet
-var bit_mask: BitMask
 var count_of_true_cells: int = 0
 var count_of_false_cells: int = 0
 var cat1: int
 var cat2: int
 
+var _bit_mask: BitMask
 var _dimension: int # the number of rows, also the number of columns
 var _math: Math = load("res://math.gd").new()
 var _is_solved: bool = false
@@ -32,7 +32,7 @@ func _init(my_dimension: int, my_bit_mask: BitMask, my_cat1 := 0, my_cat2 := 0) 
 		for col in range(_dimension):
 			_grid_cell_matrix[row][col] = GridCellState.UNKNOWN
 			_unsolved_cells.append([row, col])
-	bit_mask = my_bit_mask
+	_bit_mask = my_bit_mask
 	max_possible_solutions = _math.factorial(_dimension)
 	solutions_bitset = BitSet.new(max_possible_solutions)
 	solutions_bitset.set_in_range(0, max_possible_solutions, true)
@@ -81,7 +81,7 @@ func is_solvable() -> bool:
 
 
 func set_cell(row: int, col: int, are_equal: bool) -> void:
-	var true_bit_mask: BitSet = bit_mask.get_true_bit_mask(row, col)
+	var true_bit_mask: BitSet = _bit_mask.get_true_bit_mask(row, col)
 	if(are_equal):
 		solutions_bitset.bitwise_and(true_bit_mask)
 	else:
@@ -119,8 +119,8 @@ func _update_grid_cell_matrix() -> void:
 	count_of_false_cells = 0
 	for row in range(_dimension):
 		for col in range(_dimension):
-			var true_bit_mask: BitSet = bit_mask.get_true_bit_mask(row, col)
-			var false_bit_mask: BitSet = bit_mask.get_false_bit_mask(row, col)
+			var true_bit_mask: BitSet = _bit_mask.get_true_bit_mask(row, col)
+			var false_bit_mask: BitSet = _bit_mask.get_false_bit_mask(row, col)
 			var some_true: bool = solutions_bitset.bitwise_intersects(true_bit_mask)
 			var some_false: bool = solutions_bitset.bitwise_intersects(false_bit_mask)
 			if some_true and some_false:

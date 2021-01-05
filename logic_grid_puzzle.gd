@@ -102,7 +102,7 @@ func _build_perm_lookup_table() -> Array:
 func _build_inverse_rank_lookup_table() -> void:
 	for i in range(rank_to_inverse_rank.size()):
 		perm.set_rank(i)
-		perm.invert_perm()
+		perm.invert()
 		rank_to_inverse_rank[i] = perm.rank
 
 

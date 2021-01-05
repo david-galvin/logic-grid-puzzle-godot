@@ -7,6 +7,8 @@ class TestGrid:
 	extends "res://addons/gut/test.gd"
 
 
+	const GridCellState = preload("res://grid_cell_state.gd")
+
 	var Grid = load("res://grid.gd")
 	var BitMask = load("res://bit_mask.gd")
 	var _grid: Grid = null
@@ -32,12 +34,7 @@ class TestGrid:
 		_grid.set_cell(0, 2, false)
 		assert_eq("\n" + str(_grid), "\nOXX\nX??\nX??\n")
 		
-		var true_bit_mask: BitSet = _grid.bit_mask.get_true_bit_mask(0, 0)
-		var false_bit_mask: BitSet = _grid.bit_mask.get_false_bit_mask(0, 0)
-		var some_true: bool = _grid.solutions_bitset.bitwise_intersects(true_bit_mask)
-		var some_false: bool = _grid.solutions_bitset.bitwise_intersects(false_bit_mask)
-		assert_eq(some_true, true)
-		assert_eq(some_false, false)
+		assert_eq(_grid.read_cell(0, 0), GridCellState.TRUE)
 	
 	
 	func test_is_solved():

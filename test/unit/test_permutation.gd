@@ -22,9 +22,9 @@ class TestPermutation:
 		assert_eq(_perm.perm_ints, [4, 2, 3, 0, 1])
 
 
-	func test_invert_perm():
+	func test_invert():
 		_perm.set_rank(1)
-		_perm.invert_perm()
+		_perm.invert()
 		assert_eq(_perm.perm_ints, [3, 4, 1, 2, 0])
 
 
@@ -64,18 +64,14 @@ class TestPermutationMath:
 		
 		# confirm right = left(inverse of lower)
 		utility_perm.set_rank(lower_rank)
-		utility_perm.invert_perm()
+		utility_perm.invert()
 		utility_perm.permute_by_rank(left_rank)
 		assert_eq(utility_perm.rank, right_rank)
 		
 		# confirm lower = inverse_of_right(left)
 		utility_perm.set_rank(right_rank)
-		utility_perm.invert_perm()
+		utility_perm.invert()
 		var inverse_of_right_rank: int = utility_perm.rank
 		utility_perm.set_rank(left_rank)
 		utility_perm.permute_by_rank(inverse_of_right_rank)
 		assert_eq(utility_perm.rank, lower_rank)
-		
-		
-		
-		

@@ -225,13 +225,4 @@ class TestLogicGridPuzzle:
 				print(_moves)
 				break
 		print("Num tries: " + str(_tries))
-
-# TODO: Write some real lp tests:
-# test set one: moves that should imply something about the puzzle.
-
-# test set two: create a programmatic tester looking for failures to discover
-# all implied information. Randomly generate puzzles with category count &
-# size restrictions, and enter random legal moves. If the puzzle becomes
-# unsolvable, then we missed some implied information. Record moves for analysis.
-# bonus version: on finding an invalid puzzle, rerun the moves with elimination
-# to find the minimum move set with the error.
+		

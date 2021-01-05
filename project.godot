@@ -85,7 +85,3 @@ gdscript/warnings/integer_division=false
 [editor_plugins]
 
 enabled=PoolStringArray( "gut" )
-
-[rendering]
-
-environment/default_environment="res://default_env.tres"
