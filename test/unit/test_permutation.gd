@@ -26,3 +26,56 @@ class TestPermutation:
 		_perm.set_rank(1)
 		_perm.invert_perm()
 		assert_eq(_perm.perm_ints, [3, 4, 1, 2, 0])
+
+
+class TestPermutationMath:
+
+
+	extends "res://addons/gut/test.gd"
+
+
+	var Permutation = load("res://permutation.gd")
+	var _perm1 = null
+	var _perm2 = null
+	var _perm3 = null
+
+
+	func test_perm_composition():
+		# left, right, and lower refer to the positions of the 3 grids of a logic
+		# puzzle formed by 3 pairs of 3 categories. There will be two in a row,
+		# and 2 in a col, with the 'lower' one always below the right of the
+		# two grids in a row.
+		var perm_size: int = 5
+		var left_rank = 8
+		var right_rank = 11
+		var lower_rank = 94
+		var left_grid_perm = Permutation.new(perm_size)
+		var right_grid_perm = Permutation.new(perm_size)
+		var lower_grid_perm = Permutation.new(perm_size)
+		var utility_perm = Permutation.new(perm_size)
+		left_grid_perm.set_rank(left_rank)
+		right_grid_perm.set_rank(right_rank)
+		lower_grid_perm.set_rank(lower_rank)
+		
+		# Confirm left = right(lower)
+		utility_perm.set_rank(lower_rank)
+		utility_perm.permute_by_rank(right_rank)
+		assert_eq(utility_perm.rank, left_rank)
+		
+		# confirm right = left(inverse of lower)
+		utility_perm.set_rank(lower_rank)
+		utility_perm.invert_perm()
+		utility_perm.permute_by_rank(left_rank)
+		assert_eq(utility_perm.rank, right_rank)
+		
+		# confirm lower = inverse_of_right(left)
+		utility_perm.set_rank(right_rank)
+		utility_perm.invert_perm()
+		var inverse_of_right_rank: int = utility_perm.rank
+		utility_perm.set_rank(left_rank)
+		utility_perm.permute_by_rank(inverse_of_right_rank)
+		assert_eq(utility_perm.rank, lower_rank)
+		
+		
+		
+		

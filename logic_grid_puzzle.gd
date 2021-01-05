@@ -74,6 +74,7 @@ func set_grid_cell(cat1: int, elt1: int, \
 	_check_all_trios_multiple_times(2)
 
 
+# This is only used for testing.
 func get_random_unsolved_grid() -> Grid:
 	if _unsolved_grids.size() == 0:
 		push_error("There are no unsolved grids")
@@ -104,6 +105,25 @@ func _build_inverse_rank_lookup_table() -> void:
 		perm.invert_perm()
 		rank_to_inverse_rank[i] = perm.rank
 
+
+# TODO: Convert the _check_trios code to check larger sets of categories as
+# information can sometimes only be discovered this way. E.g. in a 4x3 puzzle,
+# with categories A, B, C, D, we can have X's in the grid (is not) for:
+# (A0, B0), (A0, C0), (A0, D0), (B0, D0), and (C0, D0). Then every solution 
+# must have and 'O' for (B0, C0). I.e. B0 = C0. Why? Because:
+# A0 and D0 not being B0 means they're collectively B1 & B2.
+# A0 and D0 not being C0 means they're collectively C1 & C2.
+# Thus B1 & B2 are collectively C1 & C2. We don't know which is which, but
+# we know B0 must equal C0.
+
+# NOTE: WE MUST LIMIT THIS TO CASES WHERE IT IS POSSIBLE FOR THERE TO BE
+# IMPLIED INFORMATION, AND DUE TO COMBINATORIAL EXPLOSION IT WILL BE IMPORTANT
+# TO USE THE (category_count - 1) GRIDS WITH THE FEWEST POSSIBLE SOLUTIONS 
+# THAT IMPLY THE REST TO REDUCE OUR TEST CASES.
+# INITIAL IMPLEMENTATION WILL BE NAIVE TO CONFIRM THIS WORKS; PERFORMANCE
+# TESTING & OPTIMIZATION TO FOLLOW
+func _scan_puzzle_solutions_for_implied_information():
+	pass
 
 func _check_all_trios_including_categories(cat1: int, cat2: int) -> void:
 	for cat3 in range(cat_count):
@@ -199,6 +219,11 @@ func _check_grid_trio(_grid_trio) -> void:
 	implied_grid.merge_solutions_from_grid_trio(implied_grid_solutions_bitset)
 
 
+# For categories A, B, C, and the three grids formed by the three ways of pairing
+# these up, a solution to any two grids determines a solution to the thirds.
+# Two of these will always be in the same row of the puzzle. Given the permutation
+# ranks of the solutions of the two in the same row, this gives the permutation
+# rank of the third.
 func _get_implied_grid_rank(left_grid_rank: int, right_grid_rank: int) -> int:
 	if implied_perm_ranks[left_grid_rank][right_grid_rank] == null:
 		implied_perm_ranks[left_grid_rank][right_grid_rank] = _calculate_implied_rank(left_grid_rank, right_grid_rank)
