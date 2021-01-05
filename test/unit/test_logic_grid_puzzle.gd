@@ -51,7 +51,7 @@ class TestLogicGridPuzzle:
 					_lp.set_grid_cell(cat1, elt1, cat2, elt2, false)
 		# Implied grid should have cat1 = 1, cat2 = 0, and false values
 		# for 12 cells.
-		
+
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(1, 0, 0, 3))
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(1, 0, 0, 4))
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(1, 1, 0, 3))
@@ -76,24 +76,24 @@ class TestLogicGridPuzzle:
 		_lp.set_grid_cell(2, 0, 0, 0, false)
 		_lp.set_grid_cell(2, 3, 0, 0, false)
 		_lp.set_grid_cell(2, 1, 1, 3, false)
-		
+
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(1, 3, 0, 0))
-		
+
 		_lp.set_grid_cell(2, 2, 1, 0, false)
 		_lp.set_grid_cell(1, 2, 0, 0, false)
 		_lp.set_grid_cell(1, 1, 0, 0, false)
-		
+
 		assert_eq(GridCellState.TRUE, _lp.read_grid_cell(1, 0, 0, 0))
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(1, 0, 0, 1))
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(1, 0, 0, 2))
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(1, 0, 0, 3))
-		
+
 		assert_eq(GridCellState.TRUE, _lp.read_grid_cell(2, 1, 0, 0))
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(2, 1, 0, 1))
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(2, 1, 0, 2))
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(2, 1, 0, 3))
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(2, 2, 0, 0))
-		
+
 		assert_eq(GridCellState.TRUE, _lp.read_grid_cell(2, 1, 1, 0))
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(2, 0, 1, 0))
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(2, 1, 1, 1))
@@ -107,58 +107,94 @@ class TestLogicGridPuzzle:
 		_cat_count = 4
 		_cat_size = 3
 		_lp = LogicGridPuzzle.new(_cat_count, _cat_size)
+		
 		_lp.set_grid_cell(3, 1, 1, 1, false)
 		_lp.set_grid_cell(2, 0, 0, 2, false)
+		assert_eq(GridCellState.UNKNOWN, _lp.read_grid_cell(2, 1, 0, 1))
 		_lp.set_grid_cell(2, 0, 0, 1, false)
-		
+
 		assert_eq(GridCellState.TRUE, _lp.read_grid_cell(2, 0, 0, 0))
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(2, 1, 0, 0))
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(2, 2, 0, 0))
-		
+
 		_lp.set_grid_cell(1, 0, 0, 2, false)
 		_lp.set_grid_cell(3, 1, 0, 1, false)
 		_lp.set_grid_cell(1, 0, 0, 0, false)
-		
+
 		assert_eq(GridCellState.TRUE, _lp.read_grid_cell(1, 0, 0, 1))
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(1, 1, 0, 1))
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(1, 2, 0, 1))
-		
+
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(3, 0, 1, 2))
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(3, 1, 1, 0))
 		assert_eq(GridCellState.TRUE, _lp.read_grid_cell(3, 1, 1, 2))
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(3, 2, 1, 2))
-		
+
 		_lp.set_grid_cell(2, 0, 1, 2, false)
-		
+
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(3, 1, 2, 0))
-		
+
 		assert_eq(GridCellState.TRUE, _lp.read_grid_cell(2, 0, 1, 1))
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(2, 1, 1, 1))
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(2, 2, 1, 1))
-		
+
 		# The last move (2,1) != (1,2) correctly updates implied information
 		# in grids (3,2) and (2,1), but misses a change to (3,0)
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(3, 0, 0, 2))
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(3, 1, 0, 0))
 		assert_eq(GridCellState.TRUE, _lp.read_grid_cell(3, 1, 0, 2))
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(3, 2, 0, 2))
-		
+
 		_lp.set_grid_cell(3, 0, 0, 1, false)
-		
+
 		assert_eq(GridCellState.TRUE, _lp.read_grid_cell(3, 0, 0, 0))
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(3, 2, 0, 0))
 		assert_eq(GridCellState.TRUE, _lp.read_grid_cell(3, 2, 0, 1))
-		
+
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(3, 0, 1, 0))
 		assert_eq(GridCellState.TRUE, _lp.read_grid_cell(3, 0, 1, 1))
 		assert_eq(GridCellState.TRUE, _lp.read_grid_cell(3, 2, 1, 0))
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(3, 2, 1, 1))
 
 
-	func test_random_puzzles():
+	func test_implied_values_cats4_size3_v2():
+		# All asserts in this test are checking that we have correctly
+		# discovered implied information
 		_cat_count = 4
 		_cat_size = 3
-		var _minutes: int = 1
+		_lp = LogicGridPuzzle.new(_cat_count, _cat_size)
+		_lp.set_grid_cell(3, 2, 2, 2, false)
+		_lp.set_grid_cell(3, 2, 0, 1, false)
+		_lp.set_grid_cell(3, 2, 1, 1, false)
+		_lp.set_grid_cell(1, 1, 0, 1, false)
+		_lp.set_grid_cell(2, 2, 0, 1, false)
+		assert_eq(GridCellState.TRUE, _lp.read_grid_cell(2, 2, 1, 1))
+
+
+
+	func test_implied_solved():
+		# All asserts in this test are checking that we have correctly
+		# discovered implied information
+		_cat_count = 4
+		_cat_size = 3
+		_lp = LogicGridPuzzle.new(_cat_count, _cat_size)
+		_lp.set_grid_cell(2, 0, 0, 0, false)
+		_lp.set_grid_cell(3, 2, 1, 1, false)
+		_lp.set_grid_cell(2, 2, 1, 2, false)
+		_lp.set_grid_cell(1, 1, 0, 1, false)
+		_lp.set_grid_cell(3, 2, 2, 2, false)
+		_lp.set_grid_cell(3, 0, 0, 1, false)
+		_lp.set_grid_cell(3, 0, 2, 2, false)
+		_lp.set_grid_cell(2, 1, 1, 2, false)
+		_lp.set_grid_cell(3, 2, 2, 0, false)
+		assert_eq(_lp.is_solved(), true)
+
+		
+
+	func test_random_puzzles():
+		_cat_count = 3
+		_cat_size = 3
+		var _minutes: int = 0
 		var _start_time = OS.get_ticks_msec()
 		var _tries: int = 0
 		while (OS.get_ticks_msec() - _start_time) < _minutes * 60000:

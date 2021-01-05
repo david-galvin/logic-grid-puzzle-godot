@@ -66,8 +66,12 @@ func read_grid_cell(cat1: int, elt1: int, cat2: int, elt2: int):
 
 func set_grid_cell(cat1: int, elt1: int, \
 		cat2: int, elt2: int, truth_val: bool) -> void:
-	_get_grid(cat1, cat2).set_cell(elt1, elt2, truth_val)
-	_check_all_trios_including_categories(cat1, cat2)
+	var grid: Grid = _get_grid(cat1, cat2)
+	if grid.is_solved():
+		push_error("Entering a move in a solved grid!")
+	grid.set_cell(elt1, elt2, truth_val)
+	#_check_all_trios_including_categories(cat1, cat2)
+	_check_all_trios_multiple_times(2)
 
 
 func get_random_unsolved_grid() -> Grid:
@@ -119,6 +123,27 @@ func _check_all_trios_including_categories(cat1: int, cat2: int) -> void:
 				_check_grid_trio(_grid_trio)
 
 
+#Dumb version checks all grid trios multiple times
+func _check_all_trios_multiple_times(var num_times: int = 2) -> void:
+	for _i in range(num_times):
+		for cat1 in range(cat_count - 2):
+			for cat2 in range(cat1 + 1, cat_count - 1):
+				for cat3 in range(cat2 + 1, cat_count):
+					var cat_trio: Array = [cat1, cat2, cat3]
+					cat_trio.sort()
+					# The order of grids in grid_trio is important. The first two
+					# need to be in the same row, with the first to the left of the
+					# second. This means they should be in order of category size:
+					# (big, small), (big, med), (med, small)
+					var _grid_trio: Array = []
+					_grid_trio.resize(3)
+					_grid_trio[0] = _get_grid(cat_trio[2], cat_trio[0])
+					_grid_trio[1] = _get_grid(cat_trio[2], cat_trio[1])
+					_grid_trio[2] = _get_grid(cat_trio[1], cat_trio[0])
+					if _is_grid_trio_worth_checking(_grid_trio):
+						_check_grid_trio(_grid_trio)
+
+
 func _calculate_implied_rank(left_grid_rank: int, right_grid_rank: int) -> int:
 	perm.set_rank(left_grid_rank)
 	perm.permute_by_rank(rank_to_inverse_rank[right_grid_rank])
@@ -144,23 +169,31 @@ func _check_grid_trio(_grid_trio) -> void:
 	var left_grid: Grid = _grid_trio[0]
 	var right_grid: Grid = _grid_trio[1]
 	var implied_grid: Grid = _grid_trio[2]
-	var left_grid_rank: int = left_grid.solutions_bitset.next_set_bit(0)
-	var right_grid_rank: int = right_grid.solutions_bitset.next_set_bit(0)
 	for i in range(grid_trio_solutions_bitsets.size()):
 		grid_trio_solutions_bitsets[i].clear()
 	var left_grid_solutions_bitset: BitSet = grid_trio_solutions_bitsets[0]
 	var right_grid_solutions_bitset: BitSet = grid_trio_solutions_bitsets[1]
 	var implied_grid_solutions_bitset: BitSet = grid_trio_solutions_bitsets[2]
-	while left_grid_rank >= 0 and left_grid_rank < left_grid.max_possible_solutions - 1:
-		while right_grid_rank >= 0 and right_grid_rank < right_grid.max_possible_solutions - 1:
+	
+	# Check all valid permutation rank combinations of the left and right grids
+	var left_grid_rank: int = left_grid.solutions_bitset.next_set_bit(0)
+	var right_grid_rank: int = right_grid.solutions_bitset.next_set_bit(0)
+	while left_grid_rank >= 0 and left_grid_rank < left_grid.max_possible_solutions:
+		while right_grid_rank >= 0 and right_grid_rank < right_grid.max_possible_solutions:
 			var implied_grid_rank: int = _get_implied_grid_rank(left_grid_rank, right_grid_rank)
 			if implied_grid.solutions_bitset.get_at_index(implied_grid_rank):
 				left_grid_solutions_bitset.set_at_index(left_grid_rank, true)
 				right_grid_solutions_bitset.set_at_index(right_grid_rank, true)
 				implied_grid_solutions_bitset.set_at_index(implied_grid_rank, true)
-			right_grid_rank = right_grid.solutions_bitset.next_set_bit(right_grid_rank + 1)
-		left_grid_rank = left_grid.solutions_bitset.next_set_bit(left_grid_rank + 1)
-		right_grid_rank = right_grid.solutions_bitset.next_set_bit(0)
+			if right_grid_rank + 1 >= right_grid.max_possible_solutions:
+				right_grid_rank = -1
+			else:
+				right_grid_rank = right_grid.solutions_bitset.next_set_bit(right_grid_rank + 1)
+		if left_grid_rank + 1 >= left_grid.max_possible_solutions:
+			left_grid_rank = -1
+		else:
+			left_grid_rank = left_grid.solutions_bitset.next_set_bit(left_grid_rank + 1)
+			right_grid_rank = right_grid.solutions_bitset.next_set_bit(0)
 	left_grid.merge_solutions_from_grid_trio(left_grid_solutions_bitset)
 	right_grid.merge_solutions_from_grid_trio(right_grid_solutions_bitset)
 	implied_grid.merge_solutions_from_grid_trio(implied_grid_solutions_bitset)

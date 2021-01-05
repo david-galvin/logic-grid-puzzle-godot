@@ -22,7 +22,7 @@ func _init(my_num_bits: int) -> void:
 
 
 func validate_index(index: int) -> void:
-	if index > _num_bits - 1:
+	if index >= _num_bits:
 		push_error("Index exceeds size of BitSet")
 	if index < 0:
 		push_error("Index can't be negative")
