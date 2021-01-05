@@ -22,7 +22,6 @@ var implied_perm_ranks: Array
 var perm: Permutation
 var grid_trio_solutions_bitsets: Array = []
 var rank_to_inverse_rank: Array = []
-var math: Math = load("res://math.gd").new()
 
 var _grids: Array = []
 var _unsolved_grids: Array = []
@@ -38,12 +37,12 @@ func _init(my_cat_count: int, my_cat_size: int) -> void:
 	# sufficient extra information to eliminate further cells
 	_grid_trio_false_cells_threshold = cat_size
 	perm = Permutation.new(cat_size)
-	rank_to_inverse_rank.resize(math.factorial(cat_size))
+	rank_to_inverse_rank.resize(Math.factorial(cat_size))
 	_build_inverse_rank_lookup_table()
 	implied_perm_ranks = _build_perm_lookup_table()
 	grid_trio_solutions_bitsets.resize(3)
 	for i in range(3):
-		grid_trio_solutions_bitsets[i] = BitSet.new(math.factorial(cat_size))
+		grid_trio_solutions_bitsets[i] = BitSet.new(Math.factorial(cat_size))
 
 
 func is_solved() -> bool:
@@ -94,7 +93,7 @@ func get_random_unsolved_grid() -> Grid:
 
 
 func _build_perm_lookup_table() -> Array:
-	var num_solutions_per_grid: int = math.factorial(cat_size)
+	var num_solutions_per_grid: int = Math.factorial(cat_size)
 	var implied_solutions: Array = []
 	implied_solutions.resize(num_solutions_per_grid)
 	for left_grid_rank in range(num_solutions_per_grid):

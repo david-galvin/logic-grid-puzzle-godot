@@ -5,14 +5,13 @@ extends Reference
 var max_possible_solutions_per_grid: int
 var true_bit_masks: Array = []
 var false_bit_mask: BitSet
-var math: Math = load("res://math.gd").new()
 
 var _cat_size: int
 
 
 func _init(my_cat_size: int) -> void:
 	_cat_size = my_cat_size
-	max_possible_solutions_per_grid = math.factorial(_cat_size)
+	max_possible_solutions_per_grid = Math.factorial(_cat_size)
 	false_bit_mask = BitSet.new(max_possible_solutions_per_grid)
 	true_bit_masks.resize(_cat_size)
 	for i in range(_cat_size):
@@ -39,7 +38,7 @@ func _build_bit_masks(cat_size: int) -> void:
 		for col in range(cat_size):
 			true_bit_masks[row][col] = BitSet.new(max_possible_solutions_per_grid)
 	var solution: Permutation = Permutation.new(cat_size)
-	for solution_id in range(math.factorial(cat_size)):
+	for solution_id in range(Math.factorial(cat_size)):
 		solution.set_rank(solution_id)
 		for row in range(cat_size):
 			var col: int = solution.perm_ints[row]

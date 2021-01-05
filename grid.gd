@@ -13,7 +13,6 @@ var cat2: int
 
 var _bit_mask: BitMask
 var _dimension: int # the number of rows, also the number of columns
-var _math: Math = load("res://math.gd").new()
 var _is_solved: bool = false
 var _is_solvable: bool = true
 var _grid_cell_matrix: Array = []
@@ -33,7 +32,7 @@ func _init(my_dimension: int, my_bit_mask: BitMask, my_cat1 := 0, my_cat2 := 0) 
 			_grid_cell_matrix[row][col] = GridCellState.UNKNOWN
 			_unsolved_cells.append([row, col])
 	_bit_mask = my_bit_mask
-	max_possible_solutions = _math.factorial(_dimension)
+	max_possible_solutions = Math.factorial(_dimension)
 	solutions_bitset = BitSet.new(max_possible_solutions)
 	solutions_bitset.set_in_range(0, max_possible_solutions, true)
 
