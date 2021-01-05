@@ -50,6 +50,11 @@ _global_script_classes=[ {
 "path": "res://math.gd"
 }, {
 "base": "Reference",
+"class": "Move",
+"language": "GDScript",
+"path": "res://move.gd"
+}, {
+"base": "Reference",
 "class": "Permutation",
 "language": "GDScript",
 "path": "res://permutation.gd"
@@ -68,6 +73,7 @@ _global_script_class_icons={
 "InvitationItem": "",
 "LogicGridPuzzle": "",
 "Math": "",
+"Move": "",
 "Permutation": "",
 "RepositoryItem": ""
 }

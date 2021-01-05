@@ -216,7 +216,9 @@ class TestLogicGridPuzzle:
 				_row = _coords[0]
 				_cat2 = _grid.cat2
 				_col = _coords[1]
-				_moves += "_lp.set_grid_cell(" + str(_cat1) + ", " + str(_row) + ", " + str(_cat2) + ", " + str(_col) + ", false)\n"
+				var move: Move = Move.new(_cat1, _row, _cat2, _col, false)
+				#_moves += "_lp.set_grid_cell(" + str(_cat1) + ", " + str(_row) + ", " + str(_cat2) + ", " + str(_col) + ", false)\n"
+				_moves += str(move)
 				_grid.set_cell(_row, _col, false)
 				_lp.set_grid_cell(_cat1, _row, _cat2, _col, false)
 				_counter += 1
