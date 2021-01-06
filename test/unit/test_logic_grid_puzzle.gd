@@ -197,7 +197,7 @@ class TestLogicGridPuzzle:
 		var _minutes: int = 0
 		var _start_time = OS.get_ticks_msec()
 		var _tries: int = 0
-		while (OS.get_ticks_msec() - _start_time) < 1000: #_minutes * 60000:
+		while (OS.get_ticks_msec() - _start_time) < 0: #_minutes * 60000:
 			_tries += 1
 			_lp = LogicGridPuzzle.new(_cat_count, _cat_size)
 			

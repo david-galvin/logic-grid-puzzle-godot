@@ -77,13 +77,40 @@ class TestPermutationMath:
 		assert_eq(utility_perm.rank, lower_rank)
 
 
+class TestPermutationRanks:
+
+
+	extends "res://addons/gut/test.gd"
+
+
+	var Permutation = load("res://permutation.gd")
+	
+	func test_ranks():
+		var size: int = Math.factorial(4)
+		var perm = Permutation.new(4)
+		var matrix = []
+		matrix.resize(size)
+		for i in range(size):
+			matrix[i] = []
+			matrix[i].resize(size)
+		for rank1 in range(size):
+			for rank2 in range(size):
+				perm.set_rank(rank1)
+				perm.permute_by_rank(rank2)
+				matrix[rank1][rank2] = perm.rank
+		var print_str = ""
+		for row in range(size):
+			for col in range(size):
+				print_str += str(matrix[row][col]) + ", "
+			print_str += "\n"
+		print(print_str)
 #class TestPermutationFile:
 #
 #
 #	extends "res://addons/gut/test.gd"
 #
 #
-#	var Permutation = load("res://permutation.gd")
+#	var Permutation = load("res://permutation.csv")
 #
 #
 #	func test_make_file():

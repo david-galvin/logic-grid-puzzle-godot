@@ -46,8 +46,8 @@ func _init(my_cat_count: int, my_cat_size: int) -> void:
 		file.close()
 	else:
 		rank_to_inverse_rank.resize(Math.factorial(cat_size))
-	
-	_build_inverse_rank_lookup_table()
+		_build_inverse_rank_lookup_table()
+		
 	implied_perm_ranks = _build_perm_lookup_table()
 	grid_trio_solutions_bitsets.resize(3)
 	for i in range(3):
