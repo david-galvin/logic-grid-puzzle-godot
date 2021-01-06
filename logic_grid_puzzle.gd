@@ -126,7 +126,20 @@ func _build_inverse_rank_lookup_table() -> void:
 # INITIAL IMPLEMENTATION WILL BE NAIVE TO CONFIRM THIS WORKS; PERFORMANCE
 # TESTING & OPTIMIZATION TO FOLLOW
 func _scan_puzzle_solutions_for_implied_information():
-	pass
+	var grids_to_scan: Array = _grids.duplicate()
+	var grids_to_permute: Array = []
+	
+	# Here we find an MST where we consider categories as vertices and grids
+	# as edges. We do this to avoid including redundant grids.
+	var categories_in_use: Dictionary = {}
+	grids_to_scan.sort_custom(GridSorter, "sort_by_cardinality")
+	var sorted_edges: Array = []
+	for grid in grids_to_scan:
+		sorted_edges.append([grid.cat1, grid.cat2])
+	var mst_edges: Array = Math.get_mst_edges(cat_count, sorted_edges)
+	for edge in mst_edges:
+		grids_to_permute.append(_get_grid(edge[0], edge[1]))
+	print(str(grids_to_permute))
 
 func _check_all_trios_including_categories(cat1: int, cat2: int) -> void:
 	for cat3 in range(cat_count):
