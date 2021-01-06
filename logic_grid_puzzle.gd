@@ -16,7 +16,7 @@ extends Reference
 #   is fully determined. This is a double array that takes two perm_ranks as
 #   inputs, and returns the perm_rank of the implied pairing.
 # grid: a pair of categories.
-const path_to_inverses_file = "res://inverses.dat"
+const path_to_inverses_file = "res://permutation_inverses.dat"
 
 var cat_count: int
 var cat_size: int

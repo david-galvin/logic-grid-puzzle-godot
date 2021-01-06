@@ -77,28 +77,28 @@ class TestPermutationMath:
 		assert_eq(utility_perm.rank, lower_rank)
 
 
-class TestPermutationFile:
-
-
-	extends "res://addons/gut/test.gd"
-
-
-	var Permutation = load("res://permutation.gd")
-
-
-	func test_make_file():
-		var size_to_inverse_ranks: Dictionary = {} 
-		for size in range(2, 8):
-			size_to_inverse_ranks[size] = []
-			size_to_inverse_ranks[size].resize(Math.factorial(size)) 
-			var perm: Permutation = Permutation.new(size)
-			for rank in range(Math.factorial(size)):
-				perm.set_rank(rank)
-				perm.invert()
-				size_to_inverse_ranks[size][rank] = perm.rank
-		var file := File.new()
-		file.open("res://inverses.dat", File.WRITE)
-		file.store_var(size_to_inverse_ranks)
-		file.close()
+#class TestPermutationFile:
+#
+#
+#	extends "res://addons/gut/test.gd"
+#
+#
+#	var Permutation = load("res://permutation.gd")
+#
+#
+#	func test_make_file():
+#		var size_to_inverse_ranks: Dictionary = {} 
+#		for size in range(2, 8):
+#			size_to_inverse_ranks[size] = []
+#			size_to_inverse_ranks[size].resize(Math.factorial(size)) 
+#			var perm: Permutation = Permutation.new(size)
+#			for rank in range(Math.factorial(size)):
+#				perm.set_rank(rank)
+#				perm.invert()
+#				size_to_inverse_ranks[size][rank] = perm.rank
+#		var file := File.new()
+#		file.open("res://inverses.dat", File.WRITE)
+#		file.store_var(size_to_inverse_ranks)
+#		file.close()
 		
 		
