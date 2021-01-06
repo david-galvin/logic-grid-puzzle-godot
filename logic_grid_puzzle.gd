@@ -17,6 +17,7 @@ extends Reference
 #   inputs, and returns the perm_rank of the implied pairing.
 # grid: a pair of categories.
 const path_to_inverses_file = "res://permutation_inverses.dat"
+const max_cat_size = 6
 
 var cat_count: int
 var cat_size: int
@@ -31,9 +32,12 @@ var _grid_trio_false_cells_threshold: int = 0
 
 
 func _init(my_cat_count: int, my_cat_size: int) -> void:
-	randomize()
 	cat_count = my_cat_count
 	cat_size = my_cat_size
+	if cat_size > max_cat_size:
+		push_error("We can only handle categories of up to 6 elements.")
+		return
+	randomize()
 	_grids = _build_grids()
 	# The minimum number of false cells before a grid trio can yield
 	# sufficient extra information to eliminate further cells
@@ -45,6 +49,7 @@ func _init(my_cat_count: int, my_cat_size: int) -> void:
 		rank_to_inverse_rank = file.get_var(true)[cat_size]
 		file.close()
 	else:
+		push_error("rank_to_inverse_rank should be loaded from a file")
 		rank_to_inverse_rank.resize(Math.factorial(cat_size))
 		_build_inverse_rank_lookup_table()
 		
@@ -112,6 +117,7 @@ func _build_perm_lookup_table() -> Array:
 
 
 func _build_inverse_rank_lookup_table() -> void:
+	push_error("This method should not be called.")
 	for i in range(rank_to_inverse_rank.size()):
 		perm.set_rank(i)
 		perm.invert()

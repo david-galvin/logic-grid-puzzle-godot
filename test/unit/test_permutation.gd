@@ -84,48 +84,40 @@ class TestPermutationRanks:
 
 
 	var Permutation = load("res://permutation.gd")
+	var _perm: Permutation = null
 	
-	func test_ranks():
-		var size: int = Math.factorial(4)
-		var perm = Permutation.new(4)
-		var matrix = []
-		matrix.resize(size)
-		for i in range(size):
-			matrix[i] = []
-			matrix[i].resize(size)
-		for rank1 in range(size):
-			for rank2 in range(size):
-				perm.set_rank(rank1)
-				perm.permute_by_rank(rank2)
-				matrix[rank1][rank2] = perm.rank
-		var print_str = ""
-		for row in range(size):
-			for col in range(size):
-				print_str += str(matrix[row][col]) + ", "
-			print_str += "\n"
-		print(print_str)
-#class TestPermutationFile:
-#
-#
-#	extends "res://addons/gut/test.gd"
-#
-#
-#	var Permutation = load("res://permutation.csv")
-#
-#
-#	func test_make_file():
-#		var size_to_inverse_ranks: Dictionary = {} 
-#		for size in range(2, 8):
-#			size_to_inverse_ranks[size] = []
-#			size_to_inverse_ranks[size].resize(Math.factorial(size)) 
-#			var perm: Permutation = Permutation.new(size)
-#			for rank in range(Math.factorial(size)):
-#				perm.set_rank(rank)
-#				perm.invert()
-#				size_to_inverse_ranks[size][rank] = perm.rank
-#		var file := File.new()
-#		file.open("res://inverses.dat", File.WRITE)
-#		file.store_var(size_to_inverse_ranks)
-#		file.close()
-		
-		
+	func test_rank_to_inverse_rank_file():
+		var file = File.new()
+		var _start_time = OS.get_ticks_msec()
+		file.open("permutation_inverses.dat", File.READ)
+		var size_to_rank_to_inverse_rank = file.get_var(true)
+		file.close()
+		print("permutation_inverses.dat load time: " + str(OS.get_ticks_msec() - _start_time))
+		for size in range(3, 7):
+			_perm = Permutation.new(size)
+
+			for rank in range(3,6):
+				_perm.set_rank(rank)
+				_perm.invert()
+				assert_eq(_perm.rank, size_to_rank_to_inverse_rank[size][rank])
+	
+	
+	func test_rank_matrix_file():
+		var _start_time = OS.get_ticks_msec()
+		var file = File.new()
+		file.open("size_to_perm_matrix.dat", File.READ)
+		var size_to_perm_matrix = file.get_var(true)
+		file.close()
+		print("size_to_perm_matrix.dat load time: " + str(OS.get_ticks_msec() - _start_time))
+		file.open("permutation_inverses.dat", File.READ)
+		var size_to_rank_to_inverse_rank = file.get_var(true)
+		file.close()
+		var file_rank: int
+		for size in range(3, 7):
+			_perm = Permutation.new(size)
+			for left_grid_rank in range(3,5):
+				for right_grid_rank in range(left_grid_rank, 6):
+					_perm.set_rank(left_grid_rank)
+					_perm.permute_by_rank(size_to_rank_to_inverse_rank[size][right_grid_rank])
+					file_rank = size_to_perm_matrix[size][left_grid_rank][size_to_rank_to_inverse_rank[size][right_grid_rank]]
+					assert_eq(file_rank, _perm.rank)
