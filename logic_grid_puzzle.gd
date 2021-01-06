@@ -125,21 +125,31 @@ func _build_inverse_rank_lookup_table() -> void:
 # THAT IMPLY THE REST TO REDUCE OUR TEST CASES.
 # INITIAL IMPLEMENTATION WILL BE NAIVE TO CONFIRM THIS WORKS; PERFORMANCE
 # TESTING & OPTIMIZATION TO FOLLOW
-func _scan_puzzle_solutions_for_implied_information():
+
+func _scan_puzzle_solutions_for_implied_information() -> void:
 	var grids_to_scan: Array = _grids.duplicate()
 	var grids_to_permute: Array = []
 	
 	# Here we find an MST where we consider categories as vertices and grids
 	# as edges. We do this to avoid including redundant grids.
-	var categories_in_use: Dictionary = {}
 	grids_to_scan.sort_custom(GridSorter, "sort_by_cardinality")
 	var sorted_edges: Array = []
 	for grid in grids_to_scan:
 		sorted_edges.append([grid.cat1, grid.cat2])
 	var mst_edges: Array = Math.get_mst_edges(cat_count, sorted_edges)
+	
+	# Add all grids with any information
 	for edge in mst_edges:
+		var grid: Grid = _get_grid(edge[0], edge[1])
+		if grid.solutions_bitset.cardinality() == grid.max_possible_solutions:
+			break 
 		grids_to_permute.append(_get_grid(edge[0], edge[1]))
-	print(str(grids_to_permute))
+	
+	# TO DO: The grids in grids_to_permute are the minimum set of grids with
+	# the minimum solutions to check that collectively determine the rest of
+	# the puzzle. To extract this information, we need to check every pairwise
+	# combination of every solution
+	
 
 func _check_all_trios_including_categories(cat1: int, cat2: int) -> void:
 	for cat3 in range(cat_count):
