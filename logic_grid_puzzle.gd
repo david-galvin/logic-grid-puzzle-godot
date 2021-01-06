@@ -16,6 +16,8 @@ extends Reference
 #   is fully determined. This is a double array that takes two perm_ranks as
 #   inputs, and returns the perm_rank of the implied pairing.
 # grid: a pair of categories.
+const path_to_inverses_file = "res://inverses.dat"
+
 var cat_count: int
 var cat_size: int
 var implied_perm_ranks: Array
@@ -37,7 +39,14 @@ func _init(my_cat_count: int, my_cat_size: int) -> void:
 	# sufficient extra information to eliminate further cells
 	_grid_trio_false_cells_threshold = cat_size
 	perm = Permutation.new(cat_size)
-	rank_to_inverse_rank.resize(Math.factorial(cat_size))
+	var file = File.new()
+	if cat_size in range(2,8) and file.file_exists(path_to_inverses_file):
+		file.open(path_to_inverses_file, File.READ)
+		rank_to_inverse_rank = file.get_var(true)[cat_size]
+		file.close()
+	else:
+		rank_to_inverse_rank.resize(Math.factorial(cat_size))
+	
 	_build_inverse_rank_lookup_table()
 	implied_perm_ranks = _build_perm_lookup_table()
 	grid_trio_solutions_bitsets.resize(3)
