@@ -13,5 +13,6 @@ script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+_should_maximize = true
 _directory1 = "res://test/unit"
 _directory2 = "res://test/integration"
