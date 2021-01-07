@@ -29,9 +29,29 @@ var rank_to_inverse_rank: Array = []
 var _grids: Array = []
 var _unsolved_grids: Array = []
 var _grid_trio_false_cells_threshold: int = 0
+var _times = {}
 
 
 func _init(my_cat_count: int, my_cat_size: int) -> void:
+	_times["_init"]  = 0
+	_times["is_solved"] = 0
+	_times["is_solvable"] = 0
+	_times["set_grid_cell"]  = 0
+	_times["apply_move"] = 0
+	_times["get_random_unsolved_grid"]  = 0
+	_times["_build_perm_lookup_table"] = 0
+	_times["_build_inverse_rank_lookup_table"]  = 0
+	_times["_scan_puzzle_solutions_for_implied_information"]  = 0
+	_times["_check_all_trios_including_categories"] = 0
+	_times["_check_all_trios_multiple_times"]  = 0
+	_times["_calculate_implied_rank"]  = 0
+	_times["_is_grid_trio_worth_checking"]  = 0
+	_times["_check_grid_trio"]  = 0
+	_times["_get_implied_grid_rank"] = 0
+	_times["_to_string"] = 0
+	_times["_get_grid_index"] = 0
+	_times["_build_grids"]  = 0
+	var _time = OS.get_ticks_msec()
 	cat_count = my_cat_count
 	cat_size = my_cat_size
 	if cat_size > max_cat_size:
@@ -57,19 +77,29 @@ func _init(my_cat_count: int, my_cat_size: int) -> void:
 	grid_trio_solutions_bitsets.resize(3)
 	for i in range(3):
 		grid_trio_solutions_bitsets[i] = BitSet.new(Math.factorial(cat_size))
+	_times["_init"] += OS.get_ticks_msec() - _time
 
+
+func print_times():
+	print(str(_times))
 
 func is_solved() -> bool:
+	var _time = OS.get_ticks_msec()
 	for grid in _grids:
 		if grid.is_solved() == false:
+			_times["is_solved"] += OS.get_ticks_msec() - _time
 			return false
+	_times["is_solved"] += OS.get_ticks_msec() - _time
 	return true
 
 
 func is_solvable() -> bool:
+	var _time = OS.get_ticks_msec()
 	for grid in _grids:
 		if not grid.is_solvable():
+			_times["is_solvable"] += OS.get_ticks_msec() - _time
 			return false
+	_times["is_solvable"] += OS.get_ticks_msec() - _time
 	return true
 
 
@@ -79,49 +109,61 @@ func read_grid_cell(cat1: int, elt1: int, cat2: int, elt2: int):
 
 func set_grid_cell(cat1: int, elt1: int, \
 		cat2: int, elt2: int, target_state: bool) -> void:
+	var _time = OS.get_ticks_msec()
 	var grid: Grid = _get_grid(cat1, cat2)
 	if grid.is_solved():
 		push_error("Entering a move in a solved grid!")
 	grid.set_cell(elt1, elt2, target_state)
 	#_check_all_trios_including_categories(cat1, cat2)
-	_check_all_trios_multiple_times(2)
+	_check_all_trios_multiple_times(1)
+	_times["set_grid_cell"] += OS.get_ticks_msec() - _time
 
 
 func apply_move(move: Move) -> void:
+	var _time = OS.get_ticks_msec()
 	set_grid_cell(move.cat1, move.elt1, move.cat2, move.elt2, move.target_state)
+	_times["apply_move"] += OS.get_ticks_msec() - _time
 
 
 # This is only used for testing.
 func get_random_unsolved_grid() -> Grid:
+	var _time = OS.get_ticks_msec()
 	if _unsolved_grids.size() == 0:
 		push_error("There are no unsolved grids")
 		print(self)
+		_times["get_random_unsolved_grid"] += OS.get_ticks_msec() - _time
 		return null
 	var rand_index: int = randi() % _unsolved_grids.size()
 	var rand_grid: Grid = _unsolved_grids[rand_index]
 	if rand_grid.is_solved():
 		_unsolved_grids.remove(rand_index)
+		_times["get_random_unsolved_grid"] += OS.get_ticks_msec() - _time
 		return get_random_unsolved_grid()
 	else:
+		_times["get_random_unsolved_grid"] += OS.get_ticks_msec() - _time
 		return rand_grid
 
 
 func _build_perm_lookup_table() -> Array:
+	var _time = OS.get_ticks_msec()
 	var num_solutions_per_grid: int = Math.factorial(cat_size)
 	var implied_solutions: Array = []
 	implied_solutions.resize(num_solutions_per_grid)
 	for left_grid_rank in range(num_solutions_per_grid):
 		implied_solutions[left_grid_rank] = []
 		implied_solutions[left_grid_rank].resize(num_solutions_per_grid)
+	_times["_build_perm_lookup_table"] += OS.get_ticks_msec() - _time
 	return implied_solutions
 
 
 func _build_inverse_rank_lookup_table() -> void:
+	var _time = OS.get_ticks_msec()
 	push_error("This method should not be called.")
 	for i in range(rank_to_inverse_rank.size()):
 		perm.set_rank(i)
 		perm.invert()
 		rank_to_inverse_rank[i] = perm.rank
+	_times["_build_inverse_rank_lookup_table"] += OS.get_ticks_msec() - _time
 
 
 # TODO: Convert the _check_trios code to check larger sets of categories as
@@ -142,6 +184,7 @@ func _build_inverse_rank_lookup_table() -> void:
 # TESTING & OPTIMIZATION TO FOLLOW
 
 func _scan_puzzle_solutions_for_implied_information() -> void:
+	var _time = OS.get_ticks_msec()
 	var grids_to_scan: Array = _grids.duplicate()
 	var grids_to_permute: Array = []
 	
@@ -160,6 +203,61 @@ func _scan_puzzle_solutions_for_implied_information() -> void:
 			break 
 		grids_to_permute.append(_get_grid(edge[0], edge[1]))
 	
+	# we'll use the same indexing for the solution as for the grids.
+	var grid_solutions_bitsets: Array = []
+	for _i in _grids.size():
+		grid_solutions_bitsets.append(BitSet.new(Math.factorial(cat_size)))
+	
+	# TO DO:
+	# For every combination of valid ranks among grids_to_permute
+	#   For every pair of grids in grids_to_permute
+	#     1. find the implied grid
+	#     2. If all implied grids have a solution, the set of ranks is valid.
+	#        Mark it as such for all grids in the puzzle
+	# Similar to check_grid_trio, for each grid in the puzzle, we merge its
+	# solutions found here with its bitset (an intersection) and determine whether
+	# we've discovered new information.
+	
+	for i in range(grids_to_permute.size()):
+		pass 
+	
+	
+	
+	var left_grid: Grid
+	var right_grid: Grid
+	var lower_grid: Grid 
+	for i in range(grids_to_permute.size() - 1):
+		for j in range( i + 1, grids_to_permute.size()):
+			var grid1: Grid = grids_to_permute[i]
+			var grid2: Grid = grids_to_permute[j]
+	
+			if grid1.cat1 == grid2.cat1:
+				if grid1.cat2 < grid2.cat2:
+					left_grid = grid1
+					right_grid = grid2
+				else:
+					left_grid = grid2
+					right_grid = grid1
+				lower_grid = _get_grid(right_grid.cat2, left_grid.cat1)
+			elif grid1.cat2 == grid2.cat2:
+				if grid1.cat1 > grid2.cat1:
+					left_grid = grid1
+					lower_grid = grid2
+				else:
+					left_grid = grid2
+					lower_grid = grid1
+				right_grid = _get_grid(left_grid.cat1, lower_grid.cat1)
+			else:
+				if grid1.cat1 > grid2.cat1:
+					right_grid = grid1
+					lower_grid = grid2
+				else:
+					right_grid = grid2
+					lower_grid = grid1
+				left_grid = _get_grid(right_grid.cat1, lower_grid.cat2)
+			
+	_times["_scan_puzzle_solutions_for_implied_information"] += OS.get_ticks_msec() - _time
+	
 	# TO DO: The grids in grids_to_permute are the minimum set of grids with
 	# the minimum solutions to check that collectively determine the rest of
 	# the puzzle. To extract this information, we need to check every pairwise
@@ -167,6 +265,7 @@ func _scan_puzzle_solutions_for_implied_information() -> void:
 	
 
 func _check_all_trios_including_categories(cat1: int, cat2: int) -> void:
+	var _time = OS.get_ticks_msec()
 	for cat3 in range(cat_count):
 		if ! [cat1, cat2].has(cat3):
 			var cat_trio: Array = [cat1, cat2, cat3]
@@ -182,10 +281,12 @@ func _check_all_trios_including_categories(cat1: int, cat2: int) -> void:
 			_grid_trio[2] = _get_grid(cat_trio[1], cat_trio[0])
 			if _is_grid_trio_worth_checking(_grid_trio):
 				_check_grid_trio(_grid_trio)
+	_times["_check_all_trios_including_categories"] += OS.get_ticks_msec() - _time
 
 
 #Dumb version checks all grid trios multiple times
-func _check_all_trios_multiple_times(var num_times: int = 2) -> void:
+func _check_all_trios_multiple_times(var num_times: int = 1) -> void:
+	var _time = OS.get_ticks_msec()
 	for _i in range(num_times):
 		for cat1 in range(cat_count - 2):
 			for cat2 in range(cat1 + 1, cat_count - 1):
@@ -203,15 +304,19 @@ func _check_all_trios_multiple_times(var num_times: int = 2) -> void:
 					_grid_trio[2] = _get_grid(cat_trio[1], cat_trio[0])
 					if _is_grid_trio_worth_checking(_grid_trio):
 						_check_grid_trio(_grid_trio)
+	_times["_check_all_trios_multiple_times"] += OS.get_ticks_msec() - _time
 
 
 func _calculate_implied_rank(left_grid_rank: int, right_grid_rank: int) -> int:
+	var _time = OS.get_ticks_msec()
 	perm.set_rank(left_grid_rank)
 	perm.permute_by_rank(rank_to_inverse_rank[right_grid_rank])
+	_times["_calculate_implied_rank"] += OS.get_ticks_msec() - _time
 	return perm.rank
 
 
 func _is_grid_trio_worth_checking(_grid_trio) -> bool:
+	var _time = OS.get_ticks_msec()
 	var count_of_false_cells_in_trio: int = 0
 	var count_of_true_cells_in_trio: int = 0
 	var num_grids_with_data: int = 0
@@ -222,11 +327,14 @@ func _is_grid_trio_worth_checking(_grid_trio) -> bool:
 	if (count_of_false_cells_in_trio >= _grid_trio_false_cells_threshold) or \
 			(count_of_true_cells_in_trio >= 1):
 		if num_grids_with_data >= 2:
+			_times["_is_grid_trio_worth_checking"] += OS.get_ticks_msec() - _time
 			return true
+	_times["_is_grid_trio_worth_checking"] += OS.get_ticks_msec() - _time
 	return false
 
 
 func _check_grid_trio(_grid_trio) -> void:
+	var _time = OS.get_ticks_msec()
 	var left_grid: Grid = _grid_trio[0]
 	var right_grid: Grid = _grid_trio[1]
 	var implied_grid: Grid = _grid_trio[2]
@@ -258,6 +366,7 @@ func _check_grid_trio(_grid_trio) -> void:
 	left_grid.merge_solutions_from_grid_trio(left_grid_solutions_bitset)
 	right_grid.merge_solutions_from_grid_trio(right_grid_solutions_bitset)
 	implied_grid.merge_solutions_from_grid_trio(implied_grid_solutions_bitset)
+	_times["_check_grid_trio"] += OS.get_ticks_msec() - _time
 
 
 # For categories A, B, C, and the three grids formed by the three ways of pairing
@@ -266,8 +375,10 @@ func _check_grid_trio(_grid_trio) -> void:
 # ranks of the solutions of the two in the same row, this gives the permutation
 # rank of the third.
 func _get_implied_grid_rank(left_grid_rank: int, right_grid_rank: int) -> int:
+	var _time = OS.get_ticks_msec()
 	if implied_perm_ranks[left_grid_rank][right_grid_rank] == null:
 		implied_perm_ranks[left_grid_rank][right_grid_rank] = _calculate_implied_rank(left_grid_rank, right_grid_rank)
+	_times["_get_implied_grid_rank"] += OS.get_ticks_msec() - _time
 	return implied_perm_ranks[left_grid_rank][right_grid_rank]
 
 
@@ -284,6 +395,7 @@ func _is_valid_elt(elt: int) -> bool:
 
 
 func _to_string() -> String:
+	var _time = OS.get_ticks_msec()
 	var print_str: String = ""
 	for row_cat in range(cat_count - 1, 0, -1):
 		print_str += _get_repeated_string("-", (row_cat) * (cat_size + 1)) + "\n"
@@ -291,6 +403,7 @@ func _to_string() -> String:
 			for col_cat in range(row_cat):
 				print_str += "|" + _get_grid(row_cat, col_cat).get_row_str(row_grid)
 			print_str += "\n"
+	_times["_to_string"] += OS.get_ticks_msec() - _time
 	return print_str
 
 
@@ -301,8 +414,10 @@ func _get_grid(cat1: int, cat2: int) -> Grid:
 
 
 func _get_grid_index(cat1: int, cat2: int) -> int:
+	var _time = OS.get_ticks_msec()
 	if cat1 < cat2:
 		return _get_grid_index(cat2, cat1)
+	_times["_get_grid_index"] += OS.get_ticks_msec() - _time
 	return cat1 * (cat1 - 1) / 2 + cat2
 
 
@@ -311,6 +426,7 @@ func _get_repeated_string(c: String, num_times: int) -> String:
 
 
 func _build_grids() -> Array:
+	var _time = OS.get_ticks_msec()
 	var bit_mask: BitMask = BitMask.new(cat_size)
 	var num_grids: int = (cat_count - 1) * cat_count / 2
 	_grids.resize(num_grids)
@@ -320,4 +436,5 @@ func _build_grids() -> Array:
 			var index: int = _get_grid_index(cat1, cat2)
 			_grids[index] = Grid.new(cat_size, bit_mask, cat1, cat2)
 			_unsolved_grids[index] = _grids[index]
+	_times["_build_grids"] += OS.get_ticks_msec() - _time
 	return _grids

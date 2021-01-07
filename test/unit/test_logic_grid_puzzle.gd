@@ -192,12 +192,12 @@ class TestLogicGridPuzzle:
 		
 
 	func test_random_puzzles():
-		_cat_count = 9
-		_cat_size = 3
+		_cat_count = 5
+		_cat_size = 5
 		var _minutes: int = 0
 		var _start_time = OS.get_ticks_msec()
 		var _tries: int = 0
-		while (OS.get_ticks_msec() - _start_time) < 0: #_minutes * 60000:
+		while (OS.get_ticks_msec() - _start_time) < 1000: #_minutes * 60000:
 			_tries += 1
 			_lp = LogicGridPuzzle.new(_cat_count, _cat_size)
 			
@@ -218,8 +218,11 @@ class TestLogicGridPuzzle:
 				_counter += 1
 			if not _lp.is_solved():
 				pass
+				_lp.print_times()
 				print(_lp)
 				print(_moves)
+				
 				break
+		_lp.print_times()
 		print("Num tries: " + str(_tries))
 		
