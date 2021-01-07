@@ -17,6 +17,7 @@ extends Reference
 #   inputs, and returns the perm_rank of the implied pairing.
 # grid: a pair of categories.
 const path_to_inverses_file = "res://permutation_inverses.dat"
+const path_to_size_to_perm_matrix_file = "res://size_to_perm_matrix.dat"
 const max_cat_size = 6
 
 var cat_count: int
@@ -25,6 +26,7 @@ var implied_perm_ranks: Array
 var perm: Permutation
 var grid_trio_solutions_bitsets: Array = []
 var rank_to_inverse_rank: Array = []
+var perm_matrix: Array
 
 var _grids: Array = []
 var _unsolved_grids: Array = []
@@ -72,7 +74,14 @@ func _init(my_cat_count: int, my_cat_size: int) -> void:
 		push_error("rank_to_inverse_rank should be loaded from a file")
 		rank_to_inverse_rank.resize(Math.factorial(cat_size))
 		_build_inverse_rank_lookup_table()
-		
+
+	if cat_size in range(2,7) and file.file_exists(path_to_inverses_file):
+		file.open(path_to_size_to_perm_matrix_file, File.READ)
+		perm_matrix = file.get_var(true)[cat_size]
+		file.close()
+	else:
+		push_error("perm_matrix should be loaded from a file")
+
 	implied_perm_ranks = _build_perm_lookup_table()
 	grid_trio_solutions_bitsets.resize(3)
 	for i in range(3):
@@ -218,43 +227,89 @@ func _scan_puzzle_solutions_for_implied_information() -> void:
 	# solutions found here with its bitset (an intersection) and determine whether
 	# we've discovered new information.
 	
-	for i in range(grids_to_permute.size()):
-		pass 
+	# TO DO: USE grid.get_solution_ranks()
 	
+	# The cardinality of a puzzle is the number of different valid solutions
+	var count_of_solutions_to_explore: int = 1
+	for grid in grids_to_permute:
+		count_of_solutions_to_explore *= grid.solutions_bitset.cardinality
 	
+	var ranks_matrix = []
+	for grid in grids_to_permute:
+		ranks_matrix.append(grid.get_solution_ranks)
 	
-	var left_grid: Grid
-	var right_grid: Grid
-	var lower_grid: Grid 
-	for i in range(grids_to_permute.size() - 1):
-		for j in range( i + 1, grids_to_permute.size()):
-			var grid1: Grid = grids_to_permute[i]
-			var grid2: Grid = grids_to_permute[j]
+	var ranks_under_consideration: Array = []
+	ranks_under_consideration.resize(grids_to_permute.size())
 	
-			if grid1.cat1 == grid2.cat1:
-				if grid1.cat2 < grid2.cat2:
-					left_grid = grid1
-					right_grid = grid2
+	var grid_solution_index: int
+	var temp_solution_index: int
+	for puzzle_solution_index in range(count_of_solutions_to_explore):
+		temp_solution_index = puzzle_solution_index
+		
+		# Populate ranks_under_consideration with the current set of ranks for
+		# all grids in grids_to_permute
+		for i in range(grids_to_permute.size()):
+			grid_solution_index = temp_solution_index % grids_to_permute[i].solutions_bitset.cardinality
+			ranks_under_consideration[i] = ranks_matrix[i][grid_solution_index]
+			temp_solution_index /= grids_to_permute[i].solutions_bitset.cardinality
+
+		# For every pair of grids, check the implied grid. break out if we get an invalid solution
+		for i in range(grids_to_permute.size() - 1):
+			for j in range(i+1, grids_to_permute.size()):
+				# TODO: Find implied grid & its rank
+				pass
+				
+				var implied_rank: int
+	
+				var left_grid: Grid
+				var right_grid: Grid
+				var lower_grid: Grid 
+				
+				var left_rank: int
+				var right_rank: int
+				var lower_rank: int
+				
+				var grid1: Grid = grids_to_permute[i]
+				var grid2: Grid = grids_to_permute[j]
+
+				if grid1.cat1 == grid2.cat1:
+					if grid1.cat2 < grid2.cat2:
+						left_grid = grid1
+						right_grid = grid2
+						left_rank = ranks_under_consideration[i]
+						right_rank = ranks_under_consideration[j]
+					else:
+						left_grid = grid2
+						right_grid = grid1
+						left_rank = ranks_under_consideration[i]
+						right_rank = ranks_under_consideration[j]
+					lower_grid = _get_grid(right_grid.cat2, left_grid.cat1)
+					lower_rank = perm_matrix[rank_to_inverse_rank[right_rank]][left_rank]
+					
+				elif grid1.cat2 == grid2.cat2:
+					if grid1.cat1 > grid2.cat1:
+						left_grid = grid1
+						lower_grid = grid2
+						left_rank = ranks_under_consideration[i]
+						lower_rank = ranks_under_consideration[j]
+					else:
+						left_grid = grid2
+						lower_grid = grid1
+						left_rank = ranks_under_consideration[j]
+						lower_rank = ranks_under_consideration[i]
+					right_grid = _get_grid(left_grid.cat1, lower_grid.cat1)
 				else:
-					left_grid = grid2
-					right_grid = grid1
-				lower_grid = _get_grid(right_grid.cat2, left_grid.cat1)
-			elif grid1.cat2 == grid2.cat2:
-				if grid1.cat1 > grid2.cat1:
-					left_grid = grid1
-					lower_grid = grid2
-				else:
-					left_grid = grid2
-					lower_grid = grid1
-				right_grid = _get_grid(left_grid.cat1, lower_grid.cat1)
-			else:
-				if grid1.cat1 > grid2.cat1:
-					right_grid = grid1
-					lower_grid = grid2
-				else:
-					right_grid = grid2
-					lower_grid = grid1
-				left_grid = _get_grid(right_grid.cat1, lower_grid.cat2)
+					if grid1.cat1 > grid2.cat1:
+						right_grid = grid1
+						lower_grid = grid2
+						right_rank = ranks_under_consideration[i]
+						lower_rank = ranks_under_consideration[j]
+					else:
+						right_grid = grid2
+						lower_grid = grid1
+						right_rank = ranks_under_consideration[j]
+						lower_rank = ranks_under_consideration[i]
+					left_grid = _get_grid(right_grid.cat1, lower_grid.cat2)
 			
 	_times["_scan_puzzle_solutions_for_implied_information"] += OS.get_ticks_msec() - _time
 	

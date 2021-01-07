@@ -37,6 +37,14 @@ func _init(my_dimension: int, my_bit_mask: BitMask, my_cat1 := 0, my_cat2 := 0) 
 	solutions_bitset.set_in_range(0, max_possible_solutions, true)
 
 
+func get_solution_ranks() -> Array:
+	var set_bits: Array = []
+	set_bits.append(solutions_bitset.next_set_bit(0))
+	while set_bits.size() < solutions_bitset.cardinality:
+		set_bits.append(solutions_bitset.next_set_bit[set_bits[-1]])
+	return set_bits
+	
+
 #TODO: Implement a return class for this
 func get_random_unsolved_cell_coordinates() -> Array:
 	if _unsolved_cells.size() == 0:
