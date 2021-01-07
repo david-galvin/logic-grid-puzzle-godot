@@ -217,17 +217,42 @@ func _scan_puzzle_solutions_for_implied_information() -> void:
 	for _i in _grids.size():
 		grid_solutions_bitsets.append(BitSet.new(Math.factorial(cat_size)))
 	
-	# TO DO:
-	# For every combination of valid ranks among grids_to_permute
-	#   For every pair of grids in grids_to_permute
-	#     1. find the implied grid
-	#     2. If all implied grids have a solution, the set of ranks is valid.
-	#        Mark it as such for all grids in the puzzle
-	# Similar to check_grid_trio, for each grid in the puzzle, we merge its
-	# solutions found here with its bitset (an intersection) and determine whether
-	# we've discovered new information.
+	var count_of_solutions_to_explore: int = 1
+	for grid in grids_to_permute:
+		count_of_solutions_to_explore *= grid.solutions_bitset.cardinality
 	
-
+	# TO DO:
+	# We need to pre-compute:
+	# 1) The pairs of grids in grids_to_permute to compare, the associated grid,
+	#    and the combination of permutations that gets us the associated grid's rank.
+	# 2) We will often need to use the ranks of implied grids to calculate other
+	#    implied grids. We can compute this and the permutations in advance as well. 
+	#
+	# Use this precomputed data as follows:
+	# 3) For every combination of valid ranks among grids_to_permute:
+	#      For every pair of grids in our precomputed set, in our precomputed order:
+	#        Use our precomputed pair of permutations to find and set the rank of the third grid.
+	# 4) Now knowing the current rank of all grids, mark the associated bitset bit as true
+	#    if the solution is valid for all grids. Do not mark as false regardless.
+	# 5) At the end of this, A grid.rank with no valid solution will be marked false.
+	
+	# Need to store an array with:
+	# 3 grid indices, 
+	
+	var ranks_matrix: Array = []
+	for grid in grids_to_permute:
+		ranks_matrix.append(grid.get_solution_ranks())
+	
+	var ranks_under_consideration: Array = []
+	ranks_under_consideration.resize(grids_to_permute.size())
+	var grid_solution_index: int
+	var temp_solution_index: int
+	for puzzle_solution_index in range(count_of_solutions_to_explore):
+		temp_solution_index = puzzle_solution_index
+		for i in range(grids_to_permute.size()):
+			grid_solution_index = temp_solution_index % grids_to_permute[i].solutions_bitset.cardinality
+			ranks_under_consideration[i] = ranks_matrix[i][grid_solution_index]
+			temp_solution_index /= grids_to_permute[i].solutions_bitset.cardinality
 	
 	var left_grid: Grid
 	var right_grid: Grid
