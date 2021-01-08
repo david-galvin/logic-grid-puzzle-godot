@@ -10,18 +10,18 @@ extends Reference
 # Some definitions:
 # rank: the rank of a permutation. The ordering is not lexicographic.
 # inverse_rank: in conjunction with a rank, the rank that undoes it
-# implied_perm_ranks: For categories A, B, C, we can use a permutation to
+# implied_perm_matrix: For categories A, B, C, we can use a permutation to
 #   represent any solution to the grids formed by all 3 pairs. Any two
 #   solutions give us the third. E.g. if A, B and A, C are solved, then B, C
 #   is fully determined. This is a double array that takes two perm_ranks as
 #   inputs, and returns the perm_rank of the implied pairing.
 # grid: a pair of categories.
-const path_to_inverses_file = "res://permutation_inverses.dat"
+const path_to_inverses_file = "permutation_inverses.dat"
 const max_cat_size = 6
 
 var cat_count: int
 var cat_size: int
-var implied_perm_ranks: Array
+var implied_perm_matrix: Array
 var perm: Permutation
 var grid_trio_solutions_bitsets: Array = []
 var rank_to_inverse_rank: Array = []
@@ -73,7 +73,7 @@ func _init(my_cat_count: int, my_cat_size: int) -> void:
 		rank_to_inverse_rank.resize(Math.factorial(cat_size))
 		_build_inverse_rank_lookup_table()
 		
-	implied_perm_ranks = _build_perm_lookup_table()
+	implied_perm_matrix = _build_perm_lookup_table()
 	grid_trio_solutions_bitsets.resize(3)
 	for i in range(3):
 		grid_trio_solutions_bitsets[i] = BitSet.new(Math.factorial(cat_size))
@@ -176,13 +176,6 @@ func _build_inverse_rank_lookup_table() -> void:
 # Thus B1 & B2 are collectively C1 & C2. We don't know which is which, but
 # we know B0 must equal C0.
 
-# NOTE: WE MUST LIMIT THIS TO CASES WHERE IT IS POSSIBLE FOR THERE TO BE
-# IMPLIED INFORMATION, AND DUE TO COMBINATORIAL EXPLOSION IT WILL BE IMPORTANT
-# TO USE THE (category_count - 1) GRIDS WITH THE FEWEST POSSIBLE SOLUTIONS 
-# THAT IMPLY THE REST TO REDUCE OUR TEST CASES.
-# INITIAL IMPLEMENTATION WILL BE NAIVE TO CONFIRM THIS WORKS; PERFORMANCE
-# TESTING & OPTIMIZATION TO FOLLOW
-
 func _scan_puzzle_get_grids_to_permute() -> Array:
 	var _time = OS.get_ticks_msec()
 	var copy_of_grids: Array = _grids.duplicate()
@@ -205,6 +198,53 @@ func _scan_puzzle_get_grids_to_permute() -> Array:
 		
 	_times["_scan_puzzle_get_grids_to_permute"] += OS.get_ticks_msec() - _time
 	return grids_to_permute
+
+
+func _scan_puzzle_get_ordered_list_of_operations(grids_to_permute: Array) -> Array:
+	var operations: Array = []
+	var left_grid: Grid
+	var right_grid: Grid
+	var lower_grid: Grid 
+	var additional_solved_grids: Array = []
+	for i in range(grids_to_permute.size() - 1):
+		for j in range(i + 1, grids_to_permute.size()):
+			var grid1: Grid = grids_to_permute[i]
+			var grid2: Grid = grids_to_permute[j]
+			var implied_grid_index: int
+	
+			if grid1.cat1 == grid2.cat1:
+				if grid1.cat2 < grid2.cat2:
+					left_grid = grid1
+					right_grid = grid2
+				else:
+					left_grid = grid2
+					right_grid = grid1
+				implied_grid_index = 2
+				lower_grid = _get_grid(right_grid.cat2, left_grid.cat1)
+				additional_solved_grids.append(lower_grid)
+			elif grid1.cat2 == grid2.cat2:
+				if grid1.cat1 > grid2.cat1:
+					left_grid = grid1
+					lower_grid = grid2
+				else:
+					left_grid = grid2
+					lower_grid = grid1
+				right_grid = _get_grid(left_grid.cat1, lower_grid.cat1)
+				additional_solved_grids.append(right_grid)
+				implied_grid_index = 1
+			elif grid1.cat1 == grid2.cat2 || grid1.cat2 == grid2.cat1:
+				if grid1.cat1 > grid2.cat1:
+					right_grid = grid1
+					lower_grid = grid2
+				else:
+					right_grid = grid2
+					lower_grid = grid1
+				implied_grid_index = 0
+				left_grid = _get_grid(right_grid.cat1, lower_grid.cat2)
+				additional_solved_grids.append(left_grid)
+			operations.append([left_grid, right_grid, lower_grid, implied_grid_index])
+			
+	return operations
 	
 
 func _scan_puzzle_solutions_for_implied_information() -> void:
@@ -239,9 +279,10 @@ func _scan_puzzle_solutions_for_implied_information() -> void:
 	# Need to store an array with:
 	# 3 grid indices, 
 	
-	var ranks_matrix: Array = []
+	var operations: Array
+	var grids_to_permute_solution_ranks_matrix: Array = []
 	for grid in grids_to_permute:
-		ranks_matrix.append(grid.get_solution_ranks())
+		grids_to_permute_solution_ranks_matrix.append(grid.get_solution_ranks())
 	
 	var ranks_under_consideration: Array = []
 	ranks_under_consideration.resize(grids_to_permute.size())
@@ -251,41 +292,11 @@ func _scan_puzzle_solutions_for_implied_information() -> void:
 		temp_solution_index = puzzle_solution_index
 		for i in range(grids_to_permute.size()):
 			grid_solution_index = temp_solution_index % grids_to_permute[i].solutions_bitset.cardinality
-			ranks_under_consideration[i] = ranks_matrix[i][grid_solution_index]
+			ranks_under_consideration[i] = grids_to_permute_solution_ranks_matrix[i][grid_solution_index]
 			temp_solution_index /= grids_to_permute[i].solutions_bitset.cardinality
-	
-	var left_grid: Grid
-	var right_grid: Grid
-	var lower_grid: Grid 
-	for i in range(grids_to_permute.size() - 1):
-		for j in range( i + 1, grids_to_permute.size()):
-			var grid1: Grid = grids_to_permute[i]
-			var grid2: Grid = grids_to_permute[j]
-	
-			if grid1.cat1 == grid2.cat1:
-				if grid1.cat2 < grid2.cat2:
-					left_grid = grid1
-					right_grid = grid2
-				else:
-					left_grid = grid2
-					right_grid = grid1
-				lower_grid = _get_grid(right_grid.cat2, left_grid.cat1)
-			elif grid1.cat2 == grid2.cat2:
-				if grid1.cat1 > grid2.cat1:
-					left_grid = grid1
-					lower_grid = grid2
-				else:
-					left_grid = grid2
-					lower_grid = grid1
-				right_grid = _get_grid(left_grid.cat1, lower_grid.cat1)
-			else:
-				if grid1.cat1 > grid2.cat1:
-					right_grid = grid1
-					lower_grid = grid2
-				else:
-					right_grid = grid2
-					lower_grid = grid1
-				left_grid = _get_grid(right_grid.cat1, lower_grid.cat2)
+		
+		operations = _scan_puzzle_get_ordered_list_of_operations(grids_to_permute)
+
 			
 	_times["_scan_puzzle_solutions_for_implied_information"] += OS.get_ticks_msec() - _time
 	
@@ -407,10 +418,10 @@ func _check_grid_trio(_grid_trio) -> void:
 # rank of the third.
 func _get_implied_grid_rank(left_grid_rank: int, right_grid_rank: int) -> int:
 	var _time = OS.get_ticks_msec()
-	if implied_perm_ranks[left_grid_rank][right_grid_rank] == null:
-		implied_perm_ranks[left_grid_rank][right_grid_rank] = _calculate_implied_rank(left_grid_rank, right_grid_rank)
+	if implied_perm_matrix[left_grid_rank][right_grid_rank] == null:
+		implied_perm_matrix[left_grid_rank][right_grid_rank] = _calculate_implied_rank(left_grid_rank, right_grid_rank)
 	_times["_get_implied_grid_rank"] += OS.get_ticks_msec() - _time
-	return implied_perm_ranks[left_grid_rank][right_grid_rank]
+	return implied_perm_matrix[left_grid_rank][right_grid_rank]
 
 
 func _is_valid_cat(cat: int) -> bool:
