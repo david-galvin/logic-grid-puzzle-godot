@@ -11,6 +11,7 @@ extends Reference
 # inverse_rank: in conjunction with a rank, the rank that undoes it
 # grid: a pair of categories.
 const path_to_inverses_file = "permutation_inverses.dat"
+const path_to_size_to_perm_matrix = "size_to_perm_matrix.dat"
 const max_cat_size = 6
 
 var _grid_trio_solutions_bitsets: Array = []
@@ -18,7 +19,6 @@ var _rank_to_inverse_rank: Array = []
 var _perm_rank_matrix: Array
 var _cat_count: int
 var _cat_size: int
-var _grid_trio_false_cells_threshold: int = 0
 var _grids: Array = []
 var _unsolved_grids: Array = []
 var _times: Dictionary = {}
@@ -46,24 +46,10 @@ func _init(my_cat_count: int, my_cat_size: int) -> void:
 	var _time = OS.get_ticks_msec()
 	_cat_count = my_cat_count
 	_cat_size = my_cat_size
-	if _cat_size > max_cat_size:
-		push_error("We can only handle categories of up to 6 elements.")
-		return
-	_perm_rank_matrix = PermutationTools.get_perm_rank_matrix(_cat_size)
 	randomize()
 	_grids = _build_grids()
-	# The minimum number of false cells before a grid trio can yield
-	# sufficient extra information to eliminate further cells
-	_grid_trio_false_cells_threshold = _cat_size
-	var file = File.new()
-	if _cat_size in range(2,8) and file.file_exists(path_to_inverses_file):
-		file.open(path_to_inverses_file, File.READ)
-		_rank_to_inverse_rank = file.get_var(true)[_cat_size]
-		file.close()
-	else:
-		push_error("_rank_to_inverse_rank should be loaded from a file")
-		_rank_to_inverse_rank = PermutationTools.get_inverse_rank_array(_cat_size)
-		
+	_set_rank_to_inverse_rank()
+	_set_perm_rank_matrix()
 	_grid_trio_solutions_bitsets.resize(3)
 	for i in range(3):
 		_grid_trio_solutions_bitsets[i] = BitSet.new(Math.factorial(_cat_size))
@@ -133,6 +119,28 @@ func get_random_unsolved_grid() -> Grid:
 	else:
 		_times["get_random_unsolved_grid"] += OS.get_ticks_msec() - _time
 		return rand_grid
+
+
+func _set_rank_to_inverse_rank():
+	var file = File.new()
+	if _cat_size in range(2,8) and file.file_exists(path_to_inverses_file):
+		file.open(path_to_inverses_file, File.READ)
+		_rank_to_inverse_rank = file.get_var(true)[_cat_size]
+		file.close()
+	else:
+		push_error("_rank_to_inverse_rank should be loaded from a file")
+		_rank_to_inverse_rank = PermutationTools.get_inverse_rank_array(_cat_size)
+
+
+func _set_perm_rank_matrix():
+	var file = File.new()
+	if _cat_size in range(2,7) and file.file_exists(path_to_size_to_perm_matrix):
+		file.open(path_to_size_to_perm_matrix, File.READ)
+		_perm_rank_matrix = file.get_var(true)[_cat_size]
+		file.close()
+	else:
+		push_error("_perm_rank_matrix should be loaded from a file")
+		_perm_rank_matrix = PermutationTools.get_perm_rank_matrix(_cat_size)
 
 
 # TODO: Convert the _check_trios code to check larger sets of categories as
@@ -327,7 +335,7 @@ func _is_grid_trio_worth_checking(_grid_trio) -> bool:
 		count_of_false_cells_in_trio += grid.count_of_false_cells
 		count_of_false_cells_in_trio += grid.count_of_true_cells
 		num_grids_with_data += 1
-	if (count_of_false_cells_in_trio >= _grid_trio_false_cells_threshold) or \
+	if (count_of_false_cells_in_trio >= _cat_size) or \
 			(count_of_true_cells_in_trio >= 1):
 		if num_grids_with_data >= 2:
 			_times["_is_grid_trio_worth_checking"] += OS.get_ticks_msec() - _time
