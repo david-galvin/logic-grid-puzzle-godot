@@ -5,12 +5,12 @@ extends Reference
 # A number of terms are abbreviated to avoid long, confusing statements. 
 # cat: category, e.g. 'job'
 # elt: element, a member of a category, e.g. 'accountant'
-# perm: permutation
+# _perm: permutation
 #
 # Some definitions:
 # rank: the rank of a permutation. The ordering is not lexicographic.
 # inverse_rank: in conjunction with a rank, the rank that undoes it
-# implied_perm_matrix: For categories A, B, C, we can use a permutation to
+# _implied_perm_matrix: For categories A, B, C, we can use a permutation to
 #   represent any solution to the grids formed by all 3 pairs. Any two
 #   solutions give us the third. E.g. if A, B and A, C are solved, then B, C
 #   is fully determined. This is a double array that takes two perm_ranks as
@@ -19,17 +19,16 @@ extends Reference
 const path_to_inverses_file = "permutation_inverses.dat"
 const max_cat_size = 6
 
-var cat_count: int
-var cat_size: int
-var implied_perm_matrix: Array
-var perm: Permutation
-var grid_trio_solutions_bitsets: Array = []
-var rank_to_inverse_rank: Array = []
-
+var _implied_perm_matrix: Array
+var _perm: Permutation
+var _grid_trio_solutions_bitsets: Array = []
+var _rank_to_inverse_rank: Array = []
+var _cat_count: int
+var _cat_size: int
+var _grid_trio_false_cells_threshold: int = 0
 var _grids: Array = []
 var _unsolved_grids: Array = []
-var _grid_trio_false_cells_threshold: int = 0
-var _times = {}
+var _times: Dictionary = {}
 
 
 func _init(my_cat_count: int, my_cat_size: int) -> void:
@@ -52,31 +51,31 @@ func _init(my_cat_count: int, my_cat_size: int) -> void:
 	_times["_get_grid_index"] = 0
 	_times["_build_grids"]  = 0
 	var _time = OS.get_ticks_msec()
-	cat_count = my_cat_count
-	cat_size = my_cat_size
-	if cat_size > max_cat_size:
+	_cat_count = my_cat_count
+	_cat_size = my_cat_size
+	if _cat_size > max_cat_size:
 		push_error("We can only handle categories of up to 6 elements.")
 		return
 	randomize()
 	_grids = _build_grids()
 	# The minimum number of false cells before a grid trio can yield
 	# sufficient extra information to eliminate further cells
-	_grid_trio_false_cells_threshold = cat_size
-	perm = Permutation.new(cat_size)
+	_grid_trio_false_cells_threshold = _cat_size
+	_perm = Permutation.new(_cat_size)
 	var file = File.new()
-	if cat_size in range(2,8) and file.file_exists(path_to_inverses_file):
+	if _cat_size in range(2,8) and file.file_exists(path_to_inverses_file):
 		file.open(path_to_inverses_file, File.READ)
-		rank_to_inverse_rank = file.get_var(true)[cat_size]
+		_rank_to_inverse_rank = file.get_var(true)[_cat_size]
 		file.close()
 	else:
-		push_error("rank_to_inverse_rank should be loaded from a file")
-		rank_to_inverse_rank.resize(Math.factorial(cat_size))
+		push_error("_rank_to_inverse_rank should be loaded from a file")
+		_rank_to_inverse_rank.resize(Math.factorial(_cat_size))
 		_build_inverse_rank_lookup_table()
 		
-	implied_perm_matrix = _build_perm_lookup_table()
-	grid_trio_solutions_bitsets.resize(3)
+	_implied_perm_matrix = _build_perm_lookup_table()
+	_grid_trio_solutions_bitsets.resize(3)
 	for i in range(3):
-		grid_trio_solutions_bitsets[i] = BitSet.new(Math.factorial(cat_size))
+		_grid_trio_solutions_bitsets[i] = BitSet.new(Math.factorial(_cat_size))
 	_times["_init"] += OS.get_ticks_msec() - _time
 
 
@@ -115,7 +114,7 @@ func set_grid_cell(cat1: int, elt1: int, \
 		push_error("Entering a move in a solved grid!")
 	grid.set_cell(elt1, elt2, target_state)
 	#_check_all_trios_including_categories(cat1, cat2)
-	_check_all_trios_multiple_times(1)
+	_check_all_trios_multiple_times(2)
 	_times["set_grid_cell"] += OS.get_ticks_msec() - _time
 
 
@@ -146,7 +145,7 @@ func get_random_unsolved_grid() -> Grid:
 
 func _build_perm_lookup_table() -> Array:
 	var _time = OS.get_ticks_msec()
-	var num_solutions_per_grid: int = Math.factorial(cat_size)
+	var num_solutions_per_grid: int = Math.factorial(_cat_size)
 	var implied_solutions: Array = []
 	implied_solutions.resize(num_solutions_per_grid)
 	for left_grid_rank in range(num_solutions_per_grid):
@@ -159,10 +158,10 @@ func _build_perm_lookup_table() -> Array:
 func _build_inverse_rank_lookup_table() -> void:
 	var _time = OS.get_ticks_msec()
 	push_error("This method should not be called.")
-	for i in range(rank_to_inverse_rank.size()):
-		perm.set_rank(i)
-		perm.invert()
-		rank_to_inverse_rank[i] = perm.rank
+	for i in range(_rank_to_inverse_rank.size()):
+		_perm.set_rank(i)
+		_perm.invert()
+		_rank_to_inverse_rank[i] = _perm.rank
 	_times["_build_inverse_rank_lookup_table"] += OS.get_ticks_msec() - _time
 
 
@@ -187,7 +186,7 @@ func _scan_puzzle_get_grids_to_permute() -> Array:
 	var sorted_edges: Array = []
 	for grid in copy_of_grids:
 		sorted_edges.append([grid.cat1, grid.cat2])
-	var mst_edges: Array = Math.get_mst_edges(cat_count, sorted_edges)
+	var mst_edges: Array = Math.get_mst_edges(_cat_count, sorted_edges)
 	
 	# Add all grids with any information
 	for edge in mst_edges:
@@ -255,7 +254,7 @@ func _scan_puzzle_solutions_for_implied_information() -> void:
 	# we'll use the same indexing for the solution as for the grids.
 	var grid_solutions_bitsets: Array = []
 	for _i in _grids.size():
-		grid_solutions_bitsets.append(BitSet.new(Math.factorial(cat_size)))
+		grid_solutions_bitsets.append(BitSet.new(Math.factorial(_cat_size)))
 	
 	var count_of_solutions_to_explore: int = 1
 	for grid in grids_to_permute:
@@ -308,7 +307,7 @@ func _scan_puzzle_solutions_for_implied_information() -> void:
 
 func _check_all_trios_including_categories(cat1: int, cat2: int) -> void:
 	var _time = OS.get_ticks_msec()
-	for cat3 in range(cat_count):
+	for cat3 in range(_cat_count):
 		if ! [cat1, cat2].has(cat3):
 			var cat_trio: Array = [cat1, cat2, cat3]
 			cat_trio.sort()
@@ -330,9 +329,9 @@ func _check_all_trios_including_categories(cat1: int, cat2: int) -> void:
 func _check_all_trios_multiple_times(var num_times: int = 1) -> void:
 	var _time = OS.get_ticks_msec()
 	for _i in range(num_times):
-		for cat1 in range(cat_count - 2):
-			for cat2 in range(cat1 + 1, cat_count - 1):
-				for cat3 in range(cat2 + 1, cat_count):
+		for cat1 in range(_cat_count - 2):
+			for cat2 in range(cat1 + 1, _cat_count - 1):
+				for cat3 in range(cat2 + 1, _cat_count):
 					var cat_trio: Array = [cat1, cat2, cat3]
 					cat_trio.sort()
 					# The order of grids in grid_trio is important. The first two
@@ -351,10 +350,10 @@ func _check_all_trios_multiple_times(var num_times: int = 1) -> void:
 
 func _calculate_implied_rank(left_grid_rank: int, right_grid_rank: int) -> int:
 	var _time = OS.get_ticks_msec()
-	perm.set_rank(left_grid_rank)
-	perm.permute_by_rank(rank_to_inverse_rank[right_grid_rank])
+	_perm.set_rank(left_grid_rank)
+	_perm.permute_by_rank(_rank_to_inverse_rank[right_grid_rank])
 	_times["_calculate_implied_rank"] += OS.get_ticks_msec() - _time
-	return perm.rank
+	return _perm.rank
 
 
 func _is_grid_trio_worth_checking(_grid_trio) -> bool:
@@ -380,11 +379,11 @@ func _check_grid_trio(_grid_trio) -> void:
 	var left_grid: Grid = _grid_trio[0]
 	var right_grid: Grid = _grid_trio[1]
 	var implied_grid: Grid = _grid_trio[2]
-	for i in range(grid_trio_solutions_bitsets.size()):
-		grid_trio_solutions_bitsets[i].clear()
-	var left_grid_solutions_bitset: BitSet = grid_trio_solutions_bitsets[0]
-	var right_grid_solutions_bitset: BitSet = grid_trio_solutions_bitsets[1]
-	var implied_grid_solutions_bitset: BitSet = grid_trio_solutions_bitsets[2]
+	for i in range(_grid_trio_solutions_bitsets.size()):
+		_grid_trio_solutions_bitsets[i].clear()
+	var left_grid_solutions_bitset: BitSet = _grid_trio_solutions_bitsets[0]
+	var right_grid_solutions_bitset: BitSet = _grid_trio_solutions_bitsets[1]
+	var implied_grid_solutions_bitset: BitSet = _grid_trio_solutions_bitsets[2]
 	
 	# Check all valid permutation rank combinations of the left and right grids
 	var left_grid_rank: int = left_grid.solutions_bitset.next_set_bit(0)
@@ -418,20 +417,20 @@ func _check_grid_trio(_grid_trio) -> void:
 # rank of the third.
 func _get_implied_grid_rank(left_grid_rank: int, right_grid_rank: int) -> int:
 	var _time = OS.get_ticks_msec()
-	if implied_perm_matrix[left_grid_rank][right_grid_rank] == null:
-		implied_perm_matrix[left_grid_rank][right_grid_rank] = _calculate_implied_rank(left_grid_rank, right_grid_rank)
+	if _implied_perm_matrix[left_grid_rank][right_grid_rank] == null:
+		_implied_perm_matrix[left_grid_rank][right_grid_rank] = _calculate_implied_rank(left_grid_rank, right_grid_rank)
 	_times["_get_implied_grid_rank"] += OS.get_ticks_msec() - _time
-	return implied_perm_matrix[left_grid_rank][right_grid_rank]
+	return _implied_perm_matrix[left_grid_rank][right_grid_rank]
 
 
 func _is_valid_cat(cat: int) -> bool:
-	if cat < 0 or cat >= cat_count:
+	if cat < 0 or cat >= _cat_count:
 		return false
 	return true
 
 
 func _is_valid_elt(elt: int) -> bool:
-	if elt < 0 or elt >= cat_size:
+	if elt < 0 or elt >= _cat_size:
 		return false
 	return true
 
@@ -439,9 +438,9 @@ func _is_valid_elt(elt: int) -> bool:
 func _to_string() -> String:
 	var _time = OS.get_ticks_msec()
 	var print_str: String = ""
-	for row_cat in range(cat_count - 1, 0, -1):
-		print_str += _get_repeated_string("-", (row_cat) * (cat_size + 1)) + "\n"
-		for row_grid in range(cat_size):
+	for row_cat in range(_cat_count - 1, 0, -1):
+		print_str += _get_repeated_string("-", (row_cat) * (_cat_size + 1)) + "\n"
+		for row_grid in range(_cat_size):
 			for col_cat in range(row_cat):
 				print_str += "|" + _get_grid(row_cat, col_cat).get_row_str(row_grid)
 			print_str += "\n"
@@ -469,14 +468,14 @@ func _get_repeated_string(c: String, num_times: int) -> String:
 
 func _build_grids() -> Array:
 	var _time = OS.get_ticks_msec()
-	var bit_mask: BitMask = BitMask.new(cat_size)
-	var num_grids: int = (cat_count - 1) * cat_count / 2
+	var bit_mask: BitMask = BitMask.new(_cat_size)
+	var num_grids: int = (_cat_count - 1) * _cat_count / 2
 	_grids.resize(num_grids)
 	_unsolved_grids.resize(num_grids)
-	for cat1 in range(1, cat_count):
+	for cat1 in range(1, _cat_count):
 		for cat2 in range(0, cat1):
 			var index: int = _get_grid_index(cat1, cat2)
-			_grids[index] = Grid.new(cat_size, bit_mask, cat1, cat2)
+			_grids[index] = Grid.new(_cat_size, bit_mask, cat1, cat2)
 			_unsolved_grids[index] = _grids[index]
 	_times["_build_grids"] += OS.get_ticks_msec() - _time
 	return _grids

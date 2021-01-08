@@ -193,7 +193,7 @@ class TestLogicGridPuzzle:
 
 	func test_random_puzzles():
 		_cat_count = 5
-		_cat_size = 5
+		_cat_size = 4
 		var _minutes: int = 0
 		var _start_time = OS.get_ticks_msec()
 		var _tries: int = 0
