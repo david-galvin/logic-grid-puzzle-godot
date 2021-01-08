@@ -5,24 +5,17 @@ extends Reference
 # A number of terms are abbreviated to avoid long, confusing statements. 
 # cat: category, e.g. 'job'
 # elt: element, a member of a category, e.g. 'accountant'
-# _perm: permutation
 #
 # Some definitions:
 # rank: the rank of a permutation. The ordering is not lexicographic.
 # inverse_rank: in conjunction with a rank, the rank that undoes it
-# _implied_perm_matrix: For categories A, B, C, we can use a permutation to
-#   represent any solution to the grids formed by all 3 pairs. Any two
-#   solutions give us the third. E.g. if A, B and A, C are solved, then B, C
-#   is fully determined. This is a double array that takes two perm_ranks as
-#   inputs, and returns the perm_rank of the implied pairing.
 # grid: a pair of categories.
 const path_to_inverses_file = "permutation_inverses.dat"
 const max_cat_size = 6
 
-var _implied_perm_matrix: Array
-var _perm: Permutation
 var _grid_trio_solutions_bitsets: Array = []
 var _rank_to_inverse_rank: Array = []
+var _perm_rank_matrix: Array
 var _cat_count: int
 var _cat_size: int
 var _grid_trio_false_cells_threshold: int = 0
@@ -56,12 +49,12 @@ func _init(my_cat_count: int, my_cat_size: int) -> void:
 	if _cat_size > max_cat_size:
 		push_error("We can only handle categories of up to 6 elements.")
 		return
+	_perm_rank_matrix = PermutationTools.get_perm_rank_matrix(_cat_size)
 	randomize()
 	_grids = _build_grids()
 	# The minimum number of false cells before a grid trio can yield
 	# sufficient extra information to eliminate further cells
 	_grid_trio_false_cells_threshold = _cat_size
-	_perm = Permutation.new(_cat_size)
 	var file = File.new()
 	if _cat_size in range(2,8) and file.file_exists(path_to_inverses_file):
 		file.open(path_to_inverses_file, File.READ)
@@ -69,10 +62,8 @@ func _init(my_cat_count: int, my_cat_size: int) -> void:
 		file.close()
 	else:
 		push_error("_rank_to_inverse_rank should be loaded from a file")
-		_rank_to_inverse_rank.resize(Math.factorial(_cat_size))
-		_build_inverse_rank_lookup_table()
+		_rank_to_inverse_rank = PermutationTools.get_inverse_rank_array(_cat_size)
 		
-	_implied_perm_matrix = _build_perm_lookup_table()
 	_grid_trio_solutions_bitsets.resize(3)
 	for i in range(3):
 		_grid_trio_solutions_bitsets[i] = BitSet.new(Math.factorial(_cat_size))
@@ -81,6 +72,7 @@ func _init(my_cat_count: int, my_cat_size: int) -> void:
 
 func print_times():
 	print(str(_times))
+
 
 func is_solved() -> bool:
 	var _time = OS.get_ticks_msec()
@@ -141,28 +133,6 @@ func get_random_unsolved_grid() -> Grid:
 	else:
 		_times["get_random_unsolved_grid"] += OS.get_ticks_msec() - _time
 		return rand_grid
-
-
-func _build_perm_lookup_table() -> Array:
-	var _time = OS.get_ticks_msec()
-	var num_solutions_per_grid: int = Math.factorial(_cat_size)
-	var implied_solutions: Array = []
-	implied_solutions.resize(num_solutions_per_grid)
-	for left_grid_rank in range(num_solutions_per_grid):
-		implied_solutions[left_grid_rank] = []
-		implied_solutions[left_grid_rank].resize(num_solutions_per_grid)
-	_times["_build_perm_lookup_table"] += OS.get_ticks_msec() - _time
-	return implied_solutions
-
-
-func _build_inverse_rank_lookup_table() -> void:
-	var _time = OS.get_ticks_msec()
-	push_error("This method should not be called.")
-	for i in range(_rank_to_inverse_rank.size()):
-		_perm.set_rank(i)
-		_perm.invert()
-		_rank_to_inverse_rank[i] = _perm.rank
-	_times["_build_inverse_rank_lookup_table"] += OS.get_ticks_msec() - _time
 
 
 # TODO: Convert the _check_trios code to check larger sets of categories as
@@ -348,14 +318,6 @@ func _check_all_trios_multiple_times(var num_times: int = 1) -> void:
 	_times["_check_all_trios_multiple_times"] += OS.get_ticks_msec() - _time
 
 
-func _calculate_implied_rank(left_grid_rank: int, right_grid_rank: int) -> int:
-	var _time = OS.get_ticks_msec()
-	_perm.set_rank(left_grid_rank)
-	_perm.permute_by_rank(_rank_to_inverse_rank[right_grid_rank])
-	_times["_calculate_implied_rank"] += OS.get_ticks_msec() - _time
-	return _perm.rank
-
-
 func _is_grid_trio_worth_checking(_grid_trio) -> bool:
 	var _time = OS.get_ticks_msec()
 	var count_of_false_cells_in_trio: int = 0
@@ -417,10 +379,7 @@ func _check_grid_trio(_grid_trio) -> void:
 # rank of the third.
 func _get_implied_grid_rank(left_grid_rank: int, right_grid_rank: int) -> int:
 	var _time = OS.get_ticks_msec()
-	if _implied_perm_matrix[left_grid_rank][right_grid_rank] == null:
-		_implied_perm_matrix[left_grid_rank][right_grid_rank] = _calculate_implied_rank(left_grid_rank, right_grid_rank)
-	_times["_get_implied_grid_rank"] += OS.get_ticks_msec() - _time
-	return _implied_perm_matrix[left_grid_rank][right_grid_rank]
+	return _perm_rank_matrix[left_grid_rank][_rank_to_inverse_rank[right_grid_rank]]
 
 
 func _is_valid_cat(cat: int) -> bool:
