@@ -223,6 +223,5 @@ class TestLogicGridPuzzle:
 				print(_moves)
 				
 				break
-		_lp.print_times()
 		print("Num tries: " + str(_tries))
 		
