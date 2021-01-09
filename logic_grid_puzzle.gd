@@ -137,7 +137,23 @@ func _scan_puzzle_get_grids_to_permute() -> Array:
 
 
 func _scan_puzzle_get_ordered_list_of_operations(grids_to_permute: Array) -> Array:
+	var cat_to_solved_grids: Array = []
+	cat_to_solved_grids.resize(_cat_size - 1)
+	for i in range(_cat_size):
+		cat_to_solved_grids[i] = []
+	
+	for grid in grids_to_permute:
+		cat_to_solved_grids[grid.cat1].append([grid, grid.cat2])
+		cat_to_solved_grids[grid.cat2].append([grid, grid.cat1])
+		
 	var operations: Array = []
+	
+	for cat in range(_cat_size):
+		if cat_to_solved_grids[cat].size() >= 2:
+			for i in range(cat_to_solved_grids[cat].size() - 1):
+				for j in range(i+1, cat_to_solved_grids[cat].size()):
+					operations.append([cat_to_solved_grids[cat][i], cat_to_solved_grids[cat][j]])
+	
 	var left_grid: Grid
 	var right_grid: Grid
 	var lower_grid: Grid 
