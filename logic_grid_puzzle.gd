@@ -181,7 +181,18 @@ func _scan_puzzle_get_ordered_list_of_operations(grids_to_permute: Array) -> Arr
 			operations.append([left_grid, right_grid, lower_grid, implied_grid_index])
 			
 	return operations
-	
+
+
+func validate_grid_rank_pair(grid1: Grid, rank1: int, grid2: Grid, rank2: int) -> bool:
+	# 1) confirm that grid1 and grid2 share a category
+	# 2) return true if they don't.
+	# 3) find grid 3
+	# 4) find how to permute the ranks of grids 1 & 2 to get the rank of grid3
+	# 5) find the rank of grid3
+	# 6) return true if it's valid for grid3
+	# 7) otherwise return false
+	return false
+
 
 func _scan_puzzle_solutions_for_implied_information() -> void:
 	var grids_to_permute: Array = _scan_puzzle_get_grids_to_permute()
