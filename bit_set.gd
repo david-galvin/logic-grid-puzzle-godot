@@ -90,7 +90,6 @@ func bitwise_intersects(other_bit_set: BitSet) -> bool:
 
 
 func next_set_bit(index: int) -> int:
-	validate_index(index)
 	var word_id: int = _get_word_id(index)
 	var bit_id: int = _get_bit_id(index)
 	if (_words[word_id] & (_ALL_SET_BITS << bit_id)) > 0:
@@ -117,7 +116,7 @@ func cardinality() -> int:
 	if _have_bits_changed:
 		var ans: int = 0
 		var index: int = next_set_bit(0)
-		while index != -1 && index < _num_bits - 1:
+		while index != -1 && index < _num_bits:
 			index  = next_set_bit(index + 1)
 			ans += 1
 		_cardinality = ans

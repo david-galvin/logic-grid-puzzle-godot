@@ -43,7 +43,7 @@ func get_solution_ranks() -> Array:
 	var set_bits: Array = []
 	set_bits.append(solutions_bitset.next_set_bit(0))
 	while set_bits.size() < solutions_bitset.cardinality():
-		set_bits.append(solutions_bitset.next_set_bit(set_bits[-1]))
+		set_bits.append(solutions_bitset.next_set_bit(set_bits[-1] + 1))
 	return set_bits
 
 

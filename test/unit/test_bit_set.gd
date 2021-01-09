@@ -112,6 +112,8 @@ class TestBitSet:
 		assert_eq(_bset.cardinality(), 4)
 		_bset.set_in_range(4, 8, false)
 		assert_eq(_bset.cardinality(), 2)
+		_bset.set_in_range(0, 10, true)
+		assert_eq(_bset.cardinality(), 10)
 
 		assert_eq(_big_bset.cardinality(), 0)
 		_big_bset.set_at_index(2 + _big_padding_size, true)
@@ -124,6 +126,8 @@ class TestBitSet:
 		assert_eq(_big_bset.cardinality(), 4)
 		_big_bset.set_in_range(4 + _big_padding_size, 8 + _big_padding_size, false)
 		assert_eq(_big_bset.cardinality(), 2)
+		_big_bset.set_in_range(0, 10 + _big_padding_size, true)
+		assert_eq(_big_bset.cardinality(), 10 + _big_padding_size)
 		
 		
 class TestBitSetPairwise:
