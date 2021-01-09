@@ -10,6 +10,7 @@ var count_of_true_cells: int = 0
 var count_of_false_cells: int = 0
 var cat1: int
 var cat2: int
+var id: int
 
 var _bit_mask: BitMask
 var _dimension: int # the number of rows, also the number of columns
@@ -19,10 +20,11 @@ var _grid_cell_matrix: Array = []
 var _unsolved_cells: Array = []
 
 
-func _init(my_dimension: int, my_bit_mask: BitMask, my_cat1 := 0, my_cat2 := 0) -> void:
+func _init(my_dimension: int, my_bit_mask: BitMask, my_cat1 := 0, my_cat2 := 0, my_id := 0) -> void:
 	randomize()
 	cat1 = my_cat1
 	cat2 = my_cat2
+	id = my_id
 	_dimension = my_dimension
 	_grid_cell_matrix.resize(_dimension)
 	for row in range(_dimension):
@@ -40,12 +42,11 @@ func _init(my_dimension: int, my_bit_mask: BitMask, my_cat1 := 0, my_cat2 := 0) 
 func get_solution_ranks() -> Array:
 	var set_bits: Array = []
 	set_bits.append(solutions_bitset.next_set_bit(0))
-	while set_bits.size() < solutions_bitset.cardinality:
-		set_bits.append(solutions_bitset.next_set_bit[set_bits[-1]])
+	while set_bits.size() < solutions_bitset.cardinality():
+		set_bits.append(solutions_bitset.next_set_bit(set_bits[-1]))
 	return set_bits
-	
 
-#TODO: Implement a return class for this
+
 func get_random_unsolved_cell_coordinates() -> Array:
 	if _unsolved_cells.size() == 0:
 		push_error("There are no unsolved cells")
@@ -61,7 +62,7 @@ func get_random_unsolved_cell_coordinates() -> Array:
 		return coords
 
 
-func read_cell(row: int, col: int):
+func read_cell(row: int, col: int) -> int:
 	match _grid_cell_matrix[row][col]:
 		GridCellState.UNKNOWN:
 			return GridCellState.UNKNOWN
@@ -71,6 +72,7 @@ func read_cell(row: int, col: int):
 			return GridCellState.TRUE
 		GridCellState.UNSOLVABLE:
 			return GridCellState.UNSOLVABLE
+	return GridCellState.UNSOLVABLE
 
 
 func merge_solutions_from_grid_trio(calculated_possible_solutions: BitSet) -> void:

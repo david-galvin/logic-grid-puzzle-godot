@@ -136,67 +136,89 @@ func _scan_puzzle_get_grids_to_permute() -> Array:
 	return grids_to_permute
 
 
-func _scan_puzzle_get_ordered_list_of_operations(grids_to_permute: Array) -> Array:
+func scan_puzzle_get_ordered_list_of_operations(grids_to_permute: Array) -> Array:
 	var cat_to_solved_grids: Array = []
-	cat_to_solved_grids.resize(_cat_size - 1)
-	for i in range(_cat_size):
+	var num_grids_in_solution = Math.choose(grids_to_permute.size(), 2) + grids_to_permute.size()
+	var solved_grid_ids: Dictionary = {}
+	
+	cat_to_solved_grids.resize(_cat_count)
+	for i in range(_cat_count):
 		cat_to_solved_grids[i] = []
 	
 	for grid in grids_to_permute:
 		cat_to_solved_grids[grid.cat1].append([grid, grid.cat2])
 		cat_to_solved_grids[grid.cat2].append([grid, grid.cat1])
+		solved_grid_ids[grid.id] = true
 		
 	var operations: Array = []
 	
-	for cat in range(_cat_size):
+	var cat: int = -1
+	var sanity_count = 0
+	
+	while solved_grid_ids.size() < num_grids_in_solution:
+		sanity_count += 1
+		if sanity_count >= 100:
+			push_error("We shouldn't pass through this loop so many times")
+			return []
+		cat = (cat + 1) % _cat_count
 		if cat_to_solved_grids[cat].size() >= 2:
 			for i in range(cat_to_solved_grids[cat].size() - 1):
+				var grid1: Grid = cat_to_solved_grids[cat][i][0]
+				var grid3_cat1: int = cat_to_solved_grids[cat][i][1]
 				for j in range(i+1, cat_to_solved_grids[cat].size()):
-					operations.append([cat_to_solved_grids[cat][i], cat_to_solved_grids[cat][j]])
-	
-	var left_grid: Grid
-	var right_grid: Grid
-	var lower_grid: Grid 
-	var additional_solved_grids: Array = []
-	for i in range(grids_to_permute.size() - 1):
-		for j in range(i + 1, grids_to_permute.size()):
-			var grid1: Grid = grids_to_permute[i]
-			var grid2: Grid = grids_to_permute[j]
-			var implied_grid_index: int
-	
-			if grid1.cat1 == grid2.cat1:
-				if grid1.cat2 < grid2.cat2:
-					left_grid = grid1
-					right_grid = grid2
-				else:
-					left_grid = grid2
-					right_grid = grid1
-				implied_grid_index = 2
-				lower_grid = _get_grid(right_grid.cat2, left_grid.cat1)
-				additional_solved_grids.append(lower_grid)
-			elif grid1.cat2 == grid2.cat2:
-				if grid1.cat1 > grid2.cat1:
-					left_grid = grid1
-					lower_grid = grid2
-				else:
-					left_grid = grid2
-					lower_grid = grid1
-				right_grid = _get_grid(left_grid.cat1, lower_grid.cat1)
-				additional_solved_grids.append(right_grid)
-				implied_grid_index = 1
-			elif grid1.cat1 == grid2.cat2 || grid1.cat2 == grid2.cat1:
-				if grid1.cat1 > grid2.cat1:
-					right_grid = grid1
-					lower_grid = grid2
-				else:
-					right_grid = grid2
-					lower_grid = grid1
-				implied_grid_index = 0
-				left_grid = _get_grid(right_grid.cat1, lower_grid.cat2)
-				additional_solved_grids.append(left_grid)
-			operations.append([left_grid, right_grid, lower_grid, implied_grid_index])
-			
+					var grid2: Grid = cat_to_solved_grids[cat][j][0]
+					var grid3_cat2: int = cat_to_solved_grids[cat][j][1]
+					var grid3: Grid = _get_grid(grid3_cat1, grid3_cat2)
+					if not solved_grid_ids.has(grid3.id):
+						operations.append([grid1, grid2, grid3])
+						solved_grid_ids[grid3.id] = true
+						cat_to_solved_grids[grid3.cat1].append([grid3, grid3.cat2])
+						cat_to_solved_grids[grid3.cat2].append([grid3, grid3.cat1])
 	return operations
+	
+#	var left_grid: Grid
+#	var right_grid: Grid
+#	var lower_grid: Grid 
+#	var additional_solved_grids: Array = []
+#	for i in range(grids_to_permute.size() - 1):
+#		for j in range(i + 1, grids_to_permute.size()):
+#			var grid1: Grid = grids_to_permute[i]
+#			var grid2: Grid = grids_to_permute[j]
+#			var implied_grid_index: int
+#
+#			if grid1.cat1 == grid2.cat1:
+#				if grid1.cat2 < grid2.cat2:
+#					left_grid = grid1
+#					right_grid = grid2
+#				else:
+#					left_grid = grid2
+#					right_grid = grid1
+#				implied_grid_index = 2
+#				lower_grid = _get_grid(right_grid.cat2, left_grid.cat1)
+#				additional_solved_grids.append(lower_grid)
+#			elif grid1.cat2 == grid2.cat2:
+#				if grid1.cat1 > grid2.cat1:
+#					left_grid = grid1
+#					lower_grid = grid2
+#				else:
+#					left_grid = grid2
+#					lower_grid = grid1
+#				right_grid = _get_grid(left_grid.cat1, lower_grid.cat1)
+#				additional_solved_grids.append(right_grid)
+#				implied_grid_index = 1
+#			elif grid1.cat1 == grid2.cat2 || grid1.cat2 == grid2.cat1:
+#				if grid1.cat1 > grid2.cat1:
+#					right_grid = grid1
+#					lower_grid = grid2
+#				else:
+#					right_grid = grid2
+#					lower_grid = grid1
+#				implied_grid_index = 0
+#				left_grid = _get_grid(right_grid.cat1, lower_grid.cat2)
+#				additional_solved_grids.append(left_grid)
+#			operations.append([left_grid, right_grid, lower_grid, implied_grid_index])
+			
+	
 
 
 func validate_grid_rank_pair(grid1: Grid, rank1: int, grid2: Grid, rank2: int) -> bool:
@@ -212,6 +234,7 @@ func validate_grid_rank_pair(grid1: Grid, rank1: int, grid2: Grid, rank2: int) -
 
 func _scan_puzzle_solutions_for_implied_information() -> void:
 	var grids_to_permute: Array = _scan_puzzle_get_grids_to_permute()
+	var ordered_operations: Array = scan_puzzle_get_ordered_list_of_operations(grids_to_permute)
 	
 	# we'll use the same indexing for the solution as for the grids.
 	var grid_solutions_bitsets: Array = []
@@ -220,7 +243,7 @@ func _scan_puzzle_solutions_for_implied_information() -> void:
 	
 	var count_of_solutions_to_explore: int = 1
 	for grid in grids_to_permute:
-		count_of_solutions_to_explore *= grid.solutions_bitset.cardinality
+		count_of_solutions_to_explore *= grid.solutions_bitset.cardinality()
 	
 	# TO DO:
 	# We need to pre-compute:
@@ -252,11 +275,11 @@ func _scan_puzzle_solutions_for_implied_information() -> void:
 	for puzzle_solution_index in range(count_of_solutions_to_explore):
 		temp_solution_index = puzzle_solution_index
 		for i in range(grids_to_permute.size()):
-			grid_solution_index = temp_solution_index % grids_to_permute[i].solutions_bitset.cardinality
+			grid_solution_index = temp_solution_index % grids_to_permute[i].solutions_bitset.cardinality()
 			ranks_under_consideration[i] = grids_to_permute_solution_ranks_matrix[i][grid_solution_index]
-			temp_solution_index /= grids_to_permute[i].solutions_bitset.cardinality
+			temp_solution_index /= grids_to_permute[i].solutions_bitset.cardinality()
 		
-		operations = _scan_puzzle_get_ordered_list_of_operations(grids_to_permute)
+		#operations = _scan_puzzle_get_ordered_list_of_operations(grids_to_permute)
 
 
 func _check_all_trios_including_categories(cat1: int, cat2: int) -> void:
@@ -397,6 +420,6 @@ func _build_grids() -> Array:
 	for cat1 in range(1, _cat_count):
 		for cat2 in range(0, cat1):
 			var index: int = _get_grid_index(cat1, cat2)
-			_grids[index] = Grid.new(_cat_size, bit_mask, cat1, cat2)
+			_grids[index] = Grid.new(_cat_size, bit_mask, cat1, cat2, index)
 			_unsolved_grids[index] = _grids[index]
 	return _grids
