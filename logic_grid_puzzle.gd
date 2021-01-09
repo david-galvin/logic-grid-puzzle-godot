@@ -230,12 +230,7 @@ func _scan_puzzle_solutions_for_implied_information() -> void:
 			temp_solution_index /= grids_to_permute[i].solutions_bitset.cardinality
 		
 		operations = _scan_puzzle_get_ordered_list_of_operations(grids_to_permute)
-	
-	# TO DO: The grids in grids_to_permute are the minimum set of grids with
-	# the minimum solutions to check that collectively determine the rest of
-	# the puzzle. To extract this information, we need to check every pairwise
-	# combination of every solution
-	
+
 
 func _check_all_trios_including_categories(cat1: int, cat2: int) -> void:
 	for cat3 in range(_cat_count):
@@ -335,15 +330,11 @@ func _get_implied_grid_rank(left_grid_rank: int, right_grid_rank: int) -> int:
 
 
 func _is_valid_cat(cat: int) -> bool:
-	if cat < 0 or cat >= _cat_count:
-		return false
-	return true
+	return cat in range(_cat_count)
 
 
 func _is_valid_elt(elt: int) -> bool:
-	if elt < 0 or elt >= _cat_size:
-		return false
-	return true
+	return elt in range(_cat_size)
 
 
 func _to_string() -> String:
@@ -358,8 +349,6 @@ func _to_string() -> String:
 
 
 func _get_grid(cat1: int, cat2: int) -> Grid:
-	# indexing is an arbitrary way to get a unique index for every row, col
-	# pair. It depends on row_id > col_id
 	return _grids[_get_grid_index(cat1, cat2)]
 
 
