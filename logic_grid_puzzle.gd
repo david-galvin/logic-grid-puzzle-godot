@@ -14,13 +14,13 @@ const path_to_inverses_file = "permutation_inverses.dat"
 const path_to_size_to_perm_matrix = "size_to_perm_matrix.dat"
 const max_cat_size = 6
 
-var _grid_trio_solutions_bitsets: Array = []
 var _rank_to_inverse_rank: Array = []
 var _perm_rank_matrix: Array
 var _cat_count: int
 var _cat_size: int
 var _grids: Array = []
 var _unsolved_grids: Array = []
+var _timer = TimerDict.new()
 
 
 func _init(my_cat_count: int, my_cat_size: int) -> void:
@@ -30,9 +30,6 @@ func _init(my_cat_count: int, my_cat_size: int) -> void:
 	_grids = _build_grids()
 	_set_rank_to_inverse_rank()
 	_set_perm_rank_matrix()
-	_grid_trio_solutions_bitsets.resize(3)
-	for i in range(3):
-		_grid_trio_solutions_bitsets[i] = BitSet.new(Math.factorial(_cat_size))
 
 
 func is_solved() -> bool:
@@ -83,6 +80,10 @@ func get_random_unsolved_grid() -> Grid:
 		return rand_grid
 
 
+func print_times():
+	print(str(_timer))
+
+
 func _set_rank_to_inverse_rank():
 	var file = File.new()
 	if _cat_size in range(2,8) and file.file_exists(path_to_inverses_file):
@@ -104,16 +105,6 @@ func _set_perm_rank_matrix():
 		push_error("_perm_rank_matrix should be loaded from a file")
 		_perm_rank_matrix = PermutationTools.get_perm_rank_matrix(_cat_size)
 
-
-# TODO: Convert the _check_trios code to check larger sets of categories as
-# information can sometimes only be discovered this way. E.g. in a 4x3 puzzle,
-# with categories A, B, C, D, we can have X's in the grid (is not) for:
-# (A0, B0), (A0, C0), (A0, D0), (B0, D0), and (C0, D0). Then every solution 
-# must have and 'O' for (B0, C0). I.e. B0 = C0. Why? Because:
-# A0 and D0 not being B0 means they're collectively B1 & B2.
-# A0 and D0 not being C0 means they're collectively C1 & C2.
-# Thus B1 & B2 are collectively C1 & C2. We don't know which is which, but
-# we know B0 must equal C0.
 
 func _scan_puzzle_get_grids_to_permute() -> Array:
 	var copy_of_grids: Array = _grids.duplicate()
@@ -217,6 +208,7 @@ func scan_puzzle_get_ordered_list_of_operations(grids_to_permute: Array) -> Arra
 
 
 func _scan_puzzle_solutions_for_implied_information() -> void:
+	_timer.start_timer("_scan_puzzle_solutions_for_implied_information")
 	var count_of_data_cells: int = 0
 	var num_grids_with_data: int = 0
 	for grid in _grids:
@@ -224,12 +216,14 @@ func _scan_puzzle_solutions_for_implied_information() -> void:
 		count_of_data_cells += grid.count_of_true_cells
 		num_grids_with_data += 1
 	if num_grids_with_data < 2 or count_of_data_cells < _cat_size:
+		_timer.end_timer("_scan_puzzle_solutions_for_implied_information")
 		return
-		
+	
 	var grids_to_permute: Array = _scan_puzzle_get_grids_to_permute()
 	var operations: Array = scan_puzzle_get_ordered_list_of_operations(grids_to_permute)
 	
 	if operations.size() == 0:
+		_timer.end_timer("_scan_puzzle_solutions_for_implied_information")
 		return
 	
 	# we'll use the same indexing for the solution as for the grids.
@@ -242,6 +236,7 @@ func _scan_puzzle_solutions_for_implied_information() -> void:
 		count_of_solutions_to_explore *= grid.solutions_bitset.cardinality()
 	
 	if count_of_solutions_to_explore > 100000:
+		_timer.end_timer("_scan_puzzle_solutions_for_implied_information")
 		return
 	
 	var grid_ids_with_information: Dictionary = {}
@@ -273,138 +268,65 @@ func _scan_puzzle_solutions_for_implied_information() -> void:
 	grid_id_to_rank.resize(_grids.size())
 	var grid_solution_index: int
 	var temp_solution_index: int
+	var grid_id: int
+	var grid_id_to_solution_ranks: Array = []
+	grid_id_to_solution_ranks.resize(_grids.size())
+	for grid in _grids:
+		grid_id_to_solution_ranks[grid.id] = grid.get_solution_ranks()
+		
 	for puzzle_solution_index in range(count_of_solutions_to_explore):
 		temp_solution_index = puzzle_solution_index
+		_timer.start_timer("scanner: for i in range(grids_to_permute.size())")
 		for i in range(grids_to_permute.size()):
-			var grid_id: int = grids_to_permute[i].id
+			grid_id = grids_to_permute[i].id
 			grid_solution_index = temp_solution_index % grids_to_permute[i].solutions_bitset.cardinality()
 			grid_id_to_rank[grid_id] = grids_to_permute_solution_ranks_matrix[i][grid_solution_index]
 			temp_solution_index /= grids_to_permute[i].solutions_bitset.cardinality()
+		_timer.end_timer("scanner: for i in range(grids_to_permute.size())")
 			
 		# operation: [grid_bottom, false, grid_right, false, grid3]
+		_timer.start_timer("scanner: for operation in operations")
 		var valid_solution: bool = true
+		var grid1_id: int
+		var rank1: int
+		var grid2_id: int
+		var rank2: int
+		var grid3_id: int
+		var rank3: int
+		var is_valid: bool
 		for operation in operations:
-			var grid1_id: int = operation[0].id
-			var rank1 = grid_id_to_rank[grid1_id]
+			grid1_id = operation[0].id
+			rank1 = grid_id_to_rank[grid1_id]
 			if operation[1]:
 				rank1 = _rank_to_inverse_rank[rank1]
-			var grid2_id: int = operation[2].id
-			var rank2 = grid_id_to_rank[grid2_id]
+			grid2_id = operation[2].id
+			rank2 = grid_id_to_rank[grid2_id]
 			if operation[3]:
 				rank2 = _rank_to_inverse_rank[rank2]
-			var rank3: int = _perm_rank_matrix[rank1][rank2]
-			var grid3_id: int = operation[4].id
+			rank3 = _perm_rank_matrix[rank1][rank2]
+			grid3_id = operation[4].id
 			grid_id_to_rank[grid3_id] = rank3
 			grid_ids_with_information[grid3_id] = true
-			if not operation[4].get_solution_ranks().has(rank3):
+			_timer.start_timer("scanner: if not operation[4].get_solution_ranks().has(rank3)")
+			is_valid = grid_id_to_solution_ranks[grid3_id].has(rank3)
+			_timer.end_timer("scanner: if not operation[4].get_solution_ranks().has(rank3)")
+			if not is_valid:
 				valid_solution = false
 				break
+		_timer.end_timer("scanner: for operation in operations")
 		
 		if valid_solution:
-			for grid_id in _grids.size():
-				if not grid_id_to_rank[grid_id] == null:
-					grid_solutions_bitsets[grid_id].set_at_index(grid_id_to_rank[grid_id], true)
+			_timer.start_timer("scanner: check_valid_solution")
+			for id in _grids.size():
+				if not grid_id_to_rank[id] == null:
+					grid_solutions_bitsets[id].set_at_index(grid_id_to_rank[id], true)
+			_timer.end_timer("scanner: check_valid_solution")
 			# If we make it here then the current puzzle_solution_index is valid. 
 		# Mark it as such for the individual grids.
-	for grid_id in _grids.size():
-		if grid_ids_with_information.has(grid_id):
-			_grids[grid_id].merge_solutions_from_grid_trio(grid_solutions_bitsets[grid_id])
-
-func _check_all_trios_including_categories(cat1: int, cat2: int) -> void:
-	for cat3 in range(_cat_count):
-		if ! [cat1, cat2].has(cat3):
-			var cat_trio: Array = [cat1, cat2, cat3]
-			cat_trio.sort()
-			# The order of grids in grid_trio is important. The first two
-			# need to be in the same row, with the first to the left of the
-			# second. This means they should be in order of category size:
-			# (big, small), (big, med), (med, small)
-			var _grid_trio: Array = []
-			_grid_trio.resize(3)
-			_grid_trio[0] = _get_grid(cat_trio[2], cat_trio[0])
-			_grid_trio[1] = _get_grid(cat_trio[2], cat_trio[1])
-			_grid_trio[2] = _get_grid(cat_trio[1], cat_trio[0])
-			if _is_grid_trio_worth_checking(_grid_trio):
-				_check_grid_trio(_grid_trio)
-
-
-#Dumb version checks all grid trios multiple times
-func _check_all_trios_multiple_times(var num_times: int = 1) -> void:
-	for _i in range(num_times):
-		for cat1 in range(_cat_count - 2):
-			for cat2 in range(cat1 + 1, _cat_count - 1):
-				for cat3 in range(cat2 + 1, _cat_count):
-					var cat_trio: Array = [cat1, cat2, cat3]
-					cat_trio.sort()
-					# The order of grids in grid_trio is important. The first two
-					# need to be in the same row, with the first to the left of the
-					# second. This means they should be in order of category size:
-					# (big, small), (big, med), (med, small)
-					var _grid_trio: Array = []
-					_grid_trio.resize(3)
-					_grid_trio[0] = _get_grid(cat_trio[2], cat_trio[0])
-					_grid_trio[1] = _get_grid(cat_trio[2], cat_trio[1])
-					_grid_trio[2] = _get_grid(cat_trio[1], cat_trio[0])
-					if _is_grid_trio_worth_checking(_grid_trio):
-						_check_grid_trio(_grid_trio)
-
-
-func _is_grid_trio_worth_checking(_grid_trio) -> bool:
-	var count_of_false_cells_in_trio: int = 0
-	var count_of_true_cells_in_trio: int = 0
-	var num_grids_with_data: int = 0
-	for grid in _grid_trio:
-		count_of_false_cells_in_trio += grid.count_of_false_cells
-		count_of_false_cells_in_trio += grid.count_of_true_cells
-		num_grids_with_data += 1
-	if (count_of_false_cells_in_trio >= _cat_size) or \
-			(count_of_true_cells_in_trio >= 1):
-		if num_grids_with_data >= 2:
-			return true
-	return false
-
-
-func _check_grid_trio(_grid_trio) -> void:
-	var left_grid: Grid = _grid_trio[0]
-	var right_grid: Grid = _grid_trio[1]
-	var implied_grid: Grid = _grid_trio[2]
-	for i in range(_grid_trio_solutions_bitsets.size()):
-		_grid_trio_solutions_bitsets[i].clear()
-	var left_grid_solutions_bitset: BitSet = _grid_trio_solutions_bitsets[0]
-	var right_grid_solutions_bitset: BitSet = _grid_trio_solutions_bitsets[1]
-	var implied_grid_solutions_bitset: BitSet = _grid_trio_solutions_bitsets[2]
-	
-	# Check all valid permutation rank combinations of the left and right grids
-	var left_grid_rank: int = left_grid.solutions_bitset.next_set_bit(0)
-	var right_grid_rank: int = right_grid.solutions_bitset.next_set_bit(0)
-	while left_grid_rank >= 0 and left_grid_rank < left_grid.max_possible_solutions:
-		while right_grid_rank >= 0 and right_grid_rank < right_grid.max_possible_solutions:
-			var implied_grid_rank: int = _get_implied_grid_rank(left_grid_rank, right_grid_rank)
-			if implied_grid.solutions_bitset.get_at_index(implied_grid_rank):
-				left_grid_solutions_bitset.set_at_index(left_grid_rank, true)
-				right_grid_solutions_bitset.set_at_index(right_grid_rank, true)
-				implied_grid_solutions_bitset.set_at_index(implied_grid_rank, true)
-			if right_grid_rank + 1 >= right_grid.max_possible_solutions:
-				right_grid_rank = -1
-			else:
-				right_grid_rank = right_grid.solutions_bitset.next_set_bit(right_grid_rank + 1)
-		if left_grid_rank + 1 >= left_grid.max_possible_solutions:
-			left_grid_rank = -1
-		else:
-			left_grid_rank = left_grid.solutions_bitset.next_set_bit(left_grid_rank + 1)
-			right_grid_rank = right_grid.solutions_bitset.next_set_bit(0)
-	left_grid.merge_solutions_from_grid_trio(left_grid_solutions_bitset)
-	right_grid.merge_solutions_from_grid_trio(right_grid_solutions_bitset)
-	implied_grid.merge_solutions_from_grid_trio(implied_grid_solutions_bitset)
-
-
-# For categories A, B, C, and the three grids formed by the three ways of pairing
-# these up, a solution to any two grids determines a solution to the thirds.
-# Two of these will always be in the same row of the puzzle. Given the permutation
-# ranks of the solutions of the two in the same row, this gives the permutation
-# rank of the third.
-func _get_implied_grid_rank(left_grid_rank: int, right_grid_rank: int) -> int:
-	return _perm_rank_matrix[left_grid_rank][_rank_to_inverse_rank[right_grid_rank]]
+	for id in _grids.size():
+		if grid_ids_with_information.has(id):
+			_grids[id].merge_solutions_from_grid_trio(grid_solutions_bitsets[id])
+	_timer.end_timer("_scan_puzzle_solutions_for_implied_information")
 
 
 func _is_valid_cat(cat: int) -> bool:

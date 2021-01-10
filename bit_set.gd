@@ -11,6 +11,7 @@ var _words: Array = []
 var _have_bits_changed: bool = true
 var _cardinality: int = 0
 var _print_str: String = ""
+var _set_bits: Dictionary = {}
 
 
 func _init(my_num_bits: int) -> void:

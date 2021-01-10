@@ -194,7 +194,7 @@ class TestLogicGridPuzzle:
 	func test_random_puzzles():
 		_cat_count = 5
 		_cat_size = 4
-		var _minutes: int = 10
+		var _minutes: int = 1
 		var _start_time = OS.get_ticks_msec()
 		var _tries: int = 0
 		while (OS.get_ticks_msec() - _start_time) < _minutes * 60000:
@@ -225,4 +225,5 @@ class TestLogicGridPuzzle:
 				print(_moves)
 				break
 		print("Num tries: " + str(_tries))
+		_lp.print_times()
 		
