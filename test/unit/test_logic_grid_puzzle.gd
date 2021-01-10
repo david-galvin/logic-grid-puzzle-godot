@@ -99,6 +99,7 @@ class TestLogicGridPuzzle:
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(2, 1, 1, 1))
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(2, 1, 1, 2))
 		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(2, 3, 1, 0))
+		_lp.print_times()
 
 
 	func test_implied_values_cats4_size3():
@@ -190,14 +191,53 @@ class TestLogicGridPuzzle:
 		assert_eq(_lp.is_solved(), true)
 
 
+	func test_speed():
+		_cat_count = 5
+		_cat_size = 4
+		_lp = LogicGridPuzzle.new(_cat_count, _cat_size)
+		_lp.set_grid_cell(4, 3, 2, 3, false)
+		_lp.set_grid_cell(2, 3, 0, 0, false)
+		_lp.set_grid_cell(4, 2, 0, 3, false)
+		_lp.set_grid_cell(4, 3, 3, 1, false)
+		_lp.set_grid_cell(4, 1, 1, 2, false)
+		_lp.set_grid_cell(3, 0, 0, 0, false)
+		_lp.set_grid_cell(4, 2, 2, 1, false)
+		_lp.set_grid_cell(4, 3, 0, 2, false)
+		_lp.set_grid_cell(4, 0, 2, 0, false)
+		_lp.set_grid_cell(4, 1, 2, 1, false)
+		_lp.set_grid_cell(4, 3, 1, 2, false)
+		_lp.set_grid_cell(4, 1, 0, 2, false)
+		_lp.set_grid_cell(4, 1, 2, 3, false)
+		_lp.set_grid_cell(3, 3, 0, 0, false)
+		_lp.set_grid_cell(2, 3, 1, 0, false)
+		_lp.set_grid_cell(3, 2, 0, 2, false)
+		_lp.set_grid_cell(4, 0, 0, 2, false)
+		_lp.set_grid_cell(4, 2, 1, 2, false)
+		_lp.set_grid_cell(4, 0, 3, 2, false)
+		_lp.set_grid_cell(4, 2, 2, 3, false)
+		_lp.set_grid_cell(1, 1, 0, 3, false)
+		_lp.set_grid_cell(3, 3, 2, 0, false)
+		_lp.set_grid_cell(3, 2, 2, 0, false)
+		_lp.set_grid_cell(1, 2, 0, 1, false)
+		_lp.set_grid_cell(3, 0, 0, 2, false)
+		_lp.set_grid_cell(3, 1, 0, 0, false)
+		_lp.set_grid_cell(3, 3, 1, 3, false)
+		_lp.set_grid_cell(3, 0, 1, 2, false)
+		_lp.set_grid_cell(4, 1, 0, 1, false)
+		_lp.set_grid_cell(2, 0, 1, 3, false)
+		_lp.set_grid_cell(2, 0, 1, 0, false)
+		_lp.set_grid_cell(3, 0, 1, 0, false)
+		_lp.print_times()
+
+
 	func test_random_puzzles():
 		_cat_count = 5
 		_cat_size = 4
-		var _minutes: int = 1
+		var _minutes: int = 0
 		var _start_time = OS.get_ticks_msec()
 		var _tries: int = 0
-		#while (OS.get_ticks_msec() - _start_time) < _minutes * 60000:
-		while _tries == 0:
+		while false and (OS.get_ticks_msec() - _start_time) < _minutes * 60000:
+		#while _tries == 0:
 			print("Beginning attempt " + str(_tries))
 			_tries += 1
 			_lp = LogicGridPuzzle.new(_cat_count, _cat_size)
@@ -217,12 +257,13 @@ class TestLogicGridPuzzle:
 				var move: Move = Move.new(_grid.cat1, _coords[0], _grid.cat2, _coords[1], false)
 				var pre_time = OS.get_ticks_msec()
 				_lp.apply_move(move)
-				_moves += ": (" + str(OS.get_ticks_msec() - pre_time) + "): "  + str(move)
+				#_moves += ": (" + str(OS.get_ticks_msec() - pre_time) + "): "  + str(move)
+				_moves += str(move)
 				_counter += 1
 			if not _lp.is_solved():
 				print(_moves)
 				print(_lp)
 				break
+			print(_moves)
 		print("Num tries: " + str(_tries))
 		_lp.print_times()
-		
