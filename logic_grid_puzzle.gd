@@ -129,7 +129,6 @@ func _scan_puzzle_get_grids_to_permute() -> Array:
 
 
 func scan_puzzle_get_ordered_list_of_operations(grids_to_permute: Array) -> Array:
-	_timer.start_timer("scan_puzzle_get_ordered_list_of_operations")
 	var cat_to_solved_grids: Array = []
 	var num_grids_in_solution = Math.choose(grids_to_permute.size(), 2) + grids_to_permute.size()
 	var solved_grid_ids: Dictionary = {}
@@ -158,7 +157,7 @@ func scan_puzzle_get_ordered_list_of_operations(grids_to_permute: Array) -> Arra
 	var added_any_grids: bool = true
 	while (solved_grid_ids.size() < num_grids_in_solution) and ((not cat == 0) or added_any_grids):
 		sanity_count += 1
-		if sanity_count >= 10:
+		if sanity_count >= 20:
 			push_error("We shouldn't pass through this loop so many times")
 			_timer.end_timer("scan_puzzle_get_ordered_list_of_operations")
 			return []
@@ -206,7 +205,6 @@ func scan_puzzle_get_ordered_list_of_operations(grids_to_permute: Array) -> Arra
 								grid_right = grid1
 							operation = [grid_bottom, false, grid_right, false, grid3]
 						operations.append(operation)
-	_timer.end_timer("scan_puzzle_get_ordered_list_of_operations")
 	return operations
 
 

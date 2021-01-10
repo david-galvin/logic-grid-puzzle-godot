@@ -189,16 +189,15 @@ class TestLogicGridPuzzle:
 		_lp.set_grid_cell(3, 2, 2, 0, false)
 		assert_eq(_lp.is_solved(), true)
 
-		
 
 	func test_random_puzzles():
-		_cat_count = 10
-		_cat_size = 5
+		_cat_count = 5
+		_cat_size = 4
 		var _minutes: int = 1
 		var _start_time = OS.get_ticks_msec()
 		var _tries: int = 0
-		while (OS.get_ticks_msec() - _start_time) < _minutes * 60000:
-		#while _tries == 0:
+		#while (OS.get_ticks_msec() - _start_time) < _minutes * 60000:
+		while _tries == 0:
 			print("Beginning attempt " + str(_tries))
 			_tries += 1
 			_lp = LogicGridPuzzle.new(_cat_count, _cat_size)
