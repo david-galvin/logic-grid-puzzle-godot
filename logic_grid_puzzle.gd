@@ -129,6 +129,7 @@ func _scan_puzzle_get_grids_to_permute() -> Array:
 
 
 func scan_puzzle_get_ordered_list_of_operations(grids_to_permute: Array) -> Array:
+	_timer.start_timer("scan_puzzle_get_ordered_list_of_operations")
 	var cat_to_solved_grids: Array = []
 	var num_grids_in_solution = Math.choose(grids_to_permute.size(), 2) + grids_to_permute.size()
 	var solved_grid_ids: Dictionary = {}
@@ -159,6 +160,7 @@ func scan_puzzle_get_ordered_list_of_operations(grids_to_permute: Array) -> Arra
 		sanity_count += 1
 		if sanity_count >= 10:
 			push_error("We shouldn't pass through this loop so many times")
+			_timer.end_timer("scan_puzzle_get_ordered_list_of_operations")
 			return []
 		cat = (cat + 1) % _cat_count
 		if cat == 0:
@@ -204,6 +206,7 @@ func scan_puzzle_get_ordered_list_of_operations(grids_to_permute: Array) -> Arra
 								grid_right = grid1
 							operation = [grid_bottom, false, grid_right, false, grid3]
 						operations.append(operation)
+	_timer.end_timer("scan_puzzle_get_ordered_list_of_operations")
 	return operations
 
 
@@ -240,25 +243,6 @@ func _scan_puzzle_solutions_for_implied_information() -> void:
 		return
 	
 	var grid_ids_with_information: Dictionary = {}
-	
-	# TO DO:
-	# We need to pre-compute:
-	# 1) The pairs of grids in grids_to_permute to compare, the associated grid,
-	#    and the combination of permutations that gets us the associated grid's rank.
-	# 2) We will often need to use the ranks of implied grids to calculate other
-	#    implied grids. We can compute this and the permutations in advance as well. 
-	#
-	# Use this precomputed data as follows:
-	# 3) For every combination of valid ranks among grids_to_permute:
-	#      For every pair of grids in our precomputed set, in our precomputed order:
-	#        Use our precomputed pair of permutations to find and set the rank of the third grid.
-	# 4) Now knowing the current rank of all grids, mark the associated bitset bit as true
-	#    if the solution is valid for all grids. Do not mark as false regardless.
-	# 5) At the end of this, A grid.rank with no valid solution will be marked false.
-	
-	# Need to store an array with:
-	# 3 grid indices, 
-	
 	var grids_to_permute_solution_ranks_matrix: Array = []
 	for grid in grids_to_permute:
 		grids_to_permute_solution_ranks_matrix.append(grid.get_solution_ranks())
