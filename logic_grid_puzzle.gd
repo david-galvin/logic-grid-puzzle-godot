@@ -217,6 +217,15 @@ func scan_puzzle_get_ordered_list_of_operations(grids_to_permute: Array) -> Arra
 
 
 func _scan_puzzle_solutions_for_implied_information() -> void:
+	var count_of_data_cells: int = 0
+	var num_grids_with_data: int = 0
+	for grid in _grids:
+		count_of_data_cells += grid.count_of_false_cells
+		count_of_data_cells += grid.count_of_true_cells
+		num_grids_with_data += 1
+	if num_grids_with_data < 2 or count_of_data_cells < _cat_size:
+		return
+		
 	var grids_to_permute: Array = _scan_puzzle_get_grids_to_permute()
 	var operations: Array = scan_puzzle_get_ordered_list_of_operations(grids_to_permute)
 	
@@ -231,6 +240,9 @@ func _scan_puzzle_solutions_for_implied_information() -> void:
 	var count_of_solutions_to_explore: int = 1
 	for grid in grids_to_permute:
 		count_of_solutions_to_explore *= grid.solutions_bitset.cardinality()
+	
+	if count_of_solutions_to_explore > 100000:
+		return
 	
 	var grid_ids_with_information: Dictionary = {}
 	
