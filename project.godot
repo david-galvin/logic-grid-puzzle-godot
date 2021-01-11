@@ -19,21 +19,6 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://bit_set.gd"
 }, {
-"base": "HBoxContainer",
-"class": "ContributorClass",
-"language": "GDScript",
-"path": "res://addons/github-integration/scripts/ContributorClass.gd"
-}, {
-"base": "Node",
-"class": "FutureThreadPool",
-"language": "GDScript",
-"path": "res://addons/thread_pool/future_thread_pool.gd"
-}, {
-"base": "PanelContainer",
-"class": "GistItem",
-"language": "GDScript",
-"path": "res://addons/github-integration/scripts/GistItem.gd"
-}, {
 "base": "Reference",
 "class": "Grid",
 "language": "GDScript",
@@ -43,11 +28,6 @@ _global_script_classes=[ {
 "class": "GridSorter",
 "language": "GDScript",
 "path": "res://grid_sorter.gd"
-}, {
-"base": "HBoxContainer",
-"class": "InvitationItem",
-"language": "GDScript",
-"path": "res://addons/github-integration/scripts/InvitationItem.gd"
 }, {
 "base": "Reference",
 "class": "LogicGridPuzzle",
@@ -74,20 +54,15 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://permutation_tools.gd"
 }, {
-"base": "PanelContainer",
-"class": "RepositoryItem",
+"base": "Reference",
+"class": "PoolIntMatrix",
 "language": "GDScript",
-"path": "res://addons/github-integration/scripts/RepositoryItem.gd"
+"path": "res://pool_int_matrix.gd"
 }, {
 "base": "Reference",
 "class": "ScanOperation",
 "language": "GDScript",
 "path": "res://scan_operation.gd"
-}, {
-"base": "Node",
-"class": "ThreadPool",
-"language": "GDScript",
-"path": "res://addons/thread_pool/thread_pool.gd"
 }, {
 "base": "Reference",
 "class": "TimerDict",
@@ -97,20 +72,15 @@ _global_script_classes=[ {
 _global_script_class_icons={
 "BitMask": "",
 "BitSet": "",
-"ContributorClass": "",
-"FutureThreadPool": "",
-"GistItem": "",
 "Grid": "",
 "GridSorter": "",
-"InvitationItem": "",
 "LogicGridPuzzle": "",
 "Math": "",
 "Move": "",
 "Permutation": "",
 "PermutationTools": "",
-"RepositoryItem": "",
+"PoolIntMatrix": "",
 "ScanOperation": "",
-"ThreadPool": "",
 "TimerDict": ""
 }
 
@@ -126,4 +96,8 @@ gdscript/warnings/integer_division=false
 
 [editor_plugins]
 
-enabled=PoolStringArray( "gut", "thread_pool" )
+enabled=PoolStringArray( "gut" )
+
+[rendering]
+
+environment/default_environment="res://default_env.tres"
