@@ -75,6 +75,11 @@ _global_script_classes=[ {
 "path": "res://addons/github-integration/scripts/RepositoryItem.gd"
 }, {
 "base": "Reference",
+"class": "ScanOperation",
+"language": "GDScript",
+"path": "res://scan_operation.gd"
+}, {
+"base": "Reference",
 "class": "TimerDict",
 "language": "GDScript",
 "path": "res://timer_dict.gd"
@@ -93,6 +98,7 @@ _global_script_class_icons={
 "Permutation": "",
 "PermutationTools": "",
 "RepositoryItem": "",
+"ScanOperation": "",
 "TimerDict": ""
 }
 
