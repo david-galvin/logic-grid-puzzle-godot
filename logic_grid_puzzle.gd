@@ -236,7 +236,7 @@ func _scan_puzzle_solutions_for_implied_information() -> void:
 	var grid_id_to_solution_ranks: Array = []
 	grid_id_to_solution_ranks.resize(_grids.size())
 	for grid in _grids:
-		grid_id_to_solution_ranks[grid.id] = grid.get_solution_ranks()
+		grid_id_to_solution_ranks[grid.id] = grid.get_solution_ranks_dict()
 
 	for puzzle_solution_index in range(count_of_solutions_to_explore):
 		temp_solution_index = puzzle_solution_index
@@ -270,10 +270,14 @@ func _scan_puzzle_solutions_for_implied_information() -> void:
 			for id in _grids.size():
 				if not grid_id_to_rank[id] == null:
 					grid_solutions_bitsets[id].set_at_index(grid_id_to_rank[id], true)
-
+	
 	for id in _grids.size():
 		if grid_ids_with_information.has(id):
 			_grids[id].merge_solutions_from_grid_trio(grid_solutions_bitsets[id])
+
+
+func _thread_scanner():
+	pass
 
 
 func _is_valid_cat(cat: int) -> bool:

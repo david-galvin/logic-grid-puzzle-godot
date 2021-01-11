@@ -47,6 +47,16 @@ func get_solution_ranks() -> Array:
 	return set_bits
 
 
+func get_solution_ranks_dict() -> Dictionary:
+	var set_bits: Dictionary = {}
+	var bit: int = solutions_bitset.next_set_bit(0)
+	set_bits[bit] = true
+	while set_bits.size() < solutions_bitset.cardinality():
+		bit = solutions_bitset.next_set_bit(bit + 1)
+		set_bits[bit] = true
+	return set_bits
+
+
 func get_random_unsolved_cell_coordinates() -> Array:
 	if _unsolved_cells.size() == 0:
 		push_error("There are no unsolved cells")
