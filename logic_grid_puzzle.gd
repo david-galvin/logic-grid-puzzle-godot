@@ -106,8 +106,16 @@ func _set_perm_rank_matrix():
 		_perm_rank_matrix = PermutationTools.get_perm_rank_matrix(_cat_size)
 
 
-func _scan_puzzle_get_grids_to_permute() -> Array:
-	var copy_of_grids: Array = _grids.duplicate()
+func _scan_puzzle_get_grids_to_permute(categories_to_use: Array = []) -> Array:
+	var copy_of_grids: Array 
+	
+	if categories_to_use.size() > 0:
+		for cat1 in range(categories_to_use.size() - 1):
+			for cat2 in range(cat1 + 1, categories_to_use.size()):
+				copy_of_grids.append(_get_grid(cat1, cat2))
+	else:
+		copy_of_grids = _grids.duplicate()
+	
 	var grids_to_permute: Array = []
 	
 	# Here we find an MST where we consider categories as vertices and grids
@@ -132,6 +140,10 @@ func _scan_puzzle_get_grids_to_permute() -> Array:
 	return grids_to_permute
 
 
+func scan_puzzle_get_ordered_list_of_operations_from_categories(categories_to_scan: Array) -> Array:
+	return []
+
+
 func scan_puzzle_get_ordered_list_of_operations(grids_to_permute: Array) -> Array:
 	var cat_to_solved_grids: Array = []
 	var num_grids_in_solution = Math.choose(grids_to_permute.size(), 2) + grids_to_permute.size()
@@ -149,7 +161,6 @@ func scan_puzzle_get_ordered_list_of_operations(grids_to_permute: Array) -> Arra
 	var operations: Array = []
 	
 	var cat: int = 0
-	var sanity_count = 0
 	var grid1: Grid
 	var grid2: Grid
 	var grid3: Grid
@@ -157,10 +168,6 @@ func scan_puzzle_get_ordered_list_of_operations(grids_to_permute: Array) -> Arra
 	var grid3_cat2: int
 	var added_any_grids: bool = true
 	while (solved_grid_ids.size() < num_grids_in_solution) and ((not cat == 0) or added_any_grids):
-		sanity_count += 1
-		if sanity_count >= 20:
-			push_error("We shouldn't pass through this loop so many times")
-			return []
 		cat = (cat + 1) % _cat_count
 		if cat == 0:
 			added_any_grids = false
