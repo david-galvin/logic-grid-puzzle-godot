@@ -230,28 +230,34 @@ func _scan_puzzle_solutions_for_implied_information() -> void:
 		grid_ids_with_information[grid.id] = true
 
 	var grid_id_to_rank: Array = []
+	var grid_id_to_confirmed_rank: Array = []
 	grid_id_to_rank.resize(_grids.size())
+	grid_id_to_confirmed_rank.resize(_grids.size())
 	var grid_solution_index: int
 	var temp_solution_index: int
 	var grid_id: int
 	var grid_id_to_solution_ranks: Array = []
 	grid_id_to_solution_ranks.resize(_grids.size())
 	for grid in _grids:
+		grid_id_to_confirmed_rank[grid.id] = {}
 		grid_id_to_solution_ranks[grid.id] = grid.get_solution_ranks_dict()
 
 	for puzzle_solution_index in range(count_of_solutions_to_explore):
+		_timer.start_timer("for i in range(grids_to_permute.size():")
 		temp_solution_index = puzzle_solution_index
 		for i in range(grids_to_permute.size()):
 			grid_id = grids_to_permute[i].id
 			grid_solution_index = temp_solution_index % grids_to_permute[i].solutions_bitset.cardinality()
 			grid_id_to_rank[grid_id] = grids_to_permute_solution_ranks_matrix[i][grid_solution_index]
 			temp_solution_index /= grids_to_permute[i].solutions_bitset.cardinality()
+		_timer.end_timer("for i in range(grids_to_permute.size():")
 
 		var valid_solution: bool = true
 		var row_grid_rank: int
 		var col_grid_rank: int
 		var implied_grid_rank: int
 		var is_valid: bool
+		_timer.start_timer("for operation in operations")
 		for operation in operations:
 			row_grid_rank = grid_id_to_rank[operation.row_grid_id]
 			if operation.invert_row_perm:
@@ -266,15 +272,22 @@ func _scan_puzzle_solutions_for_implied_information() -> void:
 			if not is_valid:
 				valid_solution = false
 				break
-
+		_timer.end_timer("for operation in operations")
+		_timer.start_timer("if valid_solution")
 		if valid_solution:
 			for id in _grids.size():
 				if not grid_id_to_rank[id] == null:
-					grid_solutions_bitsets[id].set_at_index(grid_id_to_rank[id], true)
-
+					grid_id_to_confirmed_rank[id][grid_id_to_rank[id]] = true
+		_timer.end_timer("if valid_solution")
+	_timer.start_timer("for id in _grids.size()")
+	for id in _grids.size():
+		if not grid_id_to_rank[id] == null:
+			for rank in grid_id_to_confirmed_rank[id]:
+				grid_solutions_bitsets[id].set_at_index(rank, true)
 	for id in _grids.size():
 		if grid_ids_with_information.has(id):
 			_grids[id].merge_solutions_from_grid_trio(grid_solutions_bitsets[id])
+	_timer.end_timer("for id in _grids.size()")
 
 
 func _thread_scanner():
