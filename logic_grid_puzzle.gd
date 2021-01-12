@@ -191,7 +191,12 @@ func scan_puzzle_get_ordered_list_of_operations(grids_to_permute: Array) -> Arra
 	return operations
 
 
-func _scan_puzzle_solutions_for_implied_information() -> void:
+func _scan_puzzle_is_a_solution_possible(count_of_solutions_to_explore: int, operations_size: int) -> bool:
+	if count_of_solutions_to_explore > 50000:
+		return false
+
+	if operations_size == 0:
+		return false
 	var count_of_data_cells: int = 0
 	var num_grids_with_data: int = 0
 	for grid in _grids:
@@ -199,28 +204,24 @@ func _scan_puzzle_solutions_for_implied_information() -> void:
 		count_of_data_cells += grid.count_of_true_cells
 		num_grids_with_data += 1
 	if num_grids_with_data < 2 or count_of_data_cells < _cat_size:
-		return
-	
+		return false
+	return true
+
+
+func _scan_puzzle_solutions_for_implied_information() -> void:
 	var grids_to_permute: Array = _scan_puzzle_get_grids_to_permute()
 	var operations: Array = scan_puzzle_get_ordered_list_of_operations(grids_to_permute)
-
-	if operations.size() == 0:
+	var count_of_solutions_to_explore: int = 1
+	for grid in grids_to_permute:
+		count_of_solutions_to_explore *= grid.solutions_bitset.cardinality()
+		
+	if not _scan_puzzle_is_a_solution_possible(count_of_solutions_to_explore, operations.size()):
 		return
 
 	# we'll use the same indexing for the solution as for the grids.
 	var grid_solutions_bitsets: Array = []
 	for _i in _grids.size():
 		grid_solutions_bitsets.append(BitSet.new(Math.factorial(_cat_size)))
-
-	var count_of_solutions_to_explore: int = 1
-	for grid in grids_to_permute:
-		count_of_solutions_to_explore *= grid.solutions_bitset.cardinality()
-
-	if count_of_solutions_to_explore > 50000:
-		return
-
-	_timer.start_timer("scanner: runs_past_thresholds")
-	_timer.end_timer("scanner: runs_past_thresholds")
 
 	var grid_ids_with_information: Dictionary = {}
 	var grids_to_permute_solution_ranks_matrix: Array = []
@@ -270,7 +271,7 @@ func _scan_puzzle_solutions_for_implied_information() -> void:
 			for id in _grids.size():
 				if not grid_id_to_rank[id] == null:
 					grid_solutions_bitsets[id].set_at_index(grid_id_to_rank[id], true)
-	
+
 	for id in _grids.size():
 		if grid_ids_with_information.has(id):
 			_grids[id].merge_solutions_from_grid_trio(grid_solutions_bitsets[id])
