@@ -131,7 +131,7 @@ func _scan_puzzle_get_grids_to_permute(categories_to_use: Array = []) -> Array:
 	for edge in mst_edges:
 		var grid: Grid = _get_grid(edge[0], edge[1])
 		total_cardinality *= grid.solutions_bitset.cardinality()
-		if total_cardinality > 50000:
+		if total_cardinality > 10000:
 			break
 		if grid.solutions_bitset.cardinality() == grid.max_possible_solutions:
 			break 
