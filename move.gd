@@ -18,7 +18,7 @@ func _init(my_cat1: int, my_elt1: int, my_cat2: int, my_elt2: int, my_target_sta
 	target_state = my_target_state
 	var truth_str = "true" if target_state else "false"
 	_string = "_lp.set_grid_cell(" + str(cat1) + ", " + str(elt1) + ", " \
-			+ str(cat2) + ", " + str(elt2) + ", " + truth_str + ")\n"
+			+ str(cat2) + ", " + str(elt2) + ", " + truth_str + ")"
 
 
 func _to_string() -> String:

@@ -288,11 +288,11 @@ class TestLogicGridPuzzle:
 	func test_random_puzzles():
 		_cat_count = 5
 		_cat_size = 5
-		var _minutes: int = 0
+		var _minutes: int = 360
 		var _start_time = OS.get_ticks_msec()
 		var _tries: int = 0
-		#while false and (OS.get_ticks_msec() - _start_time) < _minutes * 60000:
-		while _tries in range(1):
+		while (OS.get_ticks_msec() - _start_time) < _minutes * 60_000:
+		#while _tries <= 100:
 			_tries += 1
 			_lp = LogicGridPuzzle.new(_cat_count, _cat_size)
 			
@@ -304,17 +304,17 @@ class TestLogicGridPuzzle:
 			var _coords: Array
 			var _grid: Grid
 			var _counter: int = 0
-			var _moves: String = ""
+			var _moves: Array
 			while (_lp.is_solvable() and not _lp.is_solved()) and _counter <= _cat_size * _cat_size * _cat_count:
 				_grid = _lp.get_random_unsolved_grid()
 				_coords = _grid.get_random_unsolved_cell_coordinates()
 				var move: Move = Move.new(_grid.cat1, _coords[0], _grid.cat2, _coords[1], false)
 				_lp.apply_move(move)
-				_moves += str(move)
+				_moves.append(str(move))
 				_counter += 1
 			if not _lp.is_solved():
 				_lp.print_times()
-				print(_moves)
-				break
-		print("Num tries: " + str(_tries))
+				for i in range(_moves.size()):
+					gut.p(_moves[i])
+		gut.p("Num tries: " + str(_tries))
 		_lp.print_times()
