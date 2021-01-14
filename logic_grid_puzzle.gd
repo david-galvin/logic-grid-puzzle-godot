@@ -10,9 +10,9 @@ extends Reference
 # rank: the rank of a permutation. The ordering is not lexicographic.
 # inverse_rank: in conjunction with a rank, the rank that undoes it
 # grid: a pair of categories.
-const path_to_inverses_file = "permutation_inverses.dat"
-const path_to_size_to_perm_matrix = "size_to_perm_matrix.dat"
-const max_cat_size = 6
+const PATH_TO_INVERSES_FILE = "permutation_inverses.dat"
+const PATH_TO_SIZE_TO_PERM_MATRIX = "size_to_perm_matrix.dat"
+const MAX_SOLUTIONS_TO_CHECK = 10_000
 
 var _rank_to_inverse_rank: Array = []
 var _perm_rank_matrix: Array
@@ -57,8 +57,18 @@ func set_grid_cell(cat1: int, elt1: int, \
 	if grid.is_solved():
 		push_error("Entering a move in a solved grid!")
 	grid.set_cell(elt1, elt2, target_state)
-	_scan_puzzle_solutions_for_implied_information() 
+	#var categories_to_use: Array = []
+	var other_cats: Array = Array(range(_cat_count))
+	other_cats.erase(cat1)
+	other_cats.erase(cat2)
+	for cat3 in other_cats:
+		_scan_puzzle_solutions_for_implied_information([cat1, cat2, cat3]) 
+	_scan_puzzle_solutions_for_implied_information([]) 
 	_timer.end_timer("set_grid_cell")
+
+
+func print_grid_solutions_bitset(cat1: int, cat2: int) -> void:
+	print(str(_grids[_get_grid_index(cat1, cat2)].solutions_bitset))
 
 
 func apply_move(move: Move) -> void:
@@ -86,8 +96,8 @@ func print_times():
 
 func _set_rank_to_inverse_rank():
 	var file = File.new()
-	if _cat_size in range(2,8) and file.file_exists(path_to_inverses_file):
-		file.open(path_to_inverses_file, File.READ)
+	if _cat_size in range(2,8) and file.file_exists(PATH_TO_INVERSES_FILE):
+		file.open(PATH_TO_INVERSES_FILE, File.READ)
 		_rank_to_inverse_rank = file.get_var(true)[_cat_size]
 		file.close()
 	else:
@@ -97,8 +107,8 @@ func _set_rank_to_inverse_rank():
 
 func _set_perm_rank_matrix():
 	var file = File.new()
-	if _cat_size in range(2,7) and file.file_exists(path_to_size_to_perm_matrix):
-		file.open(path_to_size_to_perm_matrix, File.READ)
+	if _cat_size in range(2,7) and file.file_exists(PATH_TO_SIZE_TO_PERM_MATRIX):
+		file.open(PATH_TO_SIZE_TO_PERM_MATRIX, File.READ)
 		_perm_rank_matrix = file.get_var(true)[_cat_size]
 		file.close()
 	else:
@@ -110,8 +120,10 @@ func _scan_puzzle_get_grids_to_permute(categories_to_use: Array = []) -> Array:
 	var copy_of_grids: Array 
 	
 	if categories_to_use.size() > 0:
-		for cat1 in range(categories_to_use.size() - 1):
-			for cat2 in range(cat1 + 1, categories_to_use.size()):
+		for i in range(categories_to_use.size() - 1):
+			var cat1: int = categories_to_use[i]
+			for j in range(i + 1, categories_to_use.size()):
+				var cat2: int = categories_to_use[j]
 				copy_of_grids.append(_get_grid(cat1, cat2))
 	else:
 		copy_of_grids = _grids.duplicate()
@@ -131,17 +143,13 @@ func _scan_puzzle_get_grids_to_permute(categories_to_use: Array = []) -> Array:
 	for edge in mst_edges:
 		var grid: Grid = _get_grid(edge[0], edge[1])
 		total_cardinality *= grid.solutions_bitset.cardinality()
-		if total_cardinality > 10000:
+		if total_cardinality > MAX_SOLUTIONS_TO_CHECK:
 			break
 		if grid.solutions_bitset.cardinality() == grid.max_possible_solutions:
 			break 
 		grids_to_permute.append(_get_grid(edge[0], edge[1]))
 		
 	return grids_to_permute
-
-
-func scan_puzzle_get_ordered_list_of_operations_from_categories(categories_to_scan: Array) -> Array:
-	return []
 
 
 func scan_puzzle_get_ordered_list_of_operations(grids_to_permute: Array) -> Array:
@@ -216,8 +224,8 @@ func _scan_puzzle_is_a_solution_possible(operations_size: int) -> bool:
 	return true
 
 
-func _scan_puzzle_solutions_for_implied_information() -> void:
-	var grids_to_permute: Array = _scan_puzzle_get_grids_to_permute()
+func _scan_puzzle_solutions_for_implied_information(categories_to_use: Array = []) -> void:
+	var grids_to_permute: Array = _scan_puzzle_get_grids_to_permute(categories_to_use)
 	var operations: Array = scan_puzzle_get_ordered_list_of_operations(grids_to_permute)
 	var count_of_solutions_to_explore: int = 1
 	for grid in grids_to_permute:

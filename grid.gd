@@ -115,7 +115,7 @@ func get_row_str(row: int) -> String:
 	for col in range(_dimension):
 		match _grid_cell_matrix[row][col]:
 			GridCellState.UNKNOWN:
-				row_str += "?"
+				row_str += "-"
 			GridCellState.TRUE:
 				row_str += "O"
 			GridCellState.FALSE:

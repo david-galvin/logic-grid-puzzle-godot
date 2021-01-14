@@ -26,17 +26,17 @@ class TestLogicGridPuzzle:
 					_lp.set_grid_cell(cat1, elt1, cat2, elt2, false)
 
 		var lp_str: String = 	"------------\n" + \
-								"|XXX??|XXX??\n" + \
-								"|XXX??|XXX??\n" + \
-								"|???XX|???XX\n" + \
-								"|???XX|???XX\n" + \
-								"|???XX|???XX\n" + \
+								"|XXX--|XXX--\n" + \
+								"|XXX--|XXX--\n" + \
+								"|---XX|---XX\n" + \
+								"|---XX|---XX\n" + \
+								"|---XX|---XX\n" + \
 								"------\n" + \
-								"|???XX\n" + \
-								"|???XX\n" + \
-								"|???XX\n" + \
-								"|XXX??\n" + \
-								"|XXX??\n"
+								"|---XX\n" + \
+								"|---XX\n" + \
+								"|---XX\n" + \
+								"|XXX--\n" + \
+								"|XXX--\n"
 		assert_eq(str(_lp), lp_str)
 
 
@@ -190,27 +190,6 @@ class TestLogicGridPuzzle:
 		assert_eq(_lp.is_solved(), true)
 
 
-	func test_implied_solved_10_5():
-		_cat_count = 10
-		_cat_size = 5
-		_lp = LogicGridPuzzle.new(_cat_count, _cat_size)
-		_lp.set_grid_cell(9, 2, 5, 1, true)
-		_lp.set_grid_cell(5, 2, 1, 1, true)
-		_lp.set_grid_cell(8, 0, 7, 4, true)
-		_lp.set_grid_cell(8, 2, 4, 0, true)
-		_lp.set_grid_cell(9, 3, 1, 3, true)
-		_lp.set_grid_cell(4, 2, 1, 3, true)
-		_lp.set_grid_cell(7, 2, 3, 3, true)
-		_lp.set_grid_cell(6, 4, 0, 0, true)
-		_lp.set_grid_cell(7, 0, 1, 2, true)
-		_lp.set_grid_cell(3, 4, 2, 2, true)
-		_lp.set_grid_cell(7, 0, 6, 4, true)
-		_lp.set_grid_cell(8, 4, 6, 1, true)
-		_lp.set_grid_cell(7, 0, 4, 2, true)
-		assert_eq(GridCellState.FALSE, _lp.read_grid_cell(7, 0, 4, 2))
-		_lp.print_times()
-
-
 	func test_speed():
 		_cat_count = 5
 		_cat_size = 4
@@ -250,8 +229,64 @@ class TestLogicGridPuzzle:
 		_lp.print_times()
 
 
+	func test_lp_5_5():
+		_cat_count = 5
+		_cat_size = 5
+		_lp = LogicGridPuzzle.new(_cat_count, _cat_size)
+		_lp.set_grid_cell(4, 3, 3, 2, false)
+		_lp.set_grid_cell(4, 0, 3, 2, false)
+		_lp.set_grid_cell(3, 0, 2, 0, false)
+		_lp.set_grid_cell(2, 4, 0, 0, false)
+		_lp.set_grid_cell(4, 2, 3, 3, false)
+		_lp.set_grid_cell(3, 4, 1, 3, false)
+		_lp.set_grid_cell(4, 2, 0, 2, false)#
+		_lp.set_grid_cell(4, 4, 3, 3, false)
+		_lp.set_grid_cell(4, 4, 1, 2, false)
+		_lp.set_grid_cell(3, 3, 1, 3, false)
+		_lp.set_grid_cell(3, 3, 2, 2, false)
+		_lp.set_grid_cell(4, 0, 0, 2, false)
+		_lp.set_grid_cell(4, 0, 1, 4, false)#
+		_lp.set_grid_cell(4, 2, 3, 0, false)
+		_lp.set_grid_cell(3, 0, 0, 1, false)
+		_lp.set_grid_cell(3, 2, 2, 3, false)
+		_lp.set_grid_cell(4, 4, 3, 2, false)
+		_lp.set_grid_cell(4, 0, 1, 2, false)
+		_lp.set_grid_cell(4, 3, 1, 4, false)#
+		_lp.set_grid_cell(2, 1, 0, 4, false)
+		_lp.set_grid_cell(4, 0, 0, 4, false)
+		_lp.set_grid_cell(2, 3, 1, 1, false)
+		_lp.set_grid_cell(3, 1, 0, 2, false)
+		_lp.set_grid_cell(2, 1, 0, 3, false)
+		_lp.set_grid_cell(1, 2, 0, 0, false)
+		_lp.set_grid_cell(4, 4, 2, 2, false)
+		_lp.set_grid_cell(3, 4, 0, 3, false)
+		_lp.set_grid_cell(2, 1, 1, 2, false)
+		_lp.set_grid_cell(3, 4, 2, 4, false)
+		_lp.set_grid_cell(3, 1, 2, 0, false)
+		_lp.set_grid_cell(2, 0, 1, 0, false)
+		_lp.set_grid_cell(4, 1, 3, 3, false)
+		assert_eq(_lp.read_grid_cell(3, 3, 1, 4), GridCellState.FALSE)
+		_lp.set_grid_cell(3, 0, 0, 0, false)
+		_lp.set_grid_cell(3, 2, 1, 4, false)
+		_lp.set_grid_cell(4, 1, 1, 4, false)#
+		_lp.set_grid_cell(1, 0, 0, 4, false)
+		_lp.set_grid_cell(3, 0, 1, 2, false)
+		_lp.set_grid_cell(4, 4, 1, 4, false)#
+		assert_eq(_lp.read_grid_cell(4, 1, 2, 3), GridCellState.FALSE)
+		assert_eq(_lp.read_grid_cell(1, 4, 0, 2), GridCellState.FALSE)
+		assert_eq(_lp.read_grid_cell(4, 2, 1, 4), GridCellState.TRUE)
+		assert_eq(_lp.read_grid_cell(4, 1, 3, 2), GridCellState.TRUE)
+		_lp.set_grid_cell(3, 3, 2, 3, false)
+		_lp.set_grid_cell(3, 4, 0, 4, false)
+		_lp.set_grid_cell(2, 3, 1, 0, false)
+		_lp.set_grid_cell(4, 2, 3, 1, false)
+		_lp.set_grid_cell(4, 0, 3, 3, false)
+		_lp.set_grid_cell(1, 4, 0, 1, false)
+		assert_eq(_lp.read_grid_cell(1, 4, 0, 0), GridCellState.TRUE)
+
+
 	func test_random_puzzles():
-		_cat_count = 10
+		_cat_count = 5
 		_cat_size = 5
 		var _minutes: int = 0
 		var _start_time = OS.get_ticks_msec()
@@ -273,7 +308,7 @@ class TestLogicGridPuzzle:
 			while (_lp.is_solvable() and not _lp.is_solved()) and _counter <= _cat_size * _cat_size * _cat_count:
 				_grid = _lp.get_random_unsolved_grid()
 				_coords = _grid.get_random_unsolved_cell_coordinates()
-				var move: Move = Move.new(_grid.cat1, _coords[0], _grid.cat2, _coords[1], true)
+				var move: Move = Move.new(_grid.cat1, _coords[0], _grid.cat2, _coords[1], false)
 				_lp.apply_move(move)
 				_moves += str(move)
 				_counter += 1
@@ -281,5 +316,5 @@ class TestLogicGridPuzzle:
 				_lp.print_times()
 				print(_moves)
 				break
-		#print("Num tries: " + str(_tries))
+		print("Num tries: " + str(_tries))
 		_lp.print_times()

@@ -24,15 +24,15 @@ class TestGrid:
 
 	func test_set_cell_true():
 		_grid.set_cell(0, 1, true)
-		assert_eq("\n" + str(_grid), "\nXOX\n?X?\n?X?\n")
+		assert_eq("\n" + str(_grid), "\nXOX\n-X-\n-X-\n")
 
 
 	func test_set_cell_false():
 		_grid.set_cell(0, 1, false)
-		assert_eq("\n" + str(_grid), "\n?X?\n???\n???\n")
+		assert_eq("\n" + str(_grid), "\n-X-\n---\n---\n")
 		
 		_grid.set_cell(0, 2, false)
-		assert_eq("\n" + str(_grid), "\nOXX\nX??\nX??\n")
+		assert_eq("\n" + str(_grid), "\nOXX\nX--\nX--\n")
 		
 		assert_eq(_grid.read_cell(0, 0), GridCellState.TRUE)
 	

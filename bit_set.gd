@@ -105,9 +105,7 @@ func next_set_bit(index: int) -> int:
 
 
 func clear() -> void:
-	_print_str = "%0*d" % [_num_bits, 0]
-	_cardinality = 0
-	_have_bits_changed = false
+	_have_bits_changed = true
 	for i in range(_num_words):
 		_words[i] = 0
 
@@ -115,26 +113,37 @@ func clear() -> void:
 # Return the number of bits set to true
 func cardinality() -> int:
 	if _have_bits_changed:
-		var ans: int = 0
-		var index: int = next_set_bit(0)
-		while index != -1 && index < _num_bits:
-			index  = next_set_bit(index + 1)
-			ans += 1
-		_cardinality = ans
-		_have_bits_changed = false
-		return ans
-	else:
-		return _cardinality
+		_update_for_changed_bits()
+	return _cardinality
+
+
+func _update_for_changed_bits():
+	_update_print_str_for_changed_bits()
+	_update_cardinality_for_changed_bits()
+	_have_bits_changed = false
+
+
+func _update_print_str_for_changed_bits():
+	var print_str: String = ""
+	var padding: int
+	for i in range(_num_words):
+		padding = [_BITS_PER_WORD, _num_bits - i * _BITS_PER_WORD].min()
+		print_str = _word_to_string(_words[i], padding) + print_str
+	_print_str = print_str
+
+
+func _update_cardinality_for_changed_bits():
+	var ans: int = 0
+	var index: int = next_set_bit(0)
+	while index != -1 && index < _num_bits:
+		index  = next_set_bit(index + 1)
+		ans += 1
+	_cardinality = ans
 
 
 func _to_string() -> String:
 	if _have_bits_changed:
-		var print_str: String = ""
-		var padding: int
-		for i in range(_num_words):
-			padding = [_BITS_PER_WORD, _num_bits - i * _BITS_PER_WORD].min()
-			print_str = _word_to_string(_words[i], padding) + print_str
-		_print_str = print_str
+		_update_for_changed_bits()
 	return _print_str
 
 
