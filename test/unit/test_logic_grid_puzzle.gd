@@ -382,4 +382,5 @@ class TestLogicGridPuzzle:
 				_lp.print_times()
 				for i in range(_moves.size()):
 					gut.p(_moves[i])
+				break
 		gut.p("Num tries: " + str(_tries))

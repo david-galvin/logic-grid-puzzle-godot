@@ -12,7 +12,7 @@ extends Reference
 # grid: a pair of categories.
 const PATH_TO_INVERSES_FILE = "permutation_inverses.dat"
 const PATH_TO_SIZE_TO_PERM_MATRIX = "size_to_perm_matrix.dat"
-const MAX_SOLUTIONS_TO_CHECK = 10_000
+const MAX_SOLUTIONS_TO_CHECK = 15_000
 
 var _rank_to_inverse_rank: Array = []
 var _perm_rank_matrix: Array
@@ -116,8 +116,8 @@ func _recursive_solution_scan_new(cat1: int, cat2: int) -> void:
 	for size in range(max_size, 2, -1):
 		for cat_combo in _size_to_cat_combos_to_is_scanned[size]:
 			if not _size_to_cat_combos_to_is_scanned[size][cat_combo]:
-				#if cat_combo.has(cat1) and cat_combo.has(cat2):
-				categories_used = _scan_puzzle_solutions_for_implied_information(cat_combo)
+				if cat_combo.has(cat1) and cat_combo.has(cat2):
+					categories_used = _scan_puzzle_solutions_for_implied_information(cat_combo)
 				_set_cat_combos_scanned_to_true(categories_used.keys())
 
 
