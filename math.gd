@@ -39,8 +39,6 @@ static func get_subsets(arr: Array, subset_size: int):
 	for i in range(subset_size):
 		indices[i] = i
 	for _counter in range(choose(arr.size(), subset_size)):
-		if _counter == 9:
-			pass
 		subsets.append([])
 		for index in indices:
 			subsets[-1].append(arr[index])
@@ -50,13 +48,13 @@ static func get_subsets(arr: Array, subset_size: int):
 			var i: int = indices.size()
 			while i > 0:
 				i -= 1
-				if indices[i] < arr.size() - i - 1:
+				if indices[i] < arr.size() - subset_size + i:
 					break
 			if indices[i] == arr.size() - i:
 				return subsets
 			else:
 				indices[i] += 1
-				for j in range(i+1, subset_size):
+				for j in range(i + 1, subset_size):
 					indices[j] = indices[j - 1] + 1
 	return subsets
 

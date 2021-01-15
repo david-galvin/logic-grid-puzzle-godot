@@ -11,7 +11,20 @@ class TestGDScript:
 	func before_each():
 		_timer = TimerDict.new()
 		randomize()
-	
+
+
+	func test_array_equality():
+		var ints1: Array = [0, 1, 2, 3]
+		var ints2: Array = [0, 1, 2, 3]
+		assert_eq(ints1, ints2)
+		var str1: Array = ['a', 'b', 'c']
+		var str2: Array = ['a', 'b', 'c']
+		assert_eq(str1, str2)
+		var mix1: Array = [0, 'a', 1, 'b']
+		var mix2: Array = [0, 'a', 1, 'b']
+		assert_eq(mix1, mix2)
+
+
 	func test_array():
 		var ints = [0, 1, 2, 3, 4]
 		var num_times: int = 1000000

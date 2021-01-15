@@ -12,13 +12,14 @@ extends Reference
 # grid: a pair of categories.
 const PATH_TO_INVERSES_FILE = "permutation_inverses.dat"
 const PATH_TO_SIZE_TO_PERM_MATRIX = "size_to_perm_matrix.dat"
-const MAX_SOLUTIONS_TO_CHECK = 50_000
+const MAX_SOLUTIONS_TO_CHECK = 10_000
 
 var _rank_to_inverse_rank: Array = []
 var _perm_rank_matrix: Array
 var _cat_count: int
 var _cat_size: int
 var _grids: Array = []
+var _size_to_cat_combos_to_is_scanned: Dictionary
 var _unsolved_grids: Array = []
 var _timer = TimerDict.new()
 
@@ -28,6 +29,7 @@ func _init(my_cat_count: int, my_cat_size: int) -> void:
 	_cat_size = my_cat_size
 	randomize()
 	_grids = _build_grids()
+	_size_to_cat_combos_to_is_scanned = _build_cat_combos()
 	_set_rank_to_inverse_rank()
 	_set_perm_rank_matrix()
 
@@ -57,7 +59,8 @@ func set_grid_cell(cat1: int, elt1: int, \
 	if grid.is_solved():
 		push_error("Entering a move in a solved grid!")
 	grid.set_cell(elt1, elt2, target_state)
-	_recursive_solution_scan(cat1, cat2)
+	#_recursive_solution_scan(cat1, cat2)
+	_recursive_solution_scan_new(cat1, cat2)
 	_timer.end_timer("set_grid_cell")
 
 
@@ -88,19 +91,34 @@ func print_times():
 	print(str(_timer))
 
 
-func _recursive_solution_scan(cat1: int, cat2: int):
-	# TO DO: First do maximum scan. If not all categories were scanned, 
-	# figure out how many categories were scanned. This is the max allowable
-	# under MAX_SOLUTIONS_TO_CHECK. Attempt all other combinations of this size.
-	# If not all of these are scanned, determine if any combinations the next
-	# size smaller haven't been scanned and scan them. Repeat down to size 3.
-	var other_cats: Array = Array(range(_cat_count))
-	other_cats.erase(cat1)
-	other_cats.erase(cat2)
-	var categories_used: Dictionary
-	for cat3 in other_cats:
-		categories_used = _scan_puzzle_solutions_for_implied_information([cat1, cat2, cat3]) 
-	categories_used = _scan_puzzle_solutions_for_implied_information([]) 
+#func _recursive_solution_scan(cat1: int, cat2: int):
+#	# TO DO: First do maximum scan. If not all categories were scanned, 
+#	# figure out how many categories were scanned. This is the max allowable
+#	# under MAX_SOLUTIONS_TO_CHECK. Attempt all other combinations of this size.
+#	# If not all of these are scanned, determine if any combinations the next
+#	# size smaller haven't been scanned and scan them. Repeat down to size 3.
+#	var other_cats: Array = Array(range(_cat_count))
+#	other_cats.erase(cat1)
+#	other_cats.erase(cat2)
+#	var categories_used: Dictionary
+#	for cat3 in other_cats:
+#		categories_used = _scan_puzzle_solutions_for_implied_information([cat1, cat2, cat3]) 
+#	categories_used = _scan_puzzle_solutions_for_implied_information([]) 
+
+
+func _recursive_solution_scan_new(cat1: int, cat2: int) -> void:
+	_set_cat_combos_scanned_to_false()
+	var categories_used: Dictionary = _scan_puzzle_solutions_for_implied_information([]) 
+	if _cat_count == 3 or _cat_count == categories_used.size():
+		return
+	_set_cat_combos_scanned_to_true(categories_used.keys())
+	var max_size: int = categories_used.size()
+	for size in range(max_size, 2, -1):
+		for cat_combo in _size_to_cat_combos_to_is_scanned[size]:
+			if not _size_to_cat_combos_to_is_scanned[size][cat_combo]:
+				#if cat_combo.has(cat1) and cat_combo.has(cat2):
+				categories_used = _scan_puzzle_solutions_for_implied_information(cat_combo)
+				_set_cat_combos_scanned_to_true(categories_used.keys())
 
 
 func _set_rank_to_inverse_rank():
@@ -360,3 +378,24 @@ func _build_grids() -> Array:
 			_grids[index] = Grid.new(_cat_size, bit_mask, cat1, cat2, index)
 			_unsolved_grids[index] = _grids[index]
 	return _grids
+
+
+func _build_cat_combos() -> Dictionary:
+	var size_to_cat_combos_to_is_scanned: Dictionary = {}
+	for size in range(3, _cat_count):
+		size_to_cat_combos_to_is_scanned[size] = {}
+		for cat_combo in Math.get_subsets(Array(range(_cat_count)), size):
+			size_to_cat_combos_to_is_scanned[size][cat_combo] = false
+	return size_to_cat_combos_to_is_scanned
+
+
+func _set_cat_combos_scanned_to_false() -> void:
+	for size in _size_to_cat_combos_to_is_scanned:
+		for cat_combo in _size_to_cat_combos_to_is_scanned[size]:
+			_size_to_cat_combos_to_is_scanned[size][cat_combo] = false
+
+
+func _set_cat_combos_scanned_to_true(cats: Array) -> void:
+	for size in range(3, cats.size()):
+		for cat_combo in Math.get_subsets(Array(range(_cat_count)), size):
+			_size_to_cat_combos_to_is_scanned[size][cat_combo] = true

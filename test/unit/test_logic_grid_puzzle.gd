@@ -15,6 +15,10 @@ class TestLogicGridPuzzle:
 	var _lp: LogicGridPuzzle = null
 
 
+	func after_each():
+		_lp.print_times()
+
+
 	func test_string():
 		_cat_count = 3
 		_cat_size = 5
@@ -226,7 +230,6 @@ class TestLogicGridPuzzle:
 		_lp.set_grid_cell(2, 0, 1, 3, false)
 		_lp.set_grid_cell(2, 0, 1, 0, false)
 		_lp.set_grid_cell(3, 0, 1, 0, false)
-		_lp.print_times()
 
 
 	func test_lp_5_5():
@@ -346,96 +349,6 @@ class TestLogicGridPuzzle:
 		_lp.set_grid_cell(4,0,0,1,false)
 		_lp.set_grid_cell(2,4,0,2,false)
 		assert_eq(_lp.read_grid_cell(4,1,0,3), GridCellState.TRUE)
-
-
-	func test_lp_5_5_v3():
-		_cat_count=5
-		_cat_size=5
-		_lp=LogicGridPuzzle.new(_cat_count,_cat_size)
-		_lp.set_grid_cell(4, 4, 3, 2, false)
-		_lp.set_grid_cell(4, 1, 1, 2, false)
-		_lp.set_grid_cell(2, 4, 0, 0, false)
-		_lp.set_grid_cell(4, 0, 3, 1, false)
-		_lp.set_grid_cell(3, 2, 1, 4, false)
-		_lp.set_grid_cell(4, 2, 0, 1, false)
-		_lp.set_grid_cell(4, 4, 3, 3, false)
-		_lp.set_grid_cell(3, 0, 2, 2, false)
-		_lp.set_grid_cell(3, 2, 0, 0, false)
-		_lp.set_grid_cell(2, 4, 1, 0, false)
-		_lp.set_grid_cell(3, 4, 2, 4, false)
-		_lp.set_grid_cell(4, 4, 1, 1, false)
-		_lp.set_grid_cell(3, 3, 2, 0, false)
-		_lp.set_grid_cell(4, 2, 2, 2, false)
-		_lp.set_grid_cell(4, 4, 1, 4, false)
-		_lp.set_grid_cell(2, 2, 0, 2, false)
-		_lp.set_grid_cell(3, 1, 2, 2, false)
-		_lp.set_grid_cell(4, 3, 3, 0, false)
-		_lp.set_grid_cell(3, 0, 0, 3, false)
-		_lp.set_grid_cell(2, 1, 1, 1, false)
-		_lp.set_grid_cell(4, 4, 2, 2, false)
-		_lp.set_grid_cell(4, 2, 1, 3, false)
-		_lp.set_grid_cell(4, 0, 3, 4, false)
-		_lp.set_grid_cell(3, 1, 0, 4, false)
-		_lp.set_grid_cell(3, 4, 0, 3, false)
-		_lp.set_grid_cell(2, 1, 0, 1, false)
-		_lp.set_grid_cell(2, 4, 0, 1, false)
-		_lp.set_grid_cell(4, 0, 1, 0, false)
-		_lp.set_grid_cell(4, 1, 0, 3, false)
-		_lp.set_grid_cell(4, 3, 0, 2, false)
-		_lp.set_grid_cell(2, 2, 1, 2, false)
-		_lp.set_grid_cell(3, 2, 1, 1, false)
-		_lp.set_grid_cell(3, 2, 0, 4, false)
-		_lp.set_grid_cell(3, 1, 1, 1, false)
-		_lp.set_grid_cell(4, 4, 2, 3, false)
-		_lp.set_grid_cell(4, 3, 0, 0, false)
-		_lp.set_grid_cell(3, 4, 2, 3, false)
-		_lp.set_grid_cell(4, 1, 0, 4, false)
-		_lp.set_grid_cell(1, 4, 0, 3, false)
-		_lp.set_grid_cell(2, 1, 1, 3, false)
-		_lp.set_grid_cell(1, 2, 0, 4, false)
-		_lp.set_grid_cell(1, 3, 0, 1, false)
-		_lp.set_grid_cell(3, 4, 1, 1, false)
-		_lp.set_grid_cell(4, 2, 2, 0, false)
-		_lp.set_grid_cell(2, 4, 1, 1, false)
-		_lp.set_grid_cell(4, 0, 1, 3, false)
-		_lp.set_grid_cell(4, 0, 1, 1, false)
-		_lp.set_grid_cell(3, 1, 0, 1, false)
-		_lp.set_grid_cell(4, 1, 1, 1, false)
-		_lp.set_grid_cell(4, 2, 3, 3, false)
-		_lp.set_grid_cell(3, 4, 0, 2, false)
-		_lp.set_grid_cell(3, 3, 2, 1, false)
-		_lp.set_grid_cell(4, 2, 1, 0, false)
-		_lp.set_grid_cell(3, 0, 0, 2, false)
-#		assert_eq(_lp.read_grid_cell(1, 1, 0, 2), GridCellState.FALSE)
-		_lp.set_grid_cell(3, 0, 2, 3, false)
-#		assert_eq(_lp.read_grid_cell(4, 3, 2, 0), GridCellState.FALSE)
-		_lp.set_grid_cell(4, 2, 0, 0, false)
-#		assert_eq(_lp.read_grid_cell(4, 1, 1, 4), GridCellState.FALSE)
-#		assert_eq(_lp.read_grid_cell(4, 2, 1, 1), GridCellState.FALSE)
-#		assert_eq(_lp.read_grid_cell(4, 3, 1, 2), GridCellState.FALSE)
-#		assert_eq(_lp.read_grid_cell(4, 3, 1, 4), GridCellState.FALSE)
-#		assert_eq(_lp.read_grid_cell(4, 4, 1, 2), GridCellState.FALSE)
-#		assert_eq(_lp.read_grid_cell(4, 2, 3, 0), GridCellState.FALSE)
-#		assert_eq(_lp.read_grid_cell(3, 4, 1, 2), GridCellState.FALSE)
-		_lp.set_grid_cell(2, 1, 0, 3, false)
-#		assert_eq(_lp.read_grid_cell(4, 2, 2, 1), GridCellState.FALSE)
-#		assert_eq(_lp.read_grid_cell(3, 2, 2, 1), GridCellState.FALSE)
-		_lp.set_grid_cell(4, 1, 1, 4, false)
-#		assert_eq(_lp.read_grid_cell(4, 2, 3, 3), GridCellState.FALSE)
-		_lp.set_grid_cell(4, 3, 3, 3, false)
-		assert_eq(_lp.read_grid_cell(4, 2, 3, 3), GridCellState.FALSE)
-#		assert_eq(_lp.read_grid_cell(4, 4, 1, 1), GridCellState.TRUE)
-#		assert_eq(_lp.read_grid_cell(4, 4, 2, 0), GridCellState.TRUE)
-#		assert_eq(_lp.read_grid_cell(4, 4, 3, 0), GridCellState.TRUE)
-#		assert_eq(_lp.read_grid_cell(3, 0, 1, 1), GridCellState.TRUE)
-#		assert_eq(_lp.read_grid_cell(3, 0, 2, 0), GridCellState.TRUE)
-#		assert_eq(_lp.read_grid_cell(2, 0, 1, 1), GridCellState.TRUE)
-		_lp.set_grid_cell(2, 2, 1, 4, false)
-		_lp.set_grid_cell(2, 2, 1, 2, false)
-		_lp.set_grid_cell(3, 4, 0, 4, false)
-#		assert_eq(_lp.read_grid_cell(4, 1, 2, 1), GridCellState.TRUE)
-#		assert_eq(_lp.read_grid_cell(4, 0, 3, 3), GridCellState.TRUE)
-#		assert_eq(_lp.read_grid_cell(4, 3, 3, 2), GridCellState.TRUE)
 
 
 	func test_random_puzzles():
