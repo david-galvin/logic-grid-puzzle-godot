@@ -12,7 +12,7 @@ extends Reference
 # grid: a pair of categories.
 const PATH_TO_INVERSES_FILE = "permutation_inverses.dat"
 const PATH_TO_SIZE_TO_PERM_MATRIX = "size_to_perm_matrix.dat"
-const MAX_SOLUTIONS_TO_CHECK = 10_000
+const MAX_SOLUTIONS_TO_CHECK = 50_000
 
 var _rank_to_inverse_rank: Array = []
 var _perm_rank_matrix: Array
@@ -57,13 +57,7 @@ func set_grid_cell(cat1: int, elt1: int, \
 	if grid.is_solved():
 		push_error("Entering a move in a solved grid!")
 	grid.set_cell(elt1, elt2, target_state)
-	#var categories_to_use: Array = []
-	var other_cats: Array = Array(range(_cat_count))
-	other_cats.erase(cat1)
-	other_cats.erase(cat2)
-	for cat3 in other_cats:
-		_scan_puzzle_solutions_for_implied_information([cat1, cat2, cat3]) 
-	_scan_puzzle_solutions_for_implied_information([]) 
+	_recursive_solution_scan(cat1, cat2)
 	_timer.end_timer("set_grid_cell")
 
 
@@ -92,6 +86,21 @@ func get_random_unsolved_grid() -> Grid:
 
 func print_times():
 	print(str(_timer))
+
+
+func _recursive_solution_scan(cat1: int, cat2: int):
+	# TO DO: First do maximum scan. If not all categories were scanned, 
+	# figure out how many categories were scanned. This is the max allowable
+	# under MAX_SOLUTIONS_TO_CHECK. Attempt all other combinations of this size.
+	# If not all of these are scanned, determine if any combinations the next
+	# size smaller haven't been scanned and scan them. Repeat down to size 3.
+	var other_cats: Array = Array(range(_cat_count))
+	other_cats.erase(cat1)
+	other_cats.erase(cat2)
+	var categories_used: Dictionary
+	for cat3 in other_cats:
+		categories_used = _scan_puzzle_solutions_for_implied_information([cat1, cat2, cat3]) 
+	categories_used = _scan_puzzle_solutions_for_implied_information([]) 
 
 
 func _set_rank_to_inverse_rank():
@@ -224,7 +233,8 @@ func _scan_puzzle_is_a_solution_possible(operations_size: int) -> bool:
 	return true
 
 
-func _scan_puzzle_solutions_for_implied_information(categories_to_use: Array = []) -> void:
+func _scan_puzzle_solutions_for_implied_information(categories_to_use: Array = []) -> Dictionary:
+	var categories_used: Dictionary = {}
 	var grids_to_permute: Array = _scan_puzzle_get_grids_to_permute(categories_to_use)
 	var operations: Array = scan_puzzle_get_ordered_list_of_operations(grids_to_permute)
 	var count_of_solutions_to_explore: int = 1
@@ -232,7 +242,11 @@ func _scan_puzzle_solutions_for_implied_information(categories_to_use: Array = [
 		count_of_solutions_to_explore *= grid.solutions_bitset.cardinality()
 		
 	if not _scan_puzzle_is_a_solution_possible(operations.size()):
-		return
+		return categories_used
+	
+	for grid in grids_to_permute:
+		categories_used[grid.cat1] = true
+		categories_used[grid.cat2] = true
 	
 	_timer.start_timer("Times scanned")
 	_timer.end_timer("Times scanned")
@@ -300,7 +314,7 @@ func _scan_puzzle_solutions_for_implied_information(categories_to_use: Array = [
 	for id in _grids.size():
 		if grid_ids_with_information.has(id):
 			_grids[id].merge_solutions_from_grid_trio(grid_solutions_bitsets[id])
-
+	return categories_used
 
 func _is_valid_cat(cat: int) -> bool:
 	return cat in range(_cat_count)
