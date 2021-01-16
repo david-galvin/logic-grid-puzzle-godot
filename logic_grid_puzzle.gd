@@ -12,7 +12,7 @@ extends Reference
 # grid: a pair of categories.
 const PATH_TO_INVERSES_FILE = "permutation_inverses.dat"
 const PATH_TO_SIZE_TO_PERM_MATRIX = "size_to_perm_matrix.dat"
-const MAX_SOLUTIONS_TO_CHECK = 15_000
+const MAX_SOLUTIONS_TO_CHECK = 100_000
 
 var _rank_to_inverse_rank: Array = []
 var _perm_rank_matrix: Array
