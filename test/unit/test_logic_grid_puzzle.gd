@@ -410,13 +410,15 @@ class TestLogicGridPuzzle:
 		_lp.set_grid_cell(3, 2, 0, 2, false)
 		_lp.set_grid_cell(4, 1, 2, 2, false)
 		_lp.set_grid_cell(4, 1, 2, 1, false)
-		assert_eq(_lp.read_grid_cell(4,4,0,0), GridCellState.TRUE)
-		assert_eq(_lp.read_grid_cell(4,2,0,2), GridCellState.TRUE)
-		assert_eq(_lp.read_grid_cell(4,4,1,3), GridCellState.TRUE)
-		assert_eq(_lp.read_grid_cell(4,3,2,1), GridCellState.TRUE)
-		assert_eq(_lp.read_grid_cell(4,2,3,0), GridCellState.TRUE)
-		assert_eq(_lp.read_grid_cell(4,3,3,3), GridCellState.TRUE)
-		assert_eq(_lp.read_grid_cell(4,4,3,1), GridCellState.TRUE)
+		var all_true: bool = true
+		all_true = all_true and (_lp.read_grid_cell(4,2,0,2) == GridCellState.TRUE)
+		all_true = all_true and (_lp.read_grid_cell(4,2,3,0) == GridCellState.TRUE)
+		all_true = all_true and (_lp.read_grid_cell(4,3,2,1) == GridCellState.TRUE)
+		all_true = all_true and (_lp.read_grid_cell(4,3,3,3) == GridCellState.TRUE)
+		all_true = all_true and (_lp.read_grid_cell(4,4,0,0) == GridCellState.TRUE)
+		all_true = all_true and (_lp.read_grid_cell(4,4,1,3) == GridCellState.TRUE)
+		all_true = all_true and (_lp.read_grid_cell(4,4,3,1) == GridCellState.TRUE)
+		assert_true(all_true)
 		gut.p(str(_lp))
 
 	func test_random_puzzles():
