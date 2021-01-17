@@ -16,7 +16,8 @@ class TestLogicGridPuzzle:
 
 
 	func after_each():
-		gut.p(_lp.get_times())
+		if not _lp == null:
+			gut.p(_lp.get_times())
 
 
 	func test_string():

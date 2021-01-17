@@ -28,7 +28,7 @@ class TestThreads:
 #			for thread in threads:
 #				_x = thread.wait_to_finish()
 #			_timer.end_timer(run_name)
-#		print(str(_timer))
+#		gut.p(str(_timer))
 
 
 
