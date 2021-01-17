@@ -14,13 +14,13 @@ const PATH_TO_INVERSES_FILE = "permutation_inverses.dat"
 const PATH_TO_SIZE_TO_PERM_MATRIX = "size_to_perm_matrix.dat"
 const MAX_SOLUTIONS_TO_CHECK = 20_000
 
-var _rank_to_inverse_rank: Array = []
-var _perm_rank_matrix: Array
 var _cat_count: int
 var _cat_size: int
+var _inverse_ranks: Array = []
+var _rank_composition_matrix: Array
 var _grids: Array = []
-var _size_to_cat_combos_to_is_scanned: Dictionary
 var _unsolved_grids: Array = []
+var _size_to_cat_combos_to_is_scanned: Dictionary
 var _timer = TimerDict.new()
 
 
@@ -29,7 +29,7 @@ func _init(my_cat_count: int, my_cat_size: int) -> void:
 	_cat_size = my_cat_size
 	randomize()
 	_grids = _build_grids()
-	_size_to_cat_combos_to_is_scanned = _build_cat_combos()
+	_size_to_cat_combos_to_is_scanned = _get_size_to_cat_combos_to_is_scanned()
 	_set_rank_to_inverse_rank()
 	_set_perm_rank_matrix()
 
@@ -88,60 +88,60 @@ func get_random_unsolved_grid() -> Grid:
 		return rand_grid
 
 
-func print_times():
-	print(str(_timer))
+func get_times():
+	return str(_timer)
 
 
 func _recursive_solution_scan_new(cat1: int, cat2: int) -> void:
 	_set_cat_combos_scanned_to_false()
-	var cats_scanned: Dictionary = _scan_puzzle_solutions_for_implied_information([]) 
-	if _cat_count == 3 or _cat_count == cats_scanned.size():
+	var cat_to_is_scanned: Dictionary = _scan_puzzle_solutions_for_implied_information([]) 
+	if _cat_count == 3 or _cat_count == cat_to_is_scanned.size():
 		return
-	_set_cat_combos_scanned_to_true(cats_scanned.keys())
-	var max_size: int = cats_scanned.size()
-	for size in range(max_size, 2, -1):
+	_set_cat_combos_scanned_to_true(cat_to_is_scanned.keys())
+	var max_cats_to_scan_at_once: int = cat_to_is_scanned.size()
+	for size in range(max_cats_to_scan_at_once, 2, -1):
 		for cat_combo in _size_to_cat_combos_to_is_scanned[size]:
 			if not _size_to_cat_combos_to_is_scanned[size][cat_combo]:
 				if cat_combo.has(cat1) and cat_combo.has(cat2):
-					cats_scanned = _scan_puzzle_solutions_for_implied_information(cat_combo)
-				_set_cat_combos_scanned_to_true(cats_scanned.keys())
+					cat_to_is_scanned = _scan_puzzle_solutions_for_implied_information(cat_combo)
+				_set_cat_combos_scanned_to_true(cat_to_is_scanned.keys())
 
 
 func _set_rank_to_inverse_rank():
 	var file = File.new()
 	if _cat_size in range(2,8) and file.file_exists(PATH_TO_INVERSES_FILE):
 		file.open(PATH_TO_INVERSES_FILE, File.READ)
-		_rank_to_inverse_rank = file.get_var(true)[_cat_size]
+		_inverse_ranks = file.get_var(true)[_cat_size]
 		file.close()
 	else:
-		push_error("_rank_to_inverse_rank should be loaded from a file")
-		_rank_to_inverse_rank = PermutationTools.get_inverse_rank_array(_cat_size)
+		push_error("_inverse_ranks should be loaded from a file")
+		_inverse_ranks = PermutationTools.get_inverse_rank_array(_cat_size)
 
 
 func _set_perm_rank_matrix():
 	var file = File.new()
 	if _cat_size in range(2,7) and file.file_exists(PATH_TO_SIZE_TO_PERM_MATRIX):
 		file.open(PATH_TO_SIZE_TO_PERM_MATRIX, File.READ)
-		_perm_rank_matrix = file.get_var(true)[_cat_size]
+		_rank_composition_matrix = file.get_var(true)[_cat_size]
 		file.close()
 	else:
-		push_error("_perm_rank_matrix should be loaded from a file")
-		_perm_rank_matrix = PermutationTools.get_perm_rank_matrix(_cat_size)
+		push_error("_rank_composition_matrix should be loaded from a file")
+		_rank_composition_matrix = PermutationTools.get_perm_rank_matrix(_cat_size)
 
 
-func _scan_puzzle_get_grids_to_permute(cats_to_use: Array = []) -> Array:
+func _get_scannable_grids_ranks_matrix(cats_to_scan: Array = []) -> Array:
 	var copy_of_grids: Array 
 	
-	if cats_to_use.size() > 0:
-		for i in range(cats_to_use.size() - 1):
-			var cat1: int = cats_to_use[i]
-			for j in range(i + 1, cats_to_use.size()):
-				var cat2: int = cats_to_use[j]
+	if cats_to_scan.size() > 0:
+		for i in range(cats_to_scan.size() - 1):
+			var cat1: int = cats_to_scan[i]
+			for j in range(i + 1, cats_to_scan.size()):
+				var cat2: int = cats_to_scan[j]
 				copy_of_grids.append(_get_grid(cat1, cat2))
 	else:
 		copy_of_grids = _grids.duplicate()
 	
-	var grids_to_permute: Array = []
+	var scannable_grids_ranks_matrix: Array = []
 	
 	# Here we find an MST where we consider categories as vertices and grids
 	# as edges. We do this to avoid including redundant grids.
@@ -160,24 +160,24 @@ func _scan_puzzle_get_grids_to_permute(cats_to_use: Array = []) -> Array:
 			break
 		if grid.solutions_bitset.cardinality() == grid.max_possible_solutions:
 			break 
-		grids_to_permute.append(_get_grid(edge[0], edge[1]))
+		scannable_grids_ranks_matrix.append(_get_grid(edge[0], edge[1]))
 		
-	return grids_to_permute
+	return scannable_grids_ranks_matrix
 
 
-func scan_puzzle_get_ordered_list_of_operations(grids_to_permute: Array) -> Array:
+func get_scan_operations(scannable_grids_ranks_matrix: Array) -> Array:
 	var cat_to_solved_grids: Array = []
-	var num_grids_in_solution = Math.choose(grids_to_permute.size(), 2) + grids_to_permute.size()
-	var solved_grid_ids: Dictionary = {}
+	var num_grids_in_solution = Math.choose(scannable_grids_ranks_matrix.size(), 2) + scannable_grids_ranks_matrix.size()
+	var grid_id_to_is_solved: Dictionary = {}
 	
 	cat_to_solved_grids.resize(_cat_count)
 	for i in range(_cat_count):
 		cat_to_solved_grids[i] = []
 	
-	for grid in grids_to_permute:
+	for grid in scannable_grids_ranks_matrix:
 		cat_to_solved_grids[grid.cat1].append([grid, grid.cat2])
 		cat_to_solved_grids[grid.cat2].append([grid, grid.cat1])
-		solved_grid_ids[grid.id] = true
+		grid_id_to_is_solved[grid.id] = true
 		
 	var operations: Array = []
 	
@@ -188,7 +188,7 @@ func scan_puzzle_get_ordered_list_of_operations(grids_to_permute: Array) -> Arra
 	var grid3_cat1: int
 	var grid3_cat2: int
 	var added_any_grids: bool = true
-	while (solved_grid_ids.size() < num_grids_in_solution) and ((not cat == 0) or added_any_grids):
+	while (grid_id_to_is_solved.size() < num_grids_in_solution) and ((not cat == 0) or added_any_grids):
 		cat = (cat + 1) % _cat_count
 		if cat == 0:
 			added_any_grids = false
@@ -200,8 +200,8 @@ func scan_puzzle_get_ordered_list_of_operations(grids_to_permute: Array) -> Arra
 					grid2 = cat_to_solved_grids[cat][j][0]
 					grid3_cat2 = cat_to_solved_grids[cat][j][1]
 					grid3 = _get_grid(grid3_cat1, grid3_cat2)
-					if not solved_grid_ids.has(grid3.id):
-						solved_grid_ids[grid3.id] = true
+					if not grid_id_to_is_solved.has(grid3.id):
+						grid_id_to_is_solved[grid3.id] = true
 						cat_to_solved_grids[grid3.cat1].append([grid3, grid3.cat2])
 						cat_to_solved_grids[grid3.cat2].append([grid3, grid3.cat1])
 						added_any_grids = true
@@ -237,53 +237,49 @@ func _scan_puzzle_is_a_solution_possible(operations_size: int) -> bool:
 	return true
 
 
-func _scan_puzzle_solutions_for_implied_information(cats_to_use: Array = []) -> Dictionary:
-	var number_of_solutions: int = 1	
-	var grid_solution_index: int
-	var temp_solution_index: int
-	var grid_id: int
-	var grids_to_permute: Array = _scan_puzzle_get_grids_to_permute(cats_to_use)
-	var operations: Array = scan_puzzle_get_ordered_list_of_operations(grids_to_permute)
-	var grids_to_permute_solution_ranks_matrix: Array = []
-	var grid_solutions_bitsets: Array = []
-	var grid_id_to_ranks_before_scan: Array = []
-	var grid_id_to_ranks_after_scan: Array = []
-	var cats_scanned: Dictionary = {}
-	var grid_ids_with_information: Dictionary = {}
-	var grid_id_to_rank: Dictionary = {}
+func _scan_puzzle_solutions_for_implied_information(cats_to_scan: Array = []) -> Dictionary:
 	
-	for grid in grids_to_permute:
+	var scannable_grids_ranks_matrix: Array = _get_scannable_grids_ranks_matrix(cats_to_scan)
+	var operations: Array = get_scan_operations(scannable_grids_ranks_matrix)
+	var number_of_solutions: int = 1
+	for grid in scannable_grids_ranks_matrix:
 		number_of_solutions *= grid.solutions_bitset.cardinality()
 		
+	var cat_to_is_scanned: Dictionary = {}
 	if not _scan_puzzle_is_a_solution_possible(operations.size()):
-		return cats_scanned
+		return cat_to_is_scanned
 	
-	for grid in grids_to_permute:
-		cats_scanned[grid.cat1] = true
-		cats_scanned[grid.cat2] = true
+	for grid in scannable_grids_ranks_matrix:
+		cat_to_is_scanned[grid.cat1] = true
+		cat_to_is_scanned[grid.cat2] = true
 
 	# we'll use the same indexing for the solution as for the grids.
+	var grid_solutions_bitsets: Array = []
 	for _i in _grids.size():
 		grid_solutions_bitsets.append(BitSet.new(Math.factorial(_cat_size)))
 
-	for grid in grids_to_permute:
-		grids_to_permute_solution_ranks_matrix.append(grid.get_solution_ranks())
-		grid_ids_with_information[grid.id] = true
+	var grid_id_to_has_data: Dictionary = {}
+	var scannable_grids_ranks_matrix_ranks_matrix: Array = []
+	for grid in scannable_grids_ranks_matrix:
+		scannable_grids_ranks_matrix_ranks_matrix.append(grid.get_solution_ranks())
+		grid_id_to_has_data[grid.id] = true
 	
-	grid_id_to_ranks_after_scan.resize(_grids.size())
-	grid_id_to_ranks_before_scan.resize(_grids.size())
-	
+	var pre_scan_grid_ranks: Array = []
+	var post_scan_grid_ranks: Array = []
+	pre_scan_grid_ranks.resize(_grids.size())
+	post_scan_grid_ranks.resize(_grids.size())
 	for grid in _grids:
-		grid_id_to_ranks_after_scan[grid.id] = {}
-		grid_id_to_ranks_before_scan[grid.id] = grid.get_solution_ranks_dict()
+		post_scan_grid_ranks[grid.id] = {}
+		pre_scan_grid_ranks[grid.id] = grid.get_solution_ranks_dict()
 
+	var grid_id_to_rank: Dictionary = {}
 	for puzzle_solution_index in range(number_of_solutions):
-		temp_solution_index = puzzle_solution_index
-		for grid_to_permute_index in range(grids_to_permute.size()):
-			grid_id = grids_to_permute[grid_to_permute_index].id
-			grid_solution_index = temp_solution_index % grids_to_permute[grid_to_permute_index].solutions_bitset.cardinality()
-			grid_id_to_rank[grid_id] = grids_to_permute_solution_ranks_matrix[grid_to_permute_index][grid_solution_index]
-			temp_solution_index /= grids_to_permute[grid_to_permute_index].solutions_bitset.cardinality()
+		var temp_solution_index: int = puzzle_solution_index
+		for i in range(scannable_grids_ranks_matrix.size()):
+			var grid_id: int = scannable_grids_ranks_matrix[i].id
+			var grid_solution_index: int = temp_solution_index % scannable_grids_ranks_matrix[i].solutions_bitset.cardinality()
+			grid_id_to_rank[grid_id] = scannable_grids_ranks_matrix_ranks_matrix[i][grid_solution_index]
+			temp_solution_index /= scannable_grids_ranks_matrix[i].solutions_bitset.cardinality()
 
 		var row_grid_rank: int
 		var col_grid_rank: int
@@ -292,26 +288,26 @@ func _scan_puzzle_solutions_for_implied_information(cats_to_use: Array = []) -> 
 		for operation in operations:
 			row_grid_rank = grid_id_to_rank[operation.row_grid_id]
 			if operation.invert_row_perm:
-				row_grid_rank = _rank_to_inverse_rank[row_grid_rank]
+				row_grid_rank = _inverse_ranks[row_grid_rank]
 			col_grid_rank = grid_id_to_rank[operation.col_grid_id]
 			if operation.invert_col_perm:
-				col_grid_rank = _rank_to_inverse_rank[col_grid_rank]
-			implied_grid_rank = _perm_rank_matrix[row_grid_rank][col_grid_rank]
+				col_grid_rank = _inverse_ranks[col_grid_rank]
+			implied_grid_rank = _rank_composition_matrix[row_grid_rank][col_grid_rank]
 			grid_id_to_rank[operation.implied_grid_id] = implied_grid_rank
-			grid_ids_with_information[operation.implied_grid_id] = true
-			is_valid = grid_id_to_ranks_before_scan[operation.implied_grid_id].has(implied_grid_rank)
+			grid_id_to_has_data[operation.implied_grid_id] = true
+			is_valid = pre_scan_grid_ranks[operation.implied_grid_id].has(implied_grid_rank)
 			if not is_valid:
 				break
 		if is_valid:
-			for id in grid_id_to_rank:
-				grid_id_to_ranks_after_scan[id][grid_id_to_rank[id]] = true
-	for id in grid_id_to_rank:
-		for rank in grid_id_to_ranks_after_scan[id]:
-			grid_solutions_bitsets[id].set_at_index(rank, true)
-	for id in _grids.size():
-		if grid_ids_with_information.has(id):
-			_grids[id].merge_solutions_from_grid_trio(grid_solutions_bitsets[id])
-	return cats_scanned
+			for grid_id in grid_id_to_rank:
+				post_scan_grid_ranks[grid_id][grid_id_to_rank[grid_id]] = true
+	for grid_id in grid_id_to_rank:
+		for rank in post_scan_grid_ranks[grid_id]:
+			grid_solutions_bitsets[grid_id].set_at_index(rank, true)
+	for grid_id in _grids.size():
+		if grid_id_to_has_data.has(grid_id):
+			_grids[grid_id].merge_solutions_from_grid_trio(grid_solutions_bitsets[grid_id])
+	return cat_to_is_scanned
 
 
 func _is_valid_cat(cat: int) -> bool:
@@ -360,7 +356,7 @@ func _build_grids() -> Array:
 	return _grids
 
 
-func _build_cat_combos() -> Dictionary:
+func _get_size_to_cat_combos_to_is_scanned() -> Dictionary:
 	var size_to_cat_combos_to_is_scanned: Dictionary = {}
 	for size in range(3, _cat_count):
 		size_to_cat_combos_to_is_scanned[size] = {}

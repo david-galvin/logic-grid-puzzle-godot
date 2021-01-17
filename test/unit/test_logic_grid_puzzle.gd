@@ -16,7 +16,7 @@ class TestLogicGridPuzzle:
 
 
 	func after_each():
-		_lp.print_times()
+		gut.p(_lp.get_times())
 
 
 	func test_string():
