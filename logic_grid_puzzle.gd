@@ -129,7 +129,7 @@ func _set_perm_rank_matrix():
 		_rank_composition_matrix = PermutationTools.get_perm_rank_matrix(_cat_size)
 
 
-func _get_scannable_grids_ranks_matrix(cats_to_scan: Array = []) -> Array:
+func _get_scannable_grids(cats_to_scan: Array = []) -> Array:
 	var copy_of_grids: Array 
 	
 	if cats_to_scan.size() > 0:
@@ -141,7 +141,7 @@ func _get_scannable_grids_ranks_matrix(cats_to_scan: Array = []) -> Array:
 	else:
 		copy_of_grids = _grids.duplicate()
 	
-	var scannable_grids_ranks_matrix: Array = []
+	var scannable_grids: Array = []
 	
 	# Here we find an MST where we consider categories as vertices and grids
 	# as edges. We do this to avoid including redundant grids.
@@ -160,21 +160,21 @@ func _get_scannable_grids_ranks_matrix(cats_to_scan: Array = []) -> Array:
 			break
 		if grid.solutions_bitset.cardinality() == grid.max_possible_solutions:
 			break 
-		scannable_grids_ranks_matrix.append(_get_grid(edge[0], edge[1]))
+		scannable_grids.append(_get_grid(edge[0], edge[1]))
 		
-	return scannable_grids_ranks_matrix
+	return scannable_grids
 
 
-func get_scan_operations(scannable_grids_ranks_matrix: Array) -> Array:
+func get_scan_operations(scannable_grids: Array) -> Array:
 	var cat_to_solved_grids: Array = []
-	var num_grids_in_solution = Math.choose(scannable_grids_ranks_matrix.size(), 2) + scannable_grids_ranks_matrix.size()
+	var num_grids_in_solution = Math.choose(scannable_grids.size(), 2) + scannable_grids.size()
 	var grid_id_to_is_solved: Dictionary = {}
 	
 	cat_to_solved_grids.resize(_cat_count)
 	for i in range(_cat_count):
 		cat_to_solved_grids[i] = []
 	
-	for grid in scannable_grids_ranks_matrix:
+	for grid in scannable_grids:
 		cat_to_solved_grids[grid.cat1].append([grid, grid.cat2])
 		cat_to_solved_grids[grid.cat2].append([grid, grid.cat1])
 		grid_id_to_is_solved[grid.id] = true
@@ -239,17 +239,17 @@ func _scan_puzzle_is_a_solution_possible(operations_size: int) -> bool:
 
 func _scan_puzzle_solutions_for_implied_information(cats_to_scan: Array = []) -> Dictionary:
 	
-	var scannable_grids_ranks_matrix: Array = _get_scannable_grids_ranks_matrix(cats_to_scan)
-	var operations: Array = get_scan_operations(scannable_grids_ranks_matrix)
+	var scannable_grids: Array = _get_scannable_grids(cats_to_scan)
+	var operations: Array = get_scan_operations(scannable_grids)
 	var number_of_solutions: int = 1
-	for grid in scannable_grids_ranks_matrix:
+	for grid in scannable_grids:
 		number_of_solutions *= grid.solutions_bitset.cardinality()
 		
 	var cat_to_is_scanned: Dictionary = {}
 	if not _scan_puzzle_is_a_solution_possible(operations.size()):
 		return cat_to_is_scanned
 	
-	for grid in scannable_grids_ranks_matrix:
+	for grid in scannable_grids:
 		cat_to_is_scanned[grid.cat1] = true
 		cat_to_is_scanned[grid.cat2] = true
 
@@ -259,9 +259,9 @@ func _scan_puzzle_solutions_for_implied_information(cats_to_scan: Array = []) ->
 		grid_solutions_bitsets.append(BitSet.new(Math.factorial(_cat_size)))
 
 	var grid_id_to_has_data: Dictionary = {}
-	var scannable_grids_ranks_matrix_ranks_matrix: Array = []
-	for grid in scannable_grids_ranks_matrix:
-		scannable_grids_ranks_matrix_ranks_matrix.append(grid.get_solution_ranks())
+	var scannable_grids_solutions_ranks_matrix: Array = []
+	for grid in scannable_grids:
+		scannable_grids_solutions_ranks_matrix.append(grid.get_solution_ranks())
 		grid_id_to_has_data[grid.id] = true
 	
 	var pre_scan_grid_ranks: Array = []
@@ -275,11 +275,11 @@ func _scan_puzzle_solutions_for_implied_information(cats_to_scan: Array = []) ->
 	var grid_id_to_rank: Dictionary = {}
 	for puzzle_solution_index in range(number_of_solutions):
 		var temp_solution_index: int = puzzle_solution_index
-		for i in range(scannable_grids_ranks_matrix.size()):
-			var grid_id: int = scannable_grids_ranks_matrix[i].id
-			var grid_solution_index: int = temp_solution_index % scannable_grids_ranks_matrix[i].solutions_bitset.cardinality()
-			grid_id_to_rank[grid_id] = scannable_grids_ranks_matrix_ranks_matrix[i][grid_solution_index]
-			temp_solution_index /= scannable_grids_ranks_matrix[i].solutions_bitset.cardinality()
+		for i in range(scannable_grids.size()):
+			var grid_id: int = scannable_grids[i].id
+			var grid_solution_index: int = temp_solution_index % scannable_grids[i].solutions_bitset.cardinality()
+			grid_id_to_rank[grid_id] = scannable_grids_solutions_ranks_matrix[i][grid_solution_index]
+			temp_solution_index /= scannable_grids[i].solutions_bitset.cardinality()
 
 		var row_grid_rank: int
 		var col_grid_rank: int
@@ -308,6 +308,39 @@ func _scan_puzzle_solutions_for_implied_information(cats_to_scan: Array = []) ->
 		if grid_id_to_has_data.has(grid_id):
 			_grids[grid_id].merge_solutions_from_grid_trio(grid_solutions_bitsets[grid_id])
 	return cat_to_is_scanned
+
+
+#func thread_work(start_solution_index: int, stop_solution_index: int, \
+#		scannable_grids: Array, operations: Array):
+#	var grid_id_to_rank: Dictionary = {}
+#	for puzzle_solution_index in range(start_solution_index, stop_solution_index):
+#		var temp_solution_index: int = puzzle_solution_index
+#		for i in range(scannable_grids.size()):
+#			var grid_id: int = scannable_grids[i].id
+#			var grid_solution_index: int = temp_solution_index % scannable_grids[i].solutions_bitset.cardinality()
+#			grid_id_to_rank[grid_id] = scannable_grids_solutions_ranks_matrix[i][grid_solution_index]
+#			temp_solution_index /= scannable_grids[i].solutions_bitset.cardinality()
+#
+#		var row_grid_rank: int
+#		var col_grid_rank: int
+#		var implied_grid_rank: int
+#		var is_valid: bool
+#		for operation in operations:
+#			row_grid_rank = grid_id_to_rank[operation.row_grid_id]
+#			if operation.invert_row_perm:
+#				row_grid_rank = _inverse_ranks[row_grid_rank]
+#			col_grid_rank = grid_id_to_rank[operation.col_grid_id]
+#			if operation.invert_col_perm:
+#				col_grid_rank = _inverse_ranks[col_grid_rank]
+#			implied_grid_rank = _rank_composition_matrix[row_grid_rank][col_grid_rank]
+#			grid_id_to_rank[operation.implied_grid_id] = implied_grid_rank
+#			grid_id_to_has_data[operation.implied_grid_id] = true
+#			is_valid = pre_scan_grid_ranks[operation.implied_grid_id].has(implied_grid_rank)
+#			if not is_valid:
+#				break
+#		if is_valid:
+#			for grid_id in grid_id_to_rank:
+#				post_scan_grid_ranks[grid_id][grid_id_to_rank[grid_id]] = true
 
 
 func _is_valid_cat(cat: int) -> bool:
