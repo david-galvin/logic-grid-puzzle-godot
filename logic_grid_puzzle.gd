@@ -351,8 +351,6 @@ func _scan_puzzle_solutions_for_implied_information(cats_to_scan: Array = []) ->
 	for operation in operations:
 		grid_id_to_has_data[operation.implied_grid_id] = true
 	
-	#var threads: Array = []
-	
 	#TODO: move scan_parms to an object
 	for i in range(NUM_THREADS):
 		var start_index: int = (i * number_of_solutions) / NUM_THREADS
@@ -372,9 +370,6 @@ func _scan_puzzle_solutions_for_implied_information(cats_to_scan: Array = []) ->
 		for grid_id in range(_grids.size()):
 			for rank in partial_post_scan_grid_ranks_sets[grid_id]:
 				post_scan_grid_ranks_sets[grid_id][rank] = true
-#	var post_scan_grid_ranks_sets: Array = _scan_and_return_post_scan_grid_ranks_sets( \
-#			0, number_of_solutions, scannable_grids, operations, \
-#			scannable_grids_solutions_ranks_matrix, pre_scan_grid_ranks_sets)
 	
 	for grid_id in range(_grids.size()):
 		for rank in post_scan_grid_ranks_sets[grid_id]:
@@ -386,8 +381,6 @@ func _scan_puzzle_solutions_for_implied_information(cats_to_scan: Array = []) ->
 
 
 func _scan_and_return_post_scan_grid_ranks_sets(scan_params) -> Array:
-	
-	 
 	var start_solution_index: int = scan_params[0]
 	var stop_solution_index: int = scan_params[1]
 	var scannable_grids: Array = scan_params[2]
