@@ -92,7 +92,7 @@ class TestPermutationRanks:
 		file.open("permutation_inverses.dat", File.READ)
 		var size_to_rank_to_inverse_rank = file.get_var(true)
 		file.close()
-		print("permutation_inverses.dat load time: " + str(OS.get_ticks_msec() - _start_time))
+		gut.p("permutation_inverses.dat load time: " + str(OS.get_ticks_msec() - _start_time))
 		for size in range(3, 7):
 			_perm = Permutation.new(size)
 
@@ -108,7 +108,7 @@ class TestPermutationRanks:
 		file.open("size_to_perm_matrix.dat", File.READ)
 		var size_to_perm_matrix = file.get_var(true)
 		file.close()
-		print("size_to_perm_matrix.dat load time: " + str(OS.get_ticks_msec() - _start_time))
+		gut.p("size_to_perm_matrix.dat load time: " + str(OS.get_ticks_msec() - _start_time))
 		file.open("permutation_inverses.dat", File.READ)
 		var size_to_rank_to_inverse_rank = file.get_var(true)
 		file.close()

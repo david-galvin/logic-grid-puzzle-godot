@@ -66,5 +66,5 @@ class TestGDScript:
 			_d = dints.has(3)
 			_e = dints.has(4)
 		_timer.end_timer("overall Dict")
-		print(_timer)
+		gut.p(_timer)
 		

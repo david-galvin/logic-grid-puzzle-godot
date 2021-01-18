@@ -23,4 +23,4 @@ class TestBitMask:
 	func test_display_bitmasks():
 		for row in range(4, 5):
 			for col in range(5):
-				print("(" + str(row) + ", " + str(col) + "): " + str(_bmask.get_true_bit_mask(row, col)))
+				gut.p("(" + str(row) + ", " + str(col) + "): " + str(_bmask.get_true_bit_mask(row, col)))

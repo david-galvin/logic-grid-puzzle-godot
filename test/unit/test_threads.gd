@@ -37,7 +37,7 @@ class TestThreads:
 	# If no argument was passed, this one still needs to
 	# be here and it will be null.
 	func _thread_msec_delay(msecs: int) -> int:
-		#print("In thread, delay = " + str(msecs))
+		#gut.p("In thread, delay = " + str(msecs))
 		#OS.delay_msec (msecs) 
 		var _x: int = 0
 		for _i in range(msecs):
@@ -47,4 +47,4 @@ class TestThreads:
 	# Thread must be disposed (or "joined"), for portability.
 #	func _exit_tree():
 #		thread.wait_to_finish()
-#		print("Done!")
+#		gut.p("Done!")
