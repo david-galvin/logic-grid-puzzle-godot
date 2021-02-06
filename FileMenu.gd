@@ -19,3 +19,7 @@ func _on_id_pressed(ID):
 	match ID:
 		NEW:
 			print("Yep, New!")
+			var _cat_count=5
+			var _cat_size=5
+			var _lp=LogicGridPuzzle.new(_cat_count,_cat_size)
+			print(str(_lp))

@@ -138,3 +138,7 @@ window/size/height=1080
 [editor_plugins]
 
 enabled=PoolStringArray( "gut" )
+
+[rendering]
+
+environment/default_clear_color=Color( 0, 0, 0, 1 )

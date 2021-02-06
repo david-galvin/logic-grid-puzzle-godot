@@ -1,45 +1,31 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://addons/gut/plugin_control.gd" type="Script" id=1]
 [ext_resource path="res://HelpMenu.gd" type="Script" id=2]
 [ext_resource path="res://FileMenu.gd" type="Script" id=3]
 [ext_resource path="res://EditMenu.gd" type="Script" id=4]
+[ext_resource path="res://main_scene.gd" type="Script" id=5]
 
-[node name="Node2D" type="Node2D"]
+[node name="MainScene" type="Node2D"]
+script = ExtResource( 5 )
 
-[node name="GUI" type="MarginContainer" parent="."]
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_right = 1002.0
-margin_bottom = 888.0
-size_flags_horizontal = 3
-size_flags_vertical = 3
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="VBoxContainer" type="VBoxContainer" parent="GUI"]
-margin_right = 1002.0
-margin_bottom = 888.0
-
-[node name="MenuToolbar" type="PanelContainer" parent="GUI/VBoxContainer"]
-margin_right = 1002.0
+[node name="MenuToolbar" type="PanelContainer" parent="."]
+margin_right = 740.0
 margin_bottom = 34.0
-size_flags_horizontal = 3
 __meta__ = {
 "_edit_group_": true,
 "_edit_lock_": true
 }
 
-[node name="HBoxContainer" type="HBoxContainer" parent="GUI/VBoxContainer/MenuToolbar"]
+[node name="HBoxContainer" type="HBoxContainer" parent="MenuToolbar"]
 margin_left = 7.0
 margin_top = 7.0
-margin_right = 995.0
+margin_right = 733.0
 margin_bottom = 27.0
 size_flags_horizontal = 3
 size_flags_vertical = 0
 
-[node name="FileMenu" type="MenuButton" parent="GUI/VBoxContainer/MenuToolbar/HBoxContainer"]
+[node name="FileMenu" type="MenuButton" parent="MenuToolbar/HBoxContainer"]
 margin_right = 35.0
 margin_bottom = 20.0
 size_flags_horizontal = 0
@@ -48,7 +34,7 @@ text = "File"
 flat = false
 script = ExtResource( 3 )
 
-[node name="EditMenu" type="MenuButton" parent="GUI/VBoxContainer/MenuToolbar/HBoxContainer"]
+[node name="EditMenu" type="MenuButton" parent="MenuToolbar/HBoxContainer"]
 margin_left = 39.0
 margin_right = 75.0
 margin_bottom = 20.0
@@ -56,7 +42,7 @@ text = "Edit"
 flat = false
 script = ExtResource( 4 )
 
-[node name="HelpMenu" type="MenuButton" parent="GUI/VBoxContainer/MenuToolbar/HBoxContainer"]
+[node name="HelpMenu" type="MenuButton" parent="MenuToolbar/HBoxContainer"]
 margin_left = 79.0
 margin_right = 121.0
 margin_bottom = 20.0
@@ -64,56 +50,11 @@ text = "Help"
 flat = false
 script = ExtResource( 2 )
 
-[node name="PuzzleContainer" type="PanelContainer" parent="GUI/VBoxContainer"]
-margin_top = 38.0
-margin_right = 1002.0
-margin_bottom = 82.0
-size_flags_vertical = 8
-__meta__ = {
-"_edit_group_": true
-}
-
-[node name="GridContainer" type="GridContainer" parent="GUI/VBoxContainer/PuzzleContainer"]
-margin_left = 7.0
-margin_top = 7.0
-margin_right = 995.0
-margin_bottom = 37.0
-columns = 6
-__meta__ = {
-"_edit_lock_": true
-}
-
-[node name="Label" type="Label" parent="GUI/VBoxContainer/PuzzleContainer/GridContainer"]
-margin_top = 8.0
-margin_right = 42.0
-margin_bottom = 22.0
-text = "Puzzle"
-
-[node name="Label2" type="Label" parent="GUI/VBoxContainer/PuzzleContainer/GridContainer"]
-margin_left = 46.0
-margin_top = 8.0
-margin_right = 74.0
-margin_bottom = 22.0
-text = "Cat0"
-
-[node name="Label3" type="Label" parent="GUI/VBoxContainer/PuzzleContainer/GridContainer"]
-margin_left = 78.0
-margin_top = 8.0
-margin_right = 106.0
-margin_bottom = 22.0
-text = "Cat1"
-
-[node name="RichTextLabel" type="RichTextLabel" parent="GUI/VBoxContainer/PuzzleContainer/GridContainer"]
-margin_left = 110.0
-margin_right = 140.0
-margin_bottom = 30.0
-rect_min_size = Vector2( 30, 30 )
-text = "Cat2"
-
-[node name="Gut" type="Control" parent="GUI/VBoxContainer"]
-margin_top = 86.0
+[node name="Gut" type="Control" parent="."]
+visible = false
+margin_top = 34.0
 margin_right = 740.0
-margin_bottom = 336.0
+margin_bottom = 284.0
 rect_min_size = Vector2( 740, 250 )
 size_flags_horizontal = 0
 script = ExtResource( 1 )
