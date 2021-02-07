@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://addons/gut/plugin_control.gd" type="Script" id=1]
 [ext_resource path="res://HelpMenu.gd" type="Script" id=2]
@@ -6,12 +6,28 @@
 [ext_resource path="res://EditMenu.gd" type="Script" id=4]
 [ext_resource path="res://main_scene.gd" type="Script" id=5]
 
+[sub_resource type="Theme" id=1]
+HBoxContainer/constants/separation = 4
+MenuButton/colors/font_color = Color( 0.88, 0.88, 0.88, 1 )
+MenuButton/colors/font_color_disabled = Color( 1, 1, 1, 0.3 )
+MenuButton/colors/font_color_hover = Color( 0.94, 0.94, 0.94, 1 )
+MenuButton/colors/font_color_pressed = Color( 1, 1, 1, 1 )
+MenuButton/constants/hseparation = 3
+MenuButton/fonts/font = null
+MenuButton/styles/disabled = null
+MenuButton/styles/focus = null
+MenuButton/styles/hover = null
+MenuButton/styles/normal = null
+MenuButton/styles/pressed = null
+PanelContainer/styles/panel = null
+
 [node name="MainScene" type="Node2D"]
 script = ExtResource( 5 )
 
 [node name="MenuToolbar" type="PanelContainer" parent="."]
 margin_right = 740.0
 margin_bottom = 34.0
+theme = SubResource( 1 )
 __meta__ = {
 "_edit_group_": true,
 "_edit_lock_": true
@@ -51,10 +67,10 @@ flat = false
 script = ExtResource( 2 )
 
 [node name="Gut" type="Control" parent="."]
-visible = false
-margin_top = 34.0
-margin_right = 740.0
-margin_bottom = 284.0
+margin_left = 781.817
+margin_top = 23.3082
+margin_right = 1521.82
+margin_bottom = 273.308
 rect_min_size = Vector2( 740, 250 )
 size_flags_horizontal = 0
 script = ExtResource( 1 )
