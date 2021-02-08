@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://addons/gut/plugin_control.gd" type="Script" id=1]
 [ext_resource path="res://HelpMenu.gd" type="Script" id=2]
@@ -6,8 +6,10 @@
 [ext_resource path="res://EditMenu.gd" type="Script" id=4]
 [ext_resource path="res://main_scene.gd" type="Script" id=5]
 [ext_resource path="res://fonts/Flamenco.tres" type="DynamicFont" id=6]
+[ext_resource path="res://fonts/Roboto/Roboto_regular.tres" type="DynamicFont" id=7]
 
 [sub_resource type="Theme" id=1]
+default_font = ExtResource( 7 )
 HBoxContainer/constants/separation = 4
 MenuButton/colors/font_color = Color( 0.88, 0.88, 0.88, 1 )
 MenuButton/colors/font_color_disabled = Color( 1, 1, 1, 0.3 )
@@ -38,13 +40,13 @@ __meta__ = {
 margin_left = 7.0
 margin_top = 7.0
 margin_right = 733.0
-margin_bottom = 27.0
+margin_bottom = 32.0
 size_flags_horizontal = 3
 size_flags_vertical = 0
 
 [node name="FileMenu" type="MenuButton" parent="MenuToolbar/HBoxContainer"]
-margin_right = 35.0
-margin_bottom = 20.0
+margin_right = 37.0
+margin_bottom = 25.0
 size_flags_horizontal = 0
 size_flags_vertical = 0
 text = "File"
@@ -52,26 +54,26 @@ flat = false
 script = ExtResource( 3 )
 
 [node name="EditMenu" type="MenuButton" parent="MenuToolbar/HBoxContainer"]
-margin_left = 39.0
-margin_right = 75.0
-margin_bottom = 20.0
+margin_left = 41.0
+margin_right = 80.0
+margin_bottom = 25.0
 text = "Edit"
 flat = false
 script = ExtResource( 4 )
 
 [node name="HelpMenu" type="MenuButton" parent="MenuToolbar/HBoxContainer"]
-margin_left = 79.0
-margin_right = 121.0
-margin_bottom = 20.0
+margin_left = 84.0
+margin_right = 128.0
+margin_bottom = 25.0
 text = "Help"
 flat = false
 script = ExtResource( 2 )
 
 [node name="Label" type="Label" parent="MenuToolbar"]
 margin_left = 7.0
-margin_top = 7.0
+margin_top = 9.0
 margin_right = 733.0
-margin_bottom = 28.0
+margin_bottom = 30.0
 custom_fonts/font = ExtResource( 6 )
 
 [node name="Gut" type="Control" parent="."]
@@ -85,5 +87,34 @@ script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+_font_name = "AnonymousPro"
+_font_size = 20
+_font_color = Color( 0.8, 0.8, 0.8, 1 )
+_background_color = Color( 0.15, 0.15, 0.15, 1 )
+_color_output = true
+_select_script = ""
+_tests_like = ""
+_inner_class_name = ""
+_run_on_load = false
+_should_maximize = false
+_should_print_to_console = true
+_show_orphans = true
+_log_level = 1
+_yield_between_tests = true
+_disable_strict_datatype_checks = false
+_test_prefix = "test_"
+_file_prefix = "test_"
+_file_extension = ".gd"
+_inner_class_prefix = "Test"
+_temp_directory = "user://gut_temp_directory"
+_export_path = ""
+_include_subdirectories = false
 _directory1 = "res://test/unit"
 _directory2 = "res://test/integration"
+_directory3 = ""
+_directory4 = ""
+_directory5 = ""
+_directory6 = ""
+_double_strategy = 1
+_pre_run_script = ""
+_post_run_script = ""
