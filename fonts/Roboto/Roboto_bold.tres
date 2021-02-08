@@ -1,0 +1,5 @@
+[gd_resource type="DynamicFont" format=2]
+
+[resource]
+use_mipmaps = true
+use_filter = true
