@@ -102,8 +102,8 @@ func _build_main_grid(cat_count: int, elt_count: int):
 						button.size_flags_horizontal = Button.SIZE_EXPAND_FILL
 						button.size_flags_vertical = Button.SIZE_EXPAND_FILL
 						button.button_mask = BUTTON_MASK_LEFT | BUTTON_MASK_RIGHT
-						button.theme = Theme.new()
 						button.add_font_override("font", font_roboto_regular)
+						
 						_grid_buttons.append(button)
 						inner_grid.add_child(button)
 			_main_grid.add_child(inner_grid)
@@ -120,6 +120,16 @@ func _update_grid_buttons():
 				#button.disabled = true
 			GridCellState.TRUE:
 				button.text = "O"
+#				var t = Theme.new()
+#				t.set_color("font_color", "Button", Color(0.2, 0.4, 0.8))
+#				button.set_theme(t)
+				var my_style = StyleBoxFlat.new()
+				my_style.set_bg_color(Color(0.8, 0.4, 0.2))
+				button.set("custom_styles/normal", my_style)
+				button.set("custom_styles/hover", my_style)
+				button.set("custom_styles/pressed", my_style)
+				button.set("custom_styles/focus", my_style)
+				button.set("custom_styles/disabled", my_style)
 				#button.disabled = true
 			GridCellState.UNKNOWN:
 				button.text = ""
