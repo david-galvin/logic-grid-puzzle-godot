@@ -2,9 +2,12 @@ extends Node2D
 
 
 
-const GridCellState = preload("res://grid_cell_state.gd")
+
+const GRID_CELL_STATE = preload("res://grid_cell_state.gd")
+const FONT_ROBOTO_REGULAR: Font = preload("res://fonts/Roboto/Roboto_regular.tres")
 const INNER_SEPARATION := 1
 const OUTER_SEPARATION := 4
+
 
 
 
@@ -13,17 +16,42 @@ var _hbox_side_cats := HBoxContainer.new()
 var _vbox_top_elts := VBoxContainer.new()
 var _vbox_side_elts := VBoxContainer.new()
 var _main_grid := GridContainer.new()
+var _cat_elt_v2_to_color_style := {}
+var _cat_elt_v2_to_buttons := {}
 var _grid_buttons: Array
 var _lp: LogicGridPuzzle
-var font_roboto_regular: Font = load("res://fonts/Roboto/Roboto_regular.tres")
+var _color_styles: Array
+var _default_style = StyleBoxFlat.new()
 
 
 
 
 func _ready():
-	_build_puzzle(5,5)
-	_lp = LogicGridPuzzle.new(5, 5)
+	var cat_count: int = 5
+	var elt_count: int = 5
+	_lp = LogicGridPuzzle.new(cat_count, elt_count)
+	_initialize_color_styles(cat_count, elt_count)
+	_build_puzzle(cat_count, elt_count)
 	_update_gui_positions()
+
+
+
+
+func _initialize_color_styles(cat_count: int, elt_count: int):
+	_default_style.set_bg_color(Color.from_hsv(0.708, 0.15, 0.25))
+	var hue: float
+	var lightness: float = 0.6
+	var saturation: float = 1.0
+	var num_color_styles: int = (cat_count / 2) * (elt_count)
+	for i in range(num_color_styles):
+		hue = float(i) / float(num_color_styles)
+		var color_style := StyleBoxFlat.new()
+		var color := Color.from_hsv(hue, saturation, lightness)
+		color_style.set_bg_color(color)
+		if i % (cat_count / 2) == 0:
+			_color_styles.push_front(color_style)
+		else:
+			_color_styles.push_back(color_style)
 
 
 
@@ -31,23 +59,29 @@ func _ready():
 func _build_puzzle(cat_count: int, elt_count: int):
 	for cat in range(cat_count):
 		if cat <= cat_count - 2:
-			var cat_button = _get_cat_button("cat " + str(cat))
+			var cat_button: Button = _get_cat_button("cat " + str(cat))
 			_hbox_top_cats.add_child(cat_button)
-			var inner_vbox = VBoxContainer.new()
+			var inner_vbox := VBoxContainer.new()
 			inner_vbox.size_flags_vertical = VBoxContainer.SIZE_EXPAND_FILL
 			inner_vbox.add_constant_override("separation", INNER_SEPARATION)
 			for elt in range(elt_count - 1, -1, -1):
-				var elt_button = _get_elt_button("element " + str(cat_count - cat - 2) + "." + str(elt))
+				var elt_button: Button = _get_elt_button(cat_count - cat - 2, elt)
+				_cat_elt_v2_to_buttons[Vector2(cat_count - cat - 2, elt)] = [elt_button]
 				inner_vbox.add_child(elt_button)
 			_vbox_top_elts.add_child(inner_vbox)
 		if cat >= 1:
-			var cat_button = _get_cat_button("cat " + str(cat))
+			var cat_button: Button = _get_cat_button("cat " + str(cat))
 			_hbox_side_cats.add_child(cat_button)
-			var inner_vbox = VBoxContainer.new()
+			var inner_vbox := VBoxContainer.new()
 			inner_vbox.size_flags_vertical = VBoxContainer.SIZE_EXPAND_FILL
 			inner_vbox.add_constant_override("separation", INNER_SEPARATION)
 			for elt in range(elt_count):
-				var elt_button = _get_elt_button("element " + str(cat_count - cat) + "." + str(elt))
+				var elt_button: Button = _get_elt_button(cat_count - cat, elt)
+				var cat_elt_v2 := Vector2(cat_count - cat, elt)
+				if _cat_elt_v2_to_buttons.has(cat_elt_v2):
+					_cat_elt_v2_to_buttons[cat_elt_v2].append(elt_button)
+				else:
+					_cat_elt_v2_to_buttons[cat_elt_v2] = [elt_button]
 				inner_vbox.add_child(elt_button)
 			_vbox_side_elts.add_child(inner_vbox)
 
@@ -60,22 +94,37 @@ func _build_puzzle(cat_count: int, elt_count: int):
 	_build_main_grid(cat_count, elt_count)
 
 
-func _get_elt_button(default_text: String) -> Button:
-	var elt_button = Button.new()
-	elt_button.add_font_override("font", font_roboto_regular)
+
+
+func _get_elt_button(var cat: int, var elt: int) -> Button:
+	var default_text: String = "element " + str(cat) + "." + str(elt)
+	if elt == 1:
+		default_text = "elt " + str(cat) + "." + str(elt)
+	var elt_button := Button.new()
+	elt_button.add_font_override("font", FONT_ROBOTO_REGULAR)
 	elt_button.size_flags_vertical = Button.SIZE_EXPAND_FILL
 	elt_button.align = Button.ALIGN_RIGHT
 	elt_button.rect_min_size = Vector2(23, 23)
 	elt_button.text = default_text
+	elt_button.set("custom_styles/normal", _default_style)
+	elt_button.set("custom_styles/hover", _default_style)
+	elt_button.set("custom_styles/pressed", _default_style)
+	elt_button.set("custom_styles/focus", _default_style)
+	elt_button.set("custom_styles/disabled", _default_style)
 	return elt_button
 
+
+
+
 func _get_cat_button(default_text: String) -> Button:
-	var cat_button = Button.new()
-	cat_button.add_font_override("font", font_roboto_regular)
+	var cat_button := Button.new()
+	cat_button.add_font_override("font", FONT_ROBOTO_REGULAR)
 	cat_button.clip_text = true
 	cat_button.size_flags_horizontal = Button.SIZE_EXPAND_FILL
 	cat_button.text = default_text
 	return cat_button
+
+
 
 
 func _build_main_grid(cat_count: int, elt_count: int):
@@ -94,15 +143,17 @@ func _build_main_grid(cat_count: int, elt_count: int):
 				inner_grid.add_constant_override("vseparation", INNER_SEPARATION)
 				for side_elt in range(elt_count):
 					for top_elt in range(elt_count):
-						var button = EventButton.new(side_cat, side_elt, top_cat, top_elt)
+						var button := EventButton.new(side_cat, side_elt, top_cat, top_elt)
 						var x_move := Move.new(side_cat, side_elt, top_cat, top_elt, false)
 						var o_move := Move.new(side_cat, side_elt, top_cat, top_elt, true)
+# warning-ignore:return_value_discarded
 						button.connect("left_click", self, "_enter_move", [x_move])
+# warning-ignore:return_value_discarded
 						button.connect("right_click", self, "_enter_move", [o_move])
 						button.size_flags_horizontal = Button.SIZE_EXPAND_FILL
 						button.size_flags_vertical = Button.SIZE_EXPAND_FILL
 						button.button_mask = BUTTON_MASK_LEFT | BUTTON_MASK_RIGHT
-						button.add_font_override("font", font_roboto_regular)
+						button.add_font_override("font", FONT_ROBOTO_REGULAR)
 						
 						_grid_buttons.append(button)
 						inner_grid.add_child(button)
@@ -110,62 +161,93 @@ func _build_main_grid(cat_count: int, elt_count: int):
 	self.add_child(_main_grid)
 
 
+
+
+func _update_button_color(button: Button, cat_elt_v2: Vector2):
+	var style: StyleBoxFlat = _cat_elt_v2_to_color_style[cat_elt_v2]
+	button.set("custom_styles/normal", style)
+	button.set("custom_styles/hover", style)
+	button.set("custom_styles/pressed", style)
+	button.set("custom_styles/focus", style)
+	button.set("custom_styles/disabled", style)
+
+
+
+
+func _update_label_buttons():
+	for v2 in _cat_elt_v2_to_color_style:
+		for button in _cat_elt_v2_to_buttons[v2]:
+			_update_button_color(button, v2)
+
+
+
+
 func _update_grid_buttons():
 	for button in _grid_buttons:
 		var cell = _lp.read_grid_cell(button.side_cat, button.side_elt, \
 				button.top_cat, button.top_elt)
 		match cell:
-			GridCellState.FALSE:
+			GRID_CELL_STATE.FALSE:
 				button.text = "X"
-				#button.disabled = true
-			GridCellState.TRUE:
+				button.disabled = true
+			GRID_CELL_STATE.TRUE:
 				button.text = "O"
-#				var t = Theme.new()
-#				t.set_color("font_color", "Button", Color(0.2, 0.4, 0.8))
-#				button.set_theme(t)
-				var my_style = StyleBoxFlat.new()
-				my_style.set_bg_color(Color(0.8, 0.4, 0.2))
-				button.set("custom_styles/normal", my_style)
-				button.set("custom_styles/hover", my_style)
-				button.set("custom_styles/pressed", my_style)
-				button.set("custom_styles/focus", my_style)
-				button.set("custom_styles/disabled", my_style)
-				#button.disabled = true
-			GridCellState.UNKNOWN:
+				button.disabled = true
+				var side_v2 := Vector2(button.side_cat, button.side_elt)
+				var top_v2 := Vector2(button.top_cat, button.top_elt)
+				if _cat_elt_v2_to_color_style.has(side_v2):
+					var color: StyleBoxFlat = _cat_elt_v2_to_color_style[side_v2]
+					_cat_elt_v2_to_color_style[top_v2] = color
+				elif _cat_elt_v2_to_color_style.has(top_v2):
+					var color: StyleBoxFlat = _cat_elt_v2_to_color_style[top_v2]
+					_cat_elt_v2_to_color_style[side_v2] = color
+				else:
+					var color: StyleBoxFlat = _color_styles.pop_front()
+					_cat_elt_v2_to_color_style[top_v2] = color
+					_cat_elt_v2_to_color_style[side_v2] = color
+				var t = Theme.new()
+				t.set_color("font_color", "Button", Color(0.2, 0.4, 0.8))
+				button.set_theme(t)
+				_update_button_color(button, Vector2(button.side_cat, button.side_elt))
+				
+			GRID_CELL_STATE.UNKNOWN:
 				button.text = ""
-				#button.disabled = false
-			GridCellState.UNSOLVABLE:
+				button.disabled = false
+			GRID_CELL_STATE.UNSOLVABLE:
 				button.text = "?"
-				#button.disabled = true
+				button.disabled = true
+
+
+
 
 func _enter_move(move):
 	_lp.apply_move(move)
 	_update_grid_buttons()
+	_update_label_buttons()
 	_update_gui_positions()
-	#print(str(_lp))
 
 
 
 
 func _update_gui_positions():
-	var top_cat_thickness = _hbox_top_cats.rect_size[1]
-	var top_elt_thickness = _vbox_top_elts.rect_size[0]
-	var top_cat_width = _hbox_top_cats.rect_size[0]
-	var top_elt_width = _vbox_top_elts.rect_size[1]
-	var top_grid_width = _main_grid.rect_size[0]
-	var top_width = [top_cat_width, top_elt_width, top_grid_width].max()
-	var top_thickness = top_cat_thickness + top_elt_thickness
+	var top_cat_thickness := _hbox_top_cats.rect_size[1]
+	var top_elt_thickness := _vbox_top_elts.rect_size[0]
+	var top_cat_width := _hbox_top_cats.rect_size[0]
+	var top_elt_width := _vbox_top_elts.rect_size[1]
+	var top_grid_width := _main_grid.rect_size[0]
+	var top_width: float = [top_cat_width, top_elt_width, top_grid_width].max()
+	var top_thickness := top_cat_thickness + top_elt_thickness
 	
-	var side_cat_thickness = _hbox_side_cats.rect_size[1]
-	var side_elt_thickness = _vbox_side_elts.rect_size[0]
-	var side_cat_width = _hbox_side_cats.rect_size[0]
-	var side_elt_width = _vbox_side_elts.rect_size[1]
-	var side_grid_width = _main_grid.rect_size[1]
-	var side_width = [side_cat_width, side_elt_width, side_grid_width].max()
-	var side_thickness = side_cat_thickness + side_elt_thickness
+	var side_cat_thickness := _hbox_side_cats.rect_size[1]
+	var side_elt_thickness := _vbox_side_elts.rect_size[0]
+	var side_cat_width := _hbox_side_cats.rect_size[0]
+	var side_elt_width := _vbox_side_elts.rect_size[1]
+	var side_grid_width := _main_grid.rect_size[1]
+	var side_width: float = [side_cat_width, side_elt_width, side_grid_width].max()
+	var side_thickness := side_cat_thickness + side_elt_thickness
 	
 	var menu: PanelContainer = get_node("MenuToolbar")
-	var puz_position = Vector2(0, menu.rect_position[1] + menu.rect_size[1] + OUTER_SEPARATION - 1)
+	var puz_position := Vector2(0, menu.rect_position[1] + menu.rect_size[1] + OUTER_SEPARATION - 1)
 	
 	_hbox_top_cats.rect_position = Vector2(side_thickness + OUTER_SEPARATION, 0) + puz_position
 	_vbox_top_elts.rect_position = Vector2(side_thickness + OUTER_SEPARATION + top_width, top_cat_thickness + INNER_SEPARATION) + puz_position
