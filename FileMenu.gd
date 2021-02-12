@@ -1,5 +1,6 @@
 extends MenuButton
 
+signal file_new
 
 var popup
 
@@ -12,14 +13,11 @@ func _ready():
 	popup.add_item("Load", LOAD, KEY_L | KEY_MASK_CTRL)
 	popup.add_item("Save", SAVE, KEY_S | KEY_MASK_CTRL)
 	popup.connect("id_pressed", self, "_on_id_pressed")
+	connect("file_new", get_owner(), "file_new_puzzle")
 
 
 func _on_id_pressed(ID):
 	print(popup.get_item_text(ID), " pressed")
 	match ID:
 		NEW:
-			print("Yep, New!")
-			var _cat_count=5
-			var _cat_size=5
-			var _lp=LogicGridPuzzle.new(_cat_count,_cat_size)
-			print(str(_lp))
+			emit_signal("file_new")

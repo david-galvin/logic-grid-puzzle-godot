@@ -5,7 +5,7 @@ extends Node2D
 
 const GRID_CELL_STATE = preload("res://grid_cell_state.gd")
 const FONT_ROBOTO_REGULAR: Font = preload("res://fonts/Roboto/Roboto_regular.tres")
-const INNER_SEPARATION := 1
+const INNER_SEPARATION := 0
 const OUTER_SEPARATION := 4
 
 
@@ -22,13 +22,43 @@ var _grid_buttons: Array
 var _lp: LogicGridPuzzle
 var _color_styles: Array
 var _default_style = StyleBoxFlat.new()
+var _moves: Array = []
 
 
 
 
 func _ready():
-	var cat_count: int = 5
-	var elt_count: int = 5
+#	var cat_count: int = 5
+#	var elt_count: int = 5
+#	_generate_puzzle(cat_count, elt_count)
+	pass
+
+
+
+func _clear_all():
+	_hbox_top_cats.free()
+	_hbox_side_cats.free()
+	_vbox_top_elts.free()
+	_vbox_side_elts.free()
+	_main_grid.free()
+	_hbox_top_cats = HBoxContainer.new()
+	_hbox_side_cats = HBoxContainer.new()
+	_vbox_top_elts = VBoxContainer.new()
+	_vbox_side_elts = VBoxContainer.new()
+	_main_grid = GridContainer.new()
+	_cat_elt_v2_to_color_style = {}
+	_cat_elt_v2_to_buttons = {}
+	_grid_buttons = []
+	_color_styles = []
+	_moves = []
+
+
+
+
+func _generate_puzzle(cat_count_sb: SpinBox, elt_count_sb: SpinBox):
+	_clear_all()
+	var cat_count: int = int(cat_count_sb.get_value())
+	var elt_count: int = int(elt_count_sb.get_value())
 	_lp = LogicGridPuzzle.new(cat_count, elt_count)
 	_initialize_color_styles(cat_count, elt_count)
 	_build_puzzle(cat_count, elt_count)
@@ -36,11 +66,11 @@ func _ready():
 
 
 
-
 func _initialize_color_styles(cat_count: int, elt_count: int):
+	_color_styles.clear()
 	_default_style.set_bg_color(Color.from_hsv(0.708, 0.15, 0.25))
 	var hue: float
-	var lightness: float = 0.6
+	var lightness: float = 0.8
 	var saturation: float = 1.0
 	var num_color_styles: int = (cat_count / 2) * (elt_count)
 	for i in range(num_color_styles):
@@ -84,7 +114,6 @@ func _build_puzzle(cat_count: int, elt_count: int):
 					_cat_elt_v2_to_buttons[cat_elt_v2] = [elt_button]
 				inner_vbox.add_child(elt_button)
 			_vbox_side_elts.add_child(inner_vbox)
-
 	_hbox_side_cats.set_rotation(deg2rad(-90))
 	_vbox_top_elts.set_rotation(deg2rad(90))
 	self.add_child(_hbox_side_cats)
@@ -122,7 +151,52 @@ func _get_cat_button(default_text: String) -> Button:
 	cat_button.clip_text = true
 	cat_button.size_flags_horizontal = Button.SIZE_EXPAND_FILL
 	cat_button.text = default_text
+	cat_button.connect("pressed", self, "file_new_puzzle")
 	return cat_button
+
+
+
+
+func file_new_puzzle():
+	var menu = PopupPanel.new()
+	add_child(menu)
+	
+	var vbox = VBoxContainer.new()
+	menu.add_child(vbox)
+	
+	var grid := GridContainer.new()
+	vbox.add_child(grid)
+	grid.columns = 2
+	
+	var cat_label := Label.new()
+	cat_label.text = "Number of categories (3-12): "
+	var cat_count_spinbox = get_spinbox(1, 12, 5)
+	grid.add_child(cat_label)
+	grid.add_child(cat_count_spinbox)
+	
+	var elt_label := Label.new()
+	elt_label.text = "Number of elements (2-6): "
+	var elt_count_spinbox = get_spinbox(2, 5, 6)
+	grid.add_child(elt_label)
+	grid.add_child(elt_count_spinbox)
+	
+	var button = Button.new()
+	button.text = "Generate blank logic puzzle"
+	button.connect("pressed", self, "_generate_puzzle", [cat_count_spinbox, elt_count_spinbox])
+	vbox.add_child(button)
+	
+	menu.popup_centered()
+
+
+
+
+func get_spinbox(min_val: int, max_val: int, default_val: int) -> SpinBox:
+	var spinbox := SpinBox.new()
+	spinbox.set_min(min_val)
+	spinbox.set_max(max_val)
+	spinbox.set_value(default_val)
+	spinbox.set_step(1)
+	return spinbox
 
 
 
@@ -146,15 +220,12 @@ func _build_main_grid(cat_count: int, elt_count: int):
 						var button := EventButton.new(side_cat, side_elt, top_cat, top_elt)
 						var x_move := Move.new(side_cat, side_elt, top_cat, top_elt, false)
 						var o_move := Move.new(side_cat, side_elt, top_cat, top_elt, true)
-# warning-ignore:return_value_discarded
 						button.connect("left_click", self, "_enter_move", [x_move])
-# warning-ignore:return_value_discarded
 						button.connect("right_click", self, "_enter_move", [o_move])
 						button.size_flags_horizontal = Button.SIZE_EXPAND_FILL
 						button.size_flags_vertical = Button.SIZE_EXPAND_FILL
 						button.button_mask = BUTTON_MASK_LEFT | BUTTON_MASK_RIGHT
 						button.add_font_override("font", FONT_ROBOTO_REGULAR)
-						
 						_grid_buttons.append(button)
 						inner_grid.add_child(button)
 			_main_grid.add_child(inner_grid)
@@ -189,10 +260,10 @@ func _update_grid_buttons():
 		match cell:
 			GRID_CELL_STATE.FALSE:
 				button.text = "X"
-				button.disabled = true
+				#button.disabled = true
 			GRID_CELL_STATE.TRUE:
 				button.text = "O"
-				button.disabled = true
+				#button.disabled = true
 				var side_v2 := Vector2(button.side_cat, button.side_elt)
 				var top_v2 := Vector2(button.top_cat, button.top_elt)
 				if _cat_elt_v2_to_color_style.has(side_v2):
@@ -205,23 +276,21 @@ func _update_grid_buttons():
 					var color: StyleBoxFlat = _color_styles.pop_front()
 					_cat_elt_v2_to_color_style[top_v2] = color
 					_cat_elt_v2_to_color_style[side_v2] = color
-				var t = Theme.new()
-				t.set_color("font_color", "Button", Color(0.2, 0.4, 0.8))
-				button.set_theme(t)
 				_update_button_color(button, Vector2(button.side_cat, button.side_elt))
 				
 			GRID_CELL_STATE.UNKNOWN:
 				button.text = ""
-				button.disabled = false
+				#button.disabled = false
 			GRID_CELL_STATE.UNSOLVABLE:
 				button.text = "?"
-				button.disabled = true
+				#button.disabled = true
 
 
 
 
 func _enter_move(move):
 	_lp.apply_move(move)
+	_moves.append(move)
 	_update_grid_buttons()
 	_update_label_buttons()
 	_update_gui_positions()
