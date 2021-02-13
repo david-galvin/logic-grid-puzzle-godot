@@ -23,14 +23,16 @@ var _lp: LogicGridPuzzle
 var _color_styles: Array
 var _default_style = StyleBoxFlat.new()
 var _moves: Array = []
+var _cat_count: int
+var _cat_size: int
 
 
 
 
 func _ready():
-#	var cat_count: int = 5
-#	var elt_count: int = 5
-#	_generate_puzzle(cat_count, elt_count)
+#	var _cat_count: int = 5
+#	var _cat_size: int = 5
+#	_generate_puzzle(_cat_count, _cat_size)
 	pass
 
 
@@ -55,30 +57,30 @@ func _clear_all():
 
 
 
-func _generate_puzzle(cat_count_sb: SpinBox, elt_count_sb: SpinBox):
+func _generate_puzzle(_cat_count_sb: SpinBox, _cat_size_sb: SpinBox):
 	_clear_all()
-	var cat_count: int = int(cat_count_sb.get_value())
-	var elt_count: int = int(elt_count_sb.get_value())
-	_lp = LogicGridPuzzle.new(cat_count, elt_count)
-	_initialize_color_styles(cat_count, elt_count)
-	_build_puzzle(cat_count, elt_count)
+	_cat_count = int(_cat_count_sb.get_value())
+	_cat_size = int(_cat_size_sb.get_value())
+	_lp = LogicGridPuzzle.new(_cat_count, _cat_size)
+	_initialize_color_styles()
+	_build_puzzle()
 	_update_gui_positions()
 
 
 
-func _initialize_color_styles(cat_count: int, elt_count: int):
+func _initialize_color_styles():
 	_color_styles.clear()
 	_default_style.set_bg_color(Color.from_hsv(0.708, 0.15, 0.25))
 	var hue: float
 	var lightness: float = 0.8
 	var saturation: float = 1.0
-	var num_color_styles: int = (cat_count / 2) * (elt_count)
+	var num_color_styles: int = (_cat_count / 2) * (_cat_size)
 	for i in range(num_color_styles):
 		hue = float(i) / float(num_color_styles)
 		var color_style := StyleBoxFlat.new()
 		var color := Color.from_hsv(hue, saturation, lightness)
 		color_style.set_bg_color(color)
-		if i % (cat_count / 2) == 0:
+		if i % (_cat_count / 2) == 0:
 			_color_styles.push_front(color_style)
 		else:
 			_color_styles.push_back(color_style)
@@ -86,28 +88,28 @@ func _initialize_color_styles(cat_count: int, elt_count: int):
 
 
 
-func _build_puzzle(cat_count: int, elt_count: int):
-	for cat in range(cat_count):
-		if cat <= cat_count - 2:
-			var cat_button: Button = _get_cat_button("cat " + str(cat))
+func _build_puzzle():
+	for cat in range(_cat_count):
+		if cat <= _cat_count - 2:
+			var cat_button: Button = _make_cat_button(cat)
 			_hbox_top_cats.add_child(cat_button)
 			var inner_vbox := VBoxContainer.new()
 			inner_vbox.size_flags_vertical = VBoxContainer.SIZE_EXPAND_FILL
 			inner_vbox.add_constant_override("separation", INNER_SEPARATION)
-			for elt in range(elt_count - 1, -1, -1):
-				var elt_button: Button = _get_elt_button(cat_count - cat - 2, elt)
-				_cat_elt_v2_to_buttons[Vector2(cat_count - cat - 2, elt)] = [elt_button]
+			for elt in range(_cat_size - 1, -1, -1):
+				var elt_button: Button = _make_elt_button(_cat_count - cat - 2, elt)
+				_cat_elt_v2_to_buttons[Vector2(_cat_count - cat - 2, elt)] = [elt_button]
 				inner_vbox.add_child(elt_button)
 			_vbox_top_elts.add_child(inner_vbox)
 		if cat >= 1:
-			var cat_button: Button = _get_cat_button("cat " + str(cat))
+			var cat_button: Button = _make_cat_button(cat)
 			_hbox_side_cats.add_child(cat_button)
 			var inner_vbox := VBoxContainer.new()
 			inner_vbox.size_flags_vertical = VBoxContainer.SIZE_EXPAND_FILL
 			inner_vbox.add_constant_override("separation", INNER_SEPARATION)
-			for elt in range(elt_count):
-				var elt_button: Button = _get_elt_button(cat_count - cat, elt)
-				var cat_elt_v2 := Vector2(cat_count - cat, elt)
+			for elt in range(_cat_size):
+				var elt_button: Button = _make_elt_button(_cat_count - cat, elt)
+				var cat_elt_v2 := Vector2(_cat_count - cat, elt)
 				if _cat_elt_v2_to_buttons.has(cat_elt_v2):
 					_cat_elt_v2_to_buttons[cat_elt_v2].append(elt_button)
 				else:
@@ -120,12 +122,12 @@ func _build_puzzle(cat_count: int, elt_count: int):
 	self.add_child(_hbox_top_cats)
 	self.add_child(_vbox_side_elts)
 	self.add_child(_vbox_top_elts)
-	_build_main_grid(cat_count, elt_count)
+	_build_main_grid()
 
 
 
 
-func _get_elt_button(var cat: int, var elt: int) -> Button:
+func _make_elt_button(var cat: int, var elt: int) -> Button:
 	var default_text: String = "element " + str(cat) + "." + str(elt)
 	if elt == 1:
 		default_text = "elt " + str(cat) + "." + str(elt)
@@ -145,24 +147,80 @@ func _get_elt_button(var cat: int, var elt: int) -> Button:
 
 
 
-func _get_cat_button(default_text: String) -> Button:
+func _make_cat_button(cat: int) -> Button:
+	var default_text := "cat " + str(cat)
 	var cat_button := Button.new()
 	cat_button.add_font_override("font", FONT_ROBOTO_REGULAR)
 	cat_button.clip_text = true
 	cat_button.size_flags_horizontal = Button.SIZE_EXPAND_FILL
 	cat_button.text = default_text
-	cat_button.connect("pressed", self, "file_new_puzzle")
+	cat_button.connect("pressed", self, "relabel_puzzle_ui")
 	return cat_button
 
 
 
 
-func file_new_puzzle():
-	var menu = PopupPanel.new()
-	add_child(menu)
+func relabel_puzzle_ui():
+	var panel = PopupPanel.new()
+	add_child(panel)
 	
 	var vbox = VBoxContainer.new()
-	menu.add_child(vbox)
+	panel.add_child(vbox)
+	
+	var label := Label.new()
+	label.text = "Rename Categories & Elements"
+	label.align = Label.ALIGN_CENTER
+	label.set("custom_styles/default", _default_style)
+	vbox.add_child(label)
+	
+	var grid := GridContainer.new()
+	vbox.add_child(grid)
+	grid.columns = _cat_count
+	
+	#var cat_to_line_edit = {}
+	#var cat_elt_v2_to_line_edit = {}
+	
+	for cat in range(_cat_count):
+		var line_edit := LineEdit.new()
+		line_edit.text = "X"
+		line_edit.connect("focus_entered", self, "_line_edit_select", [line_edit])
+		line_edit.connect("focus_exited", self, "_line_edit_deselect", [line_edit])
+		grid.add_child(line_edit)
+		#cat_to_line_edit[cat] = line_edit
+		
+	for elt in range(_cat_size):
+		for cat in range(_cat_count):
+			var line_edit := LineEdit.new()
+			line_edit.text = "Y"
+			line_edit.connect("focus_entered", self, "_line_edit_select", [line_edit])
+			line_edit.connect("focus_exited", self, "_line_edit_deselect", [line_edit])
+			grid.add_child(line_edit)
+			#cat_elt_v2_to_line_edit[Vector2(cat, elt)] = line_edit
+	
+	var button = Button.new()
+	button.text = "Relabel!"
+	button.connect("pressed", self, "_relabel_puzzle")
+	vbox.add_child(button)
+	
+	panel.popup_centered()
+
+
+func _relabel_puzzle():
+	pass
+
+
+func file_new_puzzle():
+	var panel = PopupPanel.new()
+	add_child(panel)
+	
+	var vbox = VBoxContainer.new()
+	panel.add_child(vbox)
+	
+	var label := Label.new()
+	label.text = "Logic Puzzle Size"
+	label.align = Label.ALIGN_CENTER
+	label.set("custom_styles/default", _default_style)
+	vbox.add_child(label)
 	
 	var grid := GridContainer.new()
 	vbox.add_child(grid)
@@ -170,53 +228,69 @@ func file_new_puzzle():
 	
 	var cat_label := Label.new()
 	cat_label.text = "Number of categories (3-12): "
-	var cat_count_spinbox = get_spinbox(1, 12, 5)
+	var _cat_count_spinbox = make_spinbox(1, 12, 5)
 	grid.add_child(cat_label)
-	grid.add_child(cat_count_spinbox)
+	grid.add_child(_cat_count_spinbox)
 	
 	var elt_label := Label.new()
-	elt_label.text = "Number of elements (2-6): "
-	var elt_count_spinbox = get_spinbox(2, 5, 6)
+	elt_label.text = "Number of elements (2-7): "
+	var _cat_size_spinbox = make_spinbox(2, 7, 5)
 	grid.add_child(elt_label)
-	grid.add_child(elt_count_spinbox)
+	grid.add_child(_cat_size_spinbox)
 	
 	var button = Button.new()
 	button.text = "Generate blank logic puzzle"
-	button.connect("pressed", self, "_generate_puzzle", [cat_count_spinbox, elt_count_spinbox])
+	button.connect("pressed", self, "_generate_puzzle", [_cat_count_spinbox, _cat_size_spinbox])
 	vbox.add_child(button)
 	
-	menu.popup_centered()
+	panel.popup_centered()
 
 
 
 
-func get_spinbox(min_val: int, max_val: int, default_val: int) -> SpinBox:
+func make_spinbox(min_val: int, max_val: int, default_val: int) -> SpinBox:
 	var spinbox := SpinBox.new()
 	spinbox.set_min(min_val)
 	spinbox.set_max(max_val)
 	spinbox.set_value(default_val)
 	spinbox.set_step(1)
+	var line_edit := spinbox.get_line_edit()
+	line_edit.align = LineEdit.ALIGN_CENTER
+	line_edit.connect("focus_exited", self, "_line_edit_deselect", [line_edit])
+	line_edit.connect("focus_entered", self, "_line_edit_select", [line_edit])
 	return spinbox
 
 
 
 
-func _build_main_grid(cat_count: int, elt_count: int):
+func _line_edit_select(line_edit: LineEdit):
+	line_edit.select_all()
+
+
+
+
+func _line_edit_deselect(line_edit: LineEdit):
+	line_edit.deselect()
+
+
+
+
+func _build_main_grid():
 	_grid_buttons = []
-	_main_grid.columns = cat_count - 1
+	_main_grid.columns = _cat_count - 1
 	_main_grid.add_constant_override("hseparation", OUTER_SEPARATION)
 	_main_grid.add_constant_override("vseparation", OUTER_SEPARATION)
-	for side_cat in range(cat_count - 1, 0, -1):
-		for top_cat in range(0, cat_count - 1):
+	for side_cat in range(_cat_count - 1, 0, -1):
+		for top_cat in range(0, _cat_count - 1):
 			var inner_grid := GridContainer.new()
 			if side_cat > top_cat:
 				inner_grid.size_flags_horizontal = GridContainer.SIZE_EXPAND_FILL
 				inner_grid.size_flags_vertical = GridContainer.SIZE_EXPAND_FILL
-				inner_grid.columns = elt_count
+				inner_grid.columns = _cat_size
 				inner_grid.add_constant_override("hseparation", INNER_SEPARATION)
 				inner_grid.add_constant_override("vseparation", INNER_SEPARATION)
-				for side_elt in range(elt_count):
-					for top_elt in range(elt_count):
+				for side_elt in range(_cat_size):
+					for top_elt in range(_cat_size):
 						var button := EventButton.new(side_cat, side_elt, top_cat, top_elt)
 						var x_move := Move.new(side_cat, side_elt, top_cat, top_elt, false)
 						var o_move := Move.new(side_cat, side_elt, top_cat, top_elt, true)

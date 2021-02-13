@@ -77,10 +77,10 @@ margin_bottom = 30.0
 custom_fonts/font = ExtResource( 6 )
 
 [node name="Gut" type="Control" parent="."]
-margin_left = 781.817
-margin_top = 23.3082
-margin_right = 1521.82
-margin_bottom = 273.308
+margin_left = 83.3481
+margin_top = 312.135
+margin_right = 823.351
+margin_bottom = 562.135
 rect_min_size = Vector2( 740, 250 )
 size_flags_horizontal = 0
 script = ExtResource( 1 )
