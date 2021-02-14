@@ -127,9 +127,9 @@ func _build_puzzle():
 
 
 func _make_elt_button(var cat: int, var elt: int) -> Button:
-	var default_text: String = "element " + str(cat) + "." + str(elt)
+	var default_text: String = "elt " + str(cat) + "." + str(elt)
 	if elt == 1:
-		default_text = "elt " + str(cat) + "." + str(elt)
+		default_text = "element " + str(cat) + "." + str(elt)
 	var elt_button := Button.new()
 	elt_button.add_font_override("font", FONT_ROBOTO_REGULAR)
 	elt_button.size_flags_vertical = Button.SIZE_EXPAND_FILL
@@ -209,7 +209,7 @@ func relabel_puzzle_ui(row_col_v2: Vector2):
 
 	var button = Button.new()
 	button.text = "Relabel!"
-	button.connect("pressed", self, "_relabel_puzzle")
+	button.connect("pressed", self, "_relabel_puzzle", [matrix])
 	vbox.add_child(button)
 	
 	for row in range(_cat_size + 1):
@@ -241,8 +241,14 @@ func relabel_puzzle_ui(row_col_v2: Vector2):
 
 
 
-func _relabel_puzzle():
-	pass
+func _relabel_puzzle(matrix: Array):
+	for cat in range(_cat_count):
+		for button in _cat_to_buttons[cat]:
+			button.text = matrix[0][cat].text
+		for elt in range(_cat_size):
+			for button in _cat_elt_v2_to_buttons[Vector2(cat, elt)]:
+				button.text = matrix[elt+1][cat].text
+	_update_gui_positions()
 
 
 
@@ -411,6 +417,13 @@ func _enter_move(move):
 
 
 func _update_gui_positions():
+	_vbox_top_elts.rect_size = Vector2(1,1)
+	_vbox_side_elts.rect_size = Vector2(1,1)
+	_vbox_top_elts.rect_position = _vbox_top_elts.rect_position
+	_hbox_top_cats.rect_position = _hbox_top_cats.rect_position
+	_vbox_side_elts.rect_position = _vbox_side_elts.rect_position
+	_hbox_side_cats.rect_position = _hbox_side_cats.rect_position
+	
 	var top_cat_thickness := _hbox_top_cats.rect_size[1]
 	var top_elt_thickness := _vbox_top_elts.rect_size[0]
 	var top_cat_width := _hbox_top_cats.rect_size[0]
@@ -443,4 +456,4 @@ func _update_gui_positions():
 	_hbox_side_cats.add_constant_override("separation", OUTER_SEPARATION)
 	
 	_main_grid.rect_position = Vector2(side_thickness + OUTER_SEPARATION, top_thickness + OUTER_SEPARATION) + puz_position
-	_main_grid.rect_min_size = Vector2(top_width, side_width)
+	_main_grid.rect_size = Vector2(top_width, side_width)
