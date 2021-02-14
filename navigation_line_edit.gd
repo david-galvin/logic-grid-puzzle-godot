@@ -13,15 +13,19 @@ var neighbor_down := self
 
 
 func _input(event):
-	if event.is_action_pressed("ui_up") and self.has_focus():
-		neighbor_up.grab_focus()
-		get_tree().set_input_as_handled()
-	if event.is_action_pressed("ui_left") and self.has_focus():
-		neighbor_left.grab_focus()
-		get_tree().set_input_as_handled()
-	if event.is_action_pressed("ui_right") and self.has_focus():
-		neighbor_right.grab_focus()
-		get_tree().set_input_as_handled()
-	if (event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_down")) and self.has_focus():
-		neighbor_down.grab_focus()
-		get_tree().set_input_as_handled()
+	if self.has_focus():
+		if event.is_action_pressed("ui_up"):
+			neighbor_up.grab_focus()
+			get_tree().set_input_as_handled()
+		elif event.is_action_pressed("ui_left"):
+			neighbor_left.grab_focus()
+			get_tree().set_input_as_handled()
+		elif event.is_action_pressed("ui_right"):
+			neighbor_right.grab_focus()
+			get_tree().set_input_as_handled()
+		elif event is InputEventKey and event.pressed and event.scancode == KEY_ENTER:
+			neighbor_down.grab_focus()
+			get_tree().set_input_as_handled()
+		elif event.is_action_pressed("ui_down"):
+			neighbor_down.grab_focus()
+			get_tree().set_input_as_handled()

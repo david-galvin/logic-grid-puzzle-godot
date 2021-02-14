@@ -17,7 +17,6 @@ func _ready():
 
 
 func _on_id_pressed(ID):
-	print(popup.get_item_text(ID), " pressed")
 	match ID:
 		NEW:
 			emit_signal("file_new")
