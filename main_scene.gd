@@ -5,7 +5,7 @@ extends Node2D
 
 const GRID_CELL_STATE = preload("res://grid_cell_state.gd")
 const FONT_ROBOTO_REGULAR: Font = preload("res://fonts/Roboto/Roboto_regular.tres")
-const INNER_SEPARATION := 0
+const INNER_SEPARATION := 1
 const OUTER_SEPARATION := 4
 
 
@@ -170,43 +170,75 @@ func relabel_puzzle_ui():
 	var label := Label.new()
 	label.text = "Rename Categories & Elements"
 	label.align = Label.ALIGN_CENTER
-	label.set("custom_styles/default", _default_style)
+	#label.set("custom_styles/normal", _default_style)
 	vbox.add_child(label)
 	
 	var grid := GridContainer.new()
+	grid.add_constant_override("hseparation", INNER_SEPARATION)
+	grid.add_constant_override("vseparation", INNER_SEPARATION)
 	vbox.add_child(grid)
 	grid.columns = _cat_count
 	
-	#var cat_to_line_edit = {}
-	#var cat_elt_v2_to_line_edit = {}
+	var matrix := []
+	for i in range(_cat_size + 1):
+		var arr := []
+		arr.resize(_cat_count)
+		matrix.append(arr)
 	
 	for cat in range(_cat_count):
-		var line_edit := LineEdit.new()
+		var line_edit := NavigationLineEdit.new()
 		line_edit.text = "X"
 		line_edit.connect("focus_entered", self, "_line_edit_select", [line_edit])
 		line_edit.connect("focus_exited", self, "_line_edit_deselect", [line_edit])
 		grid.add_child(line_edit)
-		#cat_to_line_edit[cat] = line_edit
+		matrix[0][cat] = line_edit
 		
 	for elt in range(_cat_size):
 		for cat in range(_cat_count):
-			var line_edit := LineEdit.new()
+			var line_edit := NavigationLineEdit.new()
 			line_edit.text = "Y"
 			line_edit.connect("focus_entered", self, "_line_edit_select", [line_edit])
 			line_edit.connect("focus_exited", self, "_line_edit_deselect", [line_edit])
 			grid.add_child(line_edit)
-			#cat_elt_v2_to_line_edit[Vector2(cat, elt)] = line_edit
+			matrix[elt + 1][cat] = line_edit
 	
 	var button = Button.new()
 	button.text = "Relabel!"
 	button.connect("pressed", self, "_relabel_puzzle")
 	vbox.add_child(button)
 	
+	var next_row: int
+	var next_col: int
+	for row in range(_cat_size + 1):
+		for col in range(_cat_count):
+			var a: NavigationLineEdit = matrix[row][col]
+			var b: NavigationLineEdit
+			var c: NavigationLineEdit
+			
+			if row == _cat_size and col == _cat_count - 1:
+				b = matrix[0][0]
+				c = matrix[0][0]
+			elif row == _cat_size:
+				b = matrix[row][col + 1]
+				c = matrix[0][col + 1]
+			elif col == _cat_count - 1:
+				b = matrix[row + 1][0]
+				c = matrix[row + 1][col]
+			else:
+				b = matrix[row][col + 1]
+				c = matrix[row + 1][col]
+			a.neighbor_right = b
+			b.neighbor_left = a
+			a.neighbor_down = c
+			c.neighbor_up = a
 	panel.popup_centered()
 
 
 func _relabel_puzzle():
 	pass
+
+
+
 
 
 func file_new_puzzle():
@@ -219,7 +251,7 @@ func file_new_puzzle():
 	var label := Label.new()
 	label.text = "Logic Puzzle Size"
 	label.align = Label.ALIGN_CENTER
-	label.set("custom_styles/default", _default_style)
+	#label.set("custom_styles/normal", _default_style)
 	vbox.add_child(label)
 	
 	var grid := GridContainer.new()

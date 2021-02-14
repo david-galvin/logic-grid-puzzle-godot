@@ -69,6 +69,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://move.gd"
 }, {
+"base": "LineEdit",
+"class": "NavigationLineEdit",
+"language": "GDScript",
+"path": "res://navigation_line_edit.gd"
+}, {
 "base": "Reference",
 "class": "Permutation",
 "language": "GDScript",
@@ -117,6 +122,7 @@ _global_script_class_icons={
 "LogicGridPuzzle": "",
 "Math": "",
 "Move": "",
+"NavigationLineEdit": "",
 "Permutation": "",
 "PermutationTools": "",
 "PoolIntMatrix": "",
