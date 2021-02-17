@@ -17,9 +17,12 @@ func _ready():
 
 
 func _on_id_pressed(ID):
-	print(popup.get_item_text(ID), " pressed")
 	match ID:
 		SIZE_DOWN:
 			get_owner().scale -= Vector2(0.05, 0.05)
 		SIZE_UP:
 			get_owner().scale += Vector2(0.05, 0.05)
+		UNDO:
+			get_owner().edit_undo()
+		REDO:
+			get_owner().edit_redo()

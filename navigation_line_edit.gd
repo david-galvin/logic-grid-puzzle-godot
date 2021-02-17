@@ -2,14 +2,10 @@ class_name NavigationLineEdit
 extends LineEdit
 
 
-
-
 var neighbor_up := self
 var neighbor_left := self
 var neighbor_right := self
 var neighbor_down := self
-
-
 
 
 func _input(event):

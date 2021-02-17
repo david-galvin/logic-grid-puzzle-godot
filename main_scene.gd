@@ -28,6 +28,8 @@ var _cat_count: int
 var _cat_size: int
 
 
+func _init():
+	OS.set_window_maximized(true)
 
 
 func _clear_all():
@@ -51,7 +53,7 @@ func _clear_all():
 
 
 
-func _generate_puzzle(_cat_count_sb: SpinBox, _cat_size_sb: SpinBox):
+func _generate_puzzle(_cat_count_sb: SpinBox, _cat_size_sb: SpinBox, menu_panel: PopupPanel):
 	_clear_all()
 	_cat_count = int(_cat_count_sb.get_value())
 	_cat_size = int(_cat_size_sb.get_value())
@@ -59,10 +61,14 @@ func _generate_puzzle(_cat_count_sb: SpinBox, _cat_size_sb: SpinBox):
 	_initialize_color_styles()
 	_build_puzzle()
 	_update_gui_positions()
+	_set_default_label_colors()
+	_update_grid_buttons()
+	menu_panel.hide()
 
 
 
 func _initialize_color_styles():
+	_cat_elt_v2_to_color_style = {}
 	_color_styles.clear()
 	_default_style.set_bg_color(Color.from_hsv(0.708, 0.15, 0.25))
 	var hue: float
@@ -127,9 +133,7 @@ func _build_puzzle():
 
 
 func _make_elt_button(var cat: int, var elt: int) -> Button:
-	var default_text: String = "elt " + str(cat) + "." + str(elt)
-	if elt == 1:
-		default_text = "element " + str(cat) + "." + str(elt)
+	var default_text: String = "element " + str(cat) + "." + str(elt)
 	var elt_button := Button.new()
 	elt_button.add_font_override("font", FONT_ROBOTO_REGULAR)
 	elt_button.size_flags_vertical = Button.SIZE_EXPAND_FILL
@@ -209,7 +213,7 @@ func relabel_puzzle_ui(row_col_v2: Vector2):
 
 	var button = Button.new()
 	button.text = "Relabel!"
-	button.connect("pressed", self, "_relabel_puzzle", [matrix])
+	button.connect("pressed", self, "_relabel_puzzle", [matrix, panel])
 	vbox.add_child(button)
 	
 	for row in range(_cat_size + 1):
@@ -241,7 +245,7 @@ func relabel_puzzle_ui(row_col_v2: Vector2):
 
 
 
-func _relabel_puzzle(matrix: Array):
+func _relabel_puzzle(matrix: Array, menu_panel: PopupPanel):
 	for cat in range(_cat_count):
 		for button in _cat_to_buttons[cat]:
 			button.text = matrix[0][cat].text
@@ -249,8 +253,23 @@ func _relabel_puzzle(matrix: Array):
 			for button in _cat_elt_v2_to_buttons[Vector2(cat, elt)]:
 				button.text = matrix[elt+1][cat].text
 	_update_gui_positions()
+	menu_panel.hide()
 
 
+func edit_undo():
+	_initialize_color_styles()
+	_set_default_label_colors()
+	_lp.undo()
+	_update_grid_buttons()
+	_update_label_buttons()
+	_update_gui_positions()
+
+
+func edit_redo():
+	_lp.redo()
+	_update_grid_buttons()
+	_update_label_buttons()
+	_update_gui_positions()
 
 
 func file_new_puzzle():
@@ -263,7 +282,6 @@ func file_new_puzzle():
 	var label := Label.new()
 	label.text = "Logic Puzzle Size"
 	label.align = Label.ALIGN_CENTER
-	#label.set("custom_styles/normal", _default_style)
 	vbox.add_child(label)
 	
 	var grid := GridContainer.new()
@@ -272,28 +290,30 @@ func file_new_puzzle():
 	
 	var cat_label := Label.new()
 	cat_label.text = "Number of categories (3-12): "
-	var _cat_count_spinbox = make_spinbox(1, 12, 5)
+	var _cat_count_spinbox := make_nav_spinbox(3, 12, 5)
 	grid.add_child(cat_label)
 	grid.add_child(_cat_count_spinbox)
 	
 	var elt_label := Label.new()
 	elt_label.text = "Number of elements (2-7): "
-	var _cat_size_spinbox = make_spinbox(2, 7, 5)
+	var _cat_size_spinbox := make_nav_spinbox(2, 7, 5)
 	grid.add_child(elt_label)
 	grid.add_child(_cat_size_spinbox)
 	
 	var button = Button.new()
 	button.text = "Generate blank logic puzzle"
-	button.connect("pressed", self, "_generate_puzzle", [_cat_count_spinbox, _cat_size_spinbox])
+	button.connect("pressed", self, "_generate_puzzle", [_cat_count_spinbox, _cat_size_spinbox, panel])
 	vbox.add_child(button)
+	
+	_cat_count_spinbox.neighbor_down = _cat_size_spinbox.get_line_edit()
+	_cat_size_spinbox.neighbor_up = _cat_count_spinbox.get_line_edit()
+	_cat_size_spinbox.neighbor_down = button
 	
 	panel.popup_centered()
 
 
-
-
-func make_spinbox(min_val: int, max_val: int, default_val: int) -> SpinBox:
-	var spinbox := SpinBox.new()
+func make_nav_spinbox(min_val: int, max_val: int, default_val: int) -> NavigationSpinBox:
+	var spinbox := NavigationSpinBox.new()
 	spinbox.set_min(min_val)
 	spinbox.set_max(max_val)
 	spinbox.set_value(default_val)
@@ -363,11 +383,26 @@ func _update_button_color(button: Button, cat_elt_v2: Vector2):
 
 
 
+func _set_default_button_color(button: Button):
+	button.set("custom_styles/normal", _default_style)
+	button.set("custom_styles/hover", _default_style)
+	button.set("custom_styles/pressed", _default_style)
+	button.set("custom_styles/focus", _default_style)
+	button.set("custom_styles/disabled", _default_style)
+
+
+
+
 func _update_label_buttons():
 	for v2 in _cat_elt_v2_to_color_style:
 		for button in _cat_elt_v2_to_buttons[v2]:
 			_update_button_color(button, v2)
 
+
+func _set_default_label_colors():
+	for v2 in _cat_elt_v2_to_buttons:
+		for button in _cat_elt_v2_to_buttons[v2]:
+			_set_default_button_color(button)
 
 
 
@@ -378,6 +413,7 @@ func _update_grid_buttons():
 		match cell:
 			GRID_CELL_STATE.FALSE:
 				button.text = "X"
+				_set_default_button_color(button)
 				#button.disabled = true
 			GRID_CELL_STATE.TRUE:
 				button.text = "O"
@@ -398,10 +434,12 @@ func _update_grid_buttons():
 				
 			GRID_CELL_STATE.UNKNOWN:
 				button.text = ""
+				_set_default_button_color(button)
 				#button.disabled = false
 			GRID_CELL_STATE.UNSOLVABLE:
 				button.text = "?"
-				#button.disabled = true
+				_set_default_button_color(button)
+				button.disabled = true
 
 
 

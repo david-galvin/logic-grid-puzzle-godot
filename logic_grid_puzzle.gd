@@ -17,10 +17,12 @@ const NUM_THREADS: int = 128
 
 var _cat_count: int
 var _cat_size: int
-var _inverse_ranks: Array = []
+var _inverse_ranks: Array
 var _rank_composition_matrix: Array
-var _grids: Array = []
-var _unsolved_grids: Array = []
+var _grids: Array
+var _unsolved_grids: Array
+var _moves: Array
+var _undone_moves: Array
 var _threads: Array
 var _size_to_cat_combos_to_is_scanned: Dictionary
 var _timer = TimerDict.new()
@@ -29,6 +31,10 @@ var _timer = TimerDict.new()
 func _init(my_cat_count: int, my_cat_size: int) -> void:
 	_cat_count = my_cat_count
 	_cat_size = my_cat_size
+	_inverse_ranks = []
+	_unsolved_grids = []
+	_moves = []
+	_undone_moves = []
 	randomize()
 	_grids = _build_grids()
 	_size_to_cat_combos_to_is_scanned = _get_size_to_cat_combos_to_is_scanned()
@@ -57,7 +63,7 @@ func read_grid_cell(cat1: int, elt1: int, cat2: int, elt2: int):
 
 
 func set_grid_cell(cat1: int, elt1: int, \
-		cat2: int, elt2: int, target_state: bool) -> void:
+		cat2: int, elt2: int, target_state: bool, is_undo: bool = false) -> void:
 	_timer.start_timer("set_grid_cell")
 	var grid: Grid = _get_grid(cat1, cat2)
 	if grid.is_solved():
@@ -65,7 +71,8 @@ func set_grid_cell(cat1: int, elt1: int, \
 	if not grid.is_solvable():
 		push_error("Puzzle is unsolvable")
 	grid.set_cell(elt1, elt2, target_state)
-	_recursive_solution_scan_new(cat1, cat2)
+	if not is_undo:
+		_recursive_solution_scan_new(cat1, cat2)
 	_timer.end_timer("set_grid_cell")
 
 
@@ -73,9 +80,29 @@ func print_grid_solutions_bitset(cat1: int, cat2: int) -> void:
 	print(str(_grids[_get_grid_index(cat1, cat2)].solutions_bitset))
 
 
-func apply_move(move: Move) -> void:
-	set_grid_cell(move.cat1, move.elt1, move.cat2, move.elt2, move.target_state)
+func apply_move(move: Move, is_undo = false) -> void:
+	if not is_undo:
+		_undone_moves = []
+		_moves.append(move)
+	set_grid_cell(move.cat1, move.elt1, move.cat2, move.elt2, move.target_state, is_undo)
 
+
+func undo() -> void:
+	if not _moves.empty():
+		_grids = _build_grids()
+		var undone_move: Move = _moves.pop_back()
+		for move in _moves:
+			apply_move(move, true)
+		_recursive_solution_scan_new(-1, -1)
+		print(str(_timer))
+		_undone_moves.append(undone_move)
+
+
+func redo() -> void:
+	if not _undone_moves.empty():
+		var undone_moves_copy: Array = _undone_moves.duplicate()
+		apply_move(undone_moves_copy.pop_back())
+		_undone_moves = undone_moves_copy
 
 # This is only used for testing.
 func get_random_unsolved_grid() -> Grid:
@@ -106,7 +133,7 @@ func _recursive_solution_scan_new(cat1: int, cat2: int) -> void:
 	for size in range(max_cats_to_scan_at_once, 2, -1):
 		for cat_combo in _size_to_cat_combos_to_is_scanned[size]:
 			if not _size_to_cat_combos_to_is_scanned[size][cat_combo]:
-				if cat_combo.has(cat1) and cat_combo.has(cat2):
+				if (cat_combo.has(cat1) and cat_combo.has(cat2)) or cat1 == -1:
 					cat_to_is_scanned = _scan_puzzle_solutions_for_implied_information(cat_combo)
 				_set_cat_combos_scanned_to_true(cat_to_is_scanned.keys())
 

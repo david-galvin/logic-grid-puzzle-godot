@@ -6,18 +6,18 @@ const GridCellState = preload("res://grid_cell_state.gd")
 
 var max_possible_solutions: int
 var solutions_bitset: BitSet
-var count_of_true_cells: int = 0
-var count_of_false_cells: int = 0
+var count_of_true_cells := 0
+var count_of_false_cells := 0
 var cat1: int
 var cat2: int
 var id: int
 
 var _bit_mask: BitMask
 var _dimension: int # the number of rows, also the number of columns
-var _is_solved: bool = false
-var _is_solvable: bool = true
-var _grid_cell_matrix: Array = []
-var _unsolved_cells: Array = []
+var _is_solved := false
+var _is_solvable := true
+var _grid_cell_matrix := []
+var _unsolved_cells := []
 
 
 func _init(my_dimension: int, my_bit_mask: BitMask, my_cat1 := 0, my_cat2 := 0, my_id := 0) -> void:
