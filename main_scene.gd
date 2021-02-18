@@ -1,14 +1,10 @@
 extends Node2D
 
 
-
-
 const GRID_CELL_STATE = preload("res://grid_cell_state.gd")
 const FONT_ROBOTO_REGULAR: Font = preload("res://fonts/Roboto/Roboto_regular.tres")
 const INNER_SEPARATION := 1
 const OUTER_SEPARATION := 4
-
-
 
 
 var _hbox_top_cats := HBoxContainer.new()
@@ -18,7 +14,7 @@ var _vbox_side_elts := VBoxContainer.new()
 var _main_grid := GridContainer.new()
 var _cat_elt_v2_to_color_style := {}
 var _cat_elt_v2_to_buttons := {}
-var _cat_to_buttons := {}
+var _cat_to_label_buttons := {}
 var _grid_buttons: Array
 var _lp: LogicGridPuzzle
 var _color_styles: Array
@@ -45,12 +41,10 @@ func _clear_all():
 	_main_grid = GridContainer.new()
 	_cat_elt_v2_to_color_style = {}
 	_cat_elt_v2_to_buttons = {}
-	_cat_to_buttons = {}
+	_cat_to_label_buttons = {}
 	_grid_buttons = []
 	_color_styles = []
 	_moves = []
-
-
 
 
 func _generate_puzzle(_cat_count_sb: SpinBox, _cat_size_sb: SpinBox, menu_panel: PopupPanel):
@@ -64,7 +58,6 @@ func _generate_puzzle(_cat_count_sb: SpinBox, _cat_size_sb: SpinBox, menu_panel:
 	_set_default_label_colors()
 	_update_grid_buttons()
 	menu_panel.hide()
-
 
 
 func _initialize_color_styles():
@@ -86,13 +79,11 @@ func _initialize_color_styles():
 			_color_styles.push_back(color_style)
 
 
-
-
 func _build_puzzle():
 	for cat in range(_cat_count):
 		if cat <= _cat_count - 2:
 			var cat_button: Button = _make_cat_button(cat)
-			_cat_to_buttons[cat] = [cat_button]
+			_cat_to_label_buttons[cat] = [cat_button]
 			_hbox_top_cats.add_child(cat_button)
 			var inner_vbox := VBoxContainer.new()
 			inner_vbox.size_flags_vertical = VBoxContainer.SIZE_EXPAND_FILL
@@ -104,10 +95,10 @@ func _build_puzzle():
 			_vbox_top_elts.add_child(inner_vbox)
 		if cat >= 1:
 			var cat_button: Button = _make_cat_button(cat)
-			if _cat_to_buttons.has(cat):
-				_cat_to_buttons[cat].append(cat_button)
+			if _cat_to_label_buttons.has(cat):
+				_cat_to_label_buttons[cat].append(cat_button)
 			else:
-				_cat_to_buttons[cat] = [cat_button]
+				_cat_to_label_buttons[cat] = [cat_button]
 			_hbox_side_cats.add_child(cat_button)
 			var inner_vbox := VBoxContainer.new()
 			inner_vbox.size_flags_vertical = VBoxContainer.SIZE_EXPAND_FILL
@@ -130,8 +121,6 @@ func _build_puzzle():
 	_build_main_grid()
 
 
-
-
 func _make_elt_button(var cat: int, var elt: int) -> Button:
 	var default_text: String = "element " + str(cat) + "." + str(elt)
 	var elt_button := Button.new()
@@ -149,8 +138,6 @@ func _make_elt_button(var cat: int, var elt: int) -> Button:
 	return elt_button
 
 
-
-
 func _make_cat_button(cat: int) -> Button:
 	var default_text := "cat " + str(cat)
 	var cat_button := Button.new()
@@ -160,8 +147,6 @@ func _make_cat_button(cat: int) -> Button:
 	cat_button.text = default_text
 	cat_button.connect("pressed", self, "relabel_puzzle_ui", [Vector2(0, cat)])
 	return cat_button
-
-
 
 
 func relabel_puzzle_ui(row_col_v2: Vector2):
@@ -194,7 +179,7 @@ func relabel_puzzle_ui(row_col_v2: Vector2):
 	
 	for cat in range(_cat_count):
 		var line_edit := NavigationLineEdit.new()
-		line_edit.text = _cat_to_buttons[cat][0].text
+		line_edit.text = _cat_to_label_buttons[cat][0].text
 		line_edit.size_flags_horizontal = LineEdit.SIZE_EXPAND_FILL
 		line_edit.connect("focus_entered", self, "_line_edit_select", [line_edit])
 		line_edit.connect("focus_exited", self, "_line_edit_deselect", [line_edit])
@@ -243,11 +228,9 @@ func relabel_puzzle_ui(row_col_v2: Vector2):
 	matrix[row_col_v2[0]][row_col_v2[1]].grab_focus()
 
 
-
-
 func _relabel_puzzle(matrix: Array, menu_panel: PopupPanel):
 	for cat in range(_cat_count):
-		for button in _cat_to_buttons[cat]:
+		for button in _cat_to_label_buttons[cat]:
 			button.text = matrix[0][cat].text
 		for elt in range(_cat_size):
 			for button in _cat_elt_v2_to_buttons[Vector2(cat, elt)]:
@@ -325,18 +308,12 @@ func make_nav_spinbox(min_val: int, max_val: int, default_val: int) -> Navigatio
 	return spinbox
 
 
-
-
 func _line_edit_select(line_edit: LineEdit):
 	line_edit.select_all()
 
 
-
-
 func _line_edit_deselect(line_edit: LineEdit):
 	line_edit.deselect()
-
-
 
 
 func _build_main_grid():
@@ -370,8 +347,6 @@ func _build_main_grid():
 	self.add_child(_main_grid)
 
 
-
-
 func _update_button_color(button: Button, cat_elt_v2: Vector2):
 	var style: StyleBoxFlat = _cat_elt_v2_to_color_style[cat_elt_v2]
 	button.set("custom_styles/normal", style)
@@ -381,16 +356,12 @@ func _update_button_color(button: Button, cat_elt_v2: Vector2):
 	button.set("custom_styles/disabled", style)
 
 
-
-
 func _set_default_button_color(button: Button):
 	button.set("custom_styles/normal", _default_style)
 	button.set("custom_styles/hover", _default_style)
 	button.set("custom_styles/pressed", _default_style)
 	button.set("custom_styles/focus", _default_style)
 	button.set("custom_styles/disabled", _default_style)
-
-
 
 
 func _update_label_buttons():
@@ -403,7 +374,6 @@ func _set_default_label_colors():
 	for v2 in _cat_elt_v2_to_buttons:
 		for button in _cat_elt_v2_to_buttons[v2]:
 			_set_default_button_color(button)
-
 
 
 func _update_grid_buttons():
@@ -442,16 +412,12 @@ func _update_grid_buttons():
 				button.disabled = true
 
 
-
-
 func _enter_move(move):
 	_lp.apply_move(move)
 	_moves.append(move)
 	_update_grid_buttons()
 	_update_label_buttons()
 	_update_gui_positions()
-
-
 
 
 func _update_gui_positions():
