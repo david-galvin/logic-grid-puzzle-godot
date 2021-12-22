@@ -176,7 +176,6 @@ class TestLogicGridPuzzle:
 		assert_eq(GridCellState.TRUE, _lp.read_grid_cell(2, 2, 1, 1))
 
 
-
 	func test_implied_solved():
 		# All asserts in this test are checking that we have correctly
 		# discovered implied information

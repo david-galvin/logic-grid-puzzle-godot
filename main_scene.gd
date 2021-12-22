@@ -242,7 +242,7 @@ func _relabel_puzzle(matrix: Array, menu_panel: PopupPanel):
 func edit_undo():
 	_initialize_color_styles()
 	_set_default_label_colors()
-	_lp.undo()
+	_lp.undo_last_move()
 	_update_grid_buttons()
 	_update_label_buttons()
 	_update_gui_positions()
@@ -272,14 +272,14 @@ func file_new_puzzle():
 	grid.columns = 2
 	
 	var cat_label := Label.new()
-	cat_label.text = "Number of categories (3-12): "
-	var _cat_count_spinbox := make_nav_spinbox(3, 12, 5)
+	cat_label.text = str("Number of categories (", LogicGridPuzzle.MIN_CATEGORY_COUNT, "-", LogicGridPuzzle.MAX_CATEGORY_COUNT, ")")
+	var _cat_count_spinbox := make_nav_spinbox(LogicGridPuzzle.MIN_CATEGORY_COUNT, LogicGridPuzzle.MAX_CATEGORY_COUNT, 5)
 	grid.add_child(cat_label)
 	grid.add_child(_cat_count_spinbox)
 	
 	var elt_label := Label.new()
-	elt_label.text = "Number of elements (2-7): "
-	var _cat_size_spinbox := make_nav_spinbox(2, 7, 5)
+	elt_label.text = str("Number of elements (", LogicGridPuzzle.MIN_CATEGORY_SIZE, "-", LogicGridPuzzle.MAX_CATEGORY_SIZE, ")")
+	var _cat_size_spinbox := make_nav_spinbox(LogicGridPuzzle.MIN_CATEGORY_SIZE, LogicGridPuzzle.MAX_CATEGORY_SIZE, 5)
 	grid.add_child(elt_label)
 	grid.add_child(_cat_size_spinbox)
 	
@@ -294,6 +294,18 @@ func file_new_puzzle():
 	
 	panel.popup_centered()
 
+
+func file_load_puzzle():
+	pass
+	
+	
+func file_save_puzzle():
+	pass
+	
+	
+func file_quit_puzzle():
+	pass
+	
 
 func make_nav_spinbox(min_val: int, max_val: int, default_val: int) -> NavigationSpinBox:
 	var spinbox := NavigationSpinBox.new()
@@ -337,6 +349,8 @@ func _build_main_grid():
 						var o_move := Move.new(side_cat, side_elt, top_cat, top_elt, true)
 						button.connect("left_click", self, "_enter_move", [x_move])
 						button.connect("right_click", self, "_enter_move", [o_move])
+						button.connect("undo_left_click", self, "_undo_move", [x_move])
+						button.connect("undo_right_click", self, "_undo_move", [o_move])
 						button.size_flags_horizontal = Button.SIZE_EXPAND_FILL
 						button.size_flags_vertical = Button.SIZE_EXPAND_FILL
 						button.button_mask = BUTTON_MASK_LEFT | BUTTON_MASK_RIGHT
@@ -384,10 +398,16 @@ func _update_grid_buttons():
 			GRID_CELL_STATE.FALSE:
 				button.text = "X"
 				_set_default_button_color(button)
-				#button.disabled = true
+				if button.set_by_user:
+					button.disabled = false
+				else:
+					button.disabled = true
 			GRID_CELL_STATE.TRUE:
 				button.text = "O"
-				#button.disabled = true
+				if button.set_by_user:
+					button.disabled = false
+				else:
+					button.disabled = true
 				var side_v2 := Vector2(button.side_cat, button.side_elt)
 				var top_v2 := Vector2(button.top_cat, button.top_elt)
 				if _cat_elt_v2_to_color_style.has(side_v2):
@@ -405,7 +425,7 @@ func _update_grid_buttons():
 			GRID_CELL_STATE.UNKNOWN:
 				button.text = ""
 				_set_default_button_color(button)
-				#button.disabled = false
+				button.disabled = false
 			GRID_CELL_STATE.UNSOLVABLE:
 				button.text = "?"
 				_set_default_button_color(button)
@@ -415,6 +435,15 @@ func _update_grid_buttons():
 func _enter_move(move):
 	_lp.apply_move(move)
 	_moves.append(move)
+	_update_grid_buttons()
+	_update_label_buttons()
+	_update_gui_positions()
+
+
+func _undo_move(move):
+	_initialize_color_styles()
+	_set_default_label_colors()
+	_lp.undo_move(move)
 	_update_grid_buttons()
 	_update_label_buttons()
 	_update_gui_positions()
