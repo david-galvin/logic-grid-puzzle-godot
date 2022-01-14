@@ -25,15 +25,7 @@ func _ready():
 
 func _on_Button_gui_input(event):
 	if event is InputEventMouseButton and event.pressed and not disabled:
-		if self.set_by_user:
-			self.set_by_user = false
-			if self.text == "X":
-				self.text = ""
-				emit_signal("undo_left_click")
-			if self.text == "O":
-				self.text = ""
-				emit_signal("undo_right_click")
-		else:
+		if self.text == "":
 			match event.button_index:
 				BUTTON_LEFT:
 					self.text = "X"
@@ -43,3 +35,11 @@ func _on_Button_gui_input(event):
 					self.text = "O"
 					self.set_by_user = true
 					emit_signal("right_click")
+		elif self.text == "X":
+			self.text = ""
+			self.set_by_user = false
+			emit_signal("undo_left_click")
+		elif self.text == "O":
+			self.text = ""
+			self.set_by_user = false
+			emit_signal("undo_right_click")

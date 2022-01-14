@@ -426,6 +426,7 @@ func _update_grid_buttons():
 				button.text = ""
 				_set_default_button_color(button)
 				button.disabled = false
+				button.set_by_user = false
 			GRID_CELL_STATE.UNSOLVABLE:
 				button.text = "?"
 				_set_default_button_color(button)

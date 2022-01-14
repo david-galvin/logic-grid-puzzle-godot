@@ -286,6 +286,10 @@ func _scan_puzzle_solutions_for_implied_information(cats_to_scan: Array = []) ->
 		number_of_solutions *= grid.solutions_bitset.cardinality()
 		
 	var cat_to_is_scanned: Dictionary = {}
+	
+	if number_of_solutions == 0:
+		return cat_to_is_scanned
+	
 	if not _scan_puzzle_is_a_solution_possible(operations.size()):
 		return cat_to_is_scanned
 	
